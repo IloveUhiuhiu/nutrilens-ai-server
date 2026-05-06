@@ -12,7 +12,7 @@ from typing import Any
 from app.utils.image_processing import decode_image_bytes, inpaint_plate_depth
 
 MODELS_DIR = Path(__file__).resolve().parents[2] / "models"
-DA2_DIR = MODELS_DIR / "Depth-Anything-V2"
+DA2_DIR = MODELS_DIR / "Depth-Anything-V2" / "metric_depth"
 if str(DA2_DIR) not in sys.path:
     sys.path.append(str(DA2_DIR))
 
@@ -86,29 +86,65 @@ def _run_depth_inference(model_bundle: dict, image_rgb: np.ndarray) -> np.ndarra
 
 def estimate_depth(
     image_bytes: bytes,
-    plate_mask_data: dict,
-    depth_bundle: dict,
-    plate_template: np.ndarray | None = None,
+    plate_mask: np.ndarray,      # Mask đĩa (numpy)
+    food_mask: np.ndarray,       # Mask tổng hợp thức ăn (numpy)
+    plate_type: str | None,      # Loại đĩa để chọn Template
+    camera_h_ref: float,         # Chiều cao camera (cm)
+    depth_bundle: dict,          # Bundle chứa model và device
+    templates_dir: str,          # Đường dẫn folder templates
 ) -> dict:
     start = time.perf_counter()
-    logger.info("[DEBUG] Starting depth_service...")
+    logger.info("[DEBUG] Starting depth_service with SOTA Inpainting...")
     
     try:
         image_rgb = decode_image_bytes(image_bytes)
         
-        # Chạy dự đoán độ sâu CM
+        # 1. Chạy dự đoán độ sâu (đơn vị CM)
         depth_map = _run_depth_inference(depth_bundle, image_rgb)
         
-        # Inpainting Plate để khôi phục bề mặt tham chiếu
-        mask = plate_mask_data.get("mask")
-        if mask is not None:
-            plate_depth = inpaint_plate_depth(depth_map, mask, plate_template)
+        # 2. Inpainting chuyên sâu (Affine + Z-Offset)
+        # Sử dụng mặt sàn thực tế từ Template thay vì median đơn thuần
+        plate_depth = inpaint_plate_depth(
+            depth_map=depth_map,
+            plate_mask=plate_mask,
+            food_mask=food_mask,
+            plate_type=plate_type,
+            camera_h_ref=camera_h_ref,
+            template_dir=templates_dir
+        )
+            
+
+        # --- PHẦN LOG THÊM VÀO ---
+        # 1. Tính mean depth của vùng thực phẩm (mặt trên)
+        if np.any(food_mask > 0):
+            food_mean = np.mean(depth_map[food_mask > 0])
+            print(f"[DEBUG] Food surface depth mean: {food_mean:.2f} cm")
         else:
-            plate_depth = depth_map.copy()
+            print("[DEBUG] Food mask is empty, cannot calculate food mean depth.")
+
+        # 2. Tính mean depth của mặt đĩa đã phục hồi (mặt sàn)
+        if np.any(plate_mask > 0):
+            plate_mean = np.mean(plate_depth[plate_mask > 0])
+            print(f"[DEBUG] Plate surface (inpainted) depth mean: {plate_mean:.2f} cm")
+            
+            # 3. Tính chiều cao trung bình thực tế
+            if np.any(food_mask > 0):
+                # Dùng np.maximum(..., 0) để đảm bảo không bị chiều cao âm do nhiễu sensor
+                height_food = np.maximum(plate_depth - depth_map, 0)
+                
+                # Chỉ tính trung bình trên vùng có thực phẩm
+                avg_h = np.mean(height_food[food_mask > 0])
+                print(f"[DEBUG] Estimated average food height: {avg_h:.2f} cm")
+                
+                # Log thêm giá trị max để check xem có điểm nào vọt lên bất thường không
+                max_h = np.max(height_food[food_mask > 0])
+                print(f"[DEBUG] Max food height detected: {max_h:.2f} cm")
+        else:
+            print(f"[DEBUG] Plate mask is empty, fallback camera_h_ref: {camera_h_ref:.2f} cm")
             
         return {
-            "depth_map": depth_map, 
-            "plate_depth": plate_depth
+            "depth_map": depth_map,     # Độ sâu mặt trên (food + plate)
+            "plate_depth": plate_depth  # Độ sâu mặt sàn (đã khôi phục)
         }
         
     except Exception:

@@ -16,7 +16,7 @@ MODELS_DIR = Path(__file__).resolve().parents[2] / "models"
 SAM3_DIR = MODELS_DIR / "SAM3_LoRA"
 if str(SAM3_DIR) not in sys.path:
     sys.path.append(str(SAM3_DIR))
-
+os.environ.setdefault("SAM3_ASSETS_DIR", str(SAM3_DIR / "sam3" / "assets"))
 from infer_sam import SAM3LoRAInference
 
 logger = logging.getLogger(__name__)

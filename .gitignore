@@ -3,6 +3,7 @@ venv/
 templates
 *.ipynb
 __pycache__/
+unsloth_compiled_cache/
 *.pyc
 *.pyo
 *.log

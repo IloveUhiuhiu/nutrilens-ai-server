@@ -18,11 +18,11 @@ class Settings(BaseSettings):
     nutrition_db_path: str = "app/db/nutrition_db.json"
 
     # --- YOLO Detection (Food & Plate) ---
-    yolo_food_weights: str = "weights/yolo/food_yolov11.pt"
+    yolo_food_weights: str = "weights/yolo/food_yolo.pt"
     yolo_food_conf: float = 0.5
     
-    yolo_plate_weights: str = "weights/yolo/plate_yolov11_seg.pt"
-    yolo_plate_conf: float = 0.9
+    yolo_plate_weights: str = "weights/yolo/plate_yolo_seg.pt"
+    yolo_plate_conf: float = 0.8
 
     # --- VLM Extraction (Qwen3-VL) ---
     qwen3vl_weights: str = "weights/vlm/qwen3vl-4bit"
@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     # --- Depth Estimation (DepthAnythingV2) ---
     depth_encoder: Literal["vits", "vitb", "vitl", "vitg"] = "vits"
     depthanything_weights: str = "weights/depth/depth_anything_v2_vits.pth"
+    templates_dir: str = "templates"
 
     @property
     def device_resolved(self) -> str:

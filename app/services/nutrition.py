@@ -1,76 +1,90 @@
 from __future__ import annotations
 
-import json
 import logging
 import time
-from difflib import get_close_matches
-from pathlib import Path
+import difflib # Fix lỗi import
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
-def estimate_nutrition(geometry_results: list[dict], db_dict: dict) -> dict[str, Any]:
+def find_best_ingredient_match(target_name, database_keys, similarity_cutoff=0.6):
+    """
+    Tìm kiếm tên nguyên liệu phù hợp nhất.
+    """
+    target_name = target_name.lower().strip()
     
+    # Tạo bản map lowercase để so khớp chính xác hơn
+    db_map = {k.lower(): k for k in database_keys}
+    
+    # 1. Kiểm tra khớp hoàn toàn (sau khi đã chuẩn hóa)
+    if target_name in db_map:
+        return db_map[target_name]
+    
+    # 2. Substring Match: Rất quan trọng cho VLM (ví dụ: "boiled egg" -> "egg")
+    for norm_key in db_map:
+        if norm_key in target_name or target_name in norm_key:
+            return db_map[norm_key]
+
+    # 3. Sử dụng logic so khớp mờ
+    best_matches = difflib.get_close_matches(
+        target_name, 
+        list(db_map.keys()), 
+        n=1, 
+        cutoff=similarity_cutoff
+    )
+    
+    return db_map[best_matches[0]] if best_matches else None
+
+def estimate_nutrition(geometry_results: list[dict], db_dict: dict) -> dict[str, Any]:
     start = time.perf_counter()
     try:
         if not geometry_results:
-            return {"ingredients": {}, "total": {}}
+            return {"ingredients": {}, "total": {
+                "mass_g": 0.0, "calories_kcal": 0.0, "protein_g": 0.0, "fat_g": 0.0, "carbs_g": 0.0
+            }}
+            
         db_keys = list(db_dict.keys())
-        
         nutrition_details = {}
         total_summary = {
-            "mass_g": 0.0,
-            "calories_kcal": 0.0,
-            "protein_g": 0.0,
-            "fat_g": 0.0,
-            "carbs_g": 0.0
+            "mass_g": 0.0, "calories_kcal": 0.0, "protein_g": 0.0, "fat_g": 0.0, "carbs_g": 0.0
         }
 
         for item in geometry_results:
-            ing_name = item["ingredient"]
-            
-            # 2. Fuzzy Matching (So khớp tên gần nhất)
-            match = get_close_matches(ing_name, db_keys, n=1, cutoff=0.6)
-            matched_key = match[0] if match else None
+     
+            ing_name = item.get("ingredient") 
+            if not ing_name: continue
+
+            # FIX: Đổi 'cutoff' thành 'similarity_cutoff' để khớp với định nghĩa hàm
+            matched_key = find_best_ingredient_match(ing_name, db_keys, similarity_cutoff=0.6)
             
             if not matched_key:
                 logger.warning(f"[WARN] No match found for ingredient: {ing_name}")
                 continue
 
-            # 3. Trích xuất thông số từ DB (Mặc định đơn vị trên 1g)
             ing_info = db_dict[matched_key]
             density = float(ing_info.get("density", 1.0))
-            
-            # 4. Tính toán Khối lượng (g) = Thể tích (cm3) * Khối lượng riêng (g/cm3)
             volume = float(item.get("volume_cm3", 0.0))
             mass = volume * density
             
-            # 5. Tính toán chi tiết (Mass * Nutrient_per_1g)
-            # Notebook: "Chỉ số trong DB nên được hiểu là giá trị trên 1 gram"
+            # Tính toán dựa trên đơn vị 1g
             ing_nutrients = {
                 "matched_name": matched_key,
                 "volume_cm3": round(volume, 2),
                 "mass_g": round(mass, 2),
-                "avg_height_cm": round(float(item.get("avg_height_cm", 0.0)), 2),
                 "calories_kcal": round(mass * float(ing_info.get("cal", 0.0)), 2),
                 "protein_g": round(mass * float(ing_info.get("protein", 0.0)), 2),
                 "fat_g": round(mass * float(ing_info.get("fat", 0.0)), 2),
                 "carbs_g": round(mass * float(ing_info.get("carbs", 0.0)), 2),
-                "confidence": 0.9
             }
             
             nutrition_details[ing_name] = ing_nutrients
             
-            # 6. Cộng dồn tổng số
-            total_summary["mass_g"] += ing_nutrients["mass_g"]
-            total_summary["calories_kcal"] += ing_nutrients["calories_kcal"]
-            total_summary["protein_g"] += ing_nutrients["protein_g"]
-            total_summary["fat_g"] += ing_nutrients["fat_g"]
-            total_summary["carbs_g"] += ing_nutrients["carbs_g"]
+            # Cộng dồn
+            for key in ["mass_g", "calories_kcal", "protein_g", "fat_g", "carbs_g"]:
+                total_summary[key] += ing_nutrients[key]
 
-        # Làm tròn kết quả tổng cuối cùng
-        for key in total_summary:
-            total_summary[key] = round(total_summary[key], 2)
+        # Làm tròn kết quả tổng
+        total_summary = {k: round(v, 2) for k, v in total_summary.items()}
 
         return {
             "ingredients": nutrition_details,

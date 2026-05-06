@@ -5,7 +5,7 @@ from typing import Tuple
 import cv2
 import numpy as np
 from scipy.ndimage import binary_erosion
-
+from app.utils.math_helpers import estimate_affine_from_shape, load_template_data
 from app.core.constants import MIN_PLATE_DEPTH_CM
 
 
@@ -25,15 +25,34 @@ def resize_with_padding(image: np.ndarray, size: int) -> np.ndarray:
     return canvas
 
 
+import cv2
+import numpy as np
+
 def decode_image_bytes(image_bytes: bytes) -> np.ndarray:
-    """Decode image bytes into BGR numpy array."""
+    """
+    Giải mã image bytes với tùy chọn định dạng màu đầu ra.
+    
+    Args:
+        image_bytes: Dữ liệu ảnh dạng bytes.
+        
+    Returns:
+        np.ndarray: Mảng numpy của ảnh hoặc mảng rỗng nếu lỗi.
+    """
     if not image_bytes:
         return np.zeros((0, 0, 3), dtype=np.uint8)
-    data = np.frombuffer(image_bytes, dtype=np.uint8)
-    image = cv2.imdecode(data, cv2.IMREAD_COLOR)
+
+    # 1. Chuyển bytes sang numpy array 1 chiều
+    nparr = np.frombuffer(image_bytes, np.uint8)
+    
+    # 2. Giải mã ảnh (OpenCV mặc định luôn trả về BGR)
+    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    
     if image is None:
         return np.zeros((0, 0, 3), dtype=np.uint8)
-    return image
+
+    
+    return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    
 
 
 def crop_image(image: np.ndarray, bbox: list[float] | tuple[float, float, float, float]) -> np.ndarray:
@@ -72,35 +91,76 @@ def template_match(depth_map: np.ndarray, template: np.ndarray) -> Tuple[int, in
 
 def inpaint_plate_depth(
     depth_map: np.ndarray,
-    plate_mask: dict | None,
-    template: np.ndarray | None,
+    plate_mask: np.ndarray,
+    food_mask: np.ndarray,
+    plate_type: str | None,
+    camera_h_ref: float,
+    template_dir: str = "templates" # Đường dẫn template trên server
 ) -> np.ndarray:
-    """Inpaint plate depth using template matching and warp affine."""
-    if depth_map.size == 0:
-        return depth_map
+    """
+    Phiên bản inpaint chuyên sâu từ Notebook: Khớp hình dạng + Hiệu chỉnh Z + Lọc mịn.
+    """
+    img_h, img_w = depth_map.shape
+    
+    # 1. Lấy mẫu sạch (Anchors) để làm mốc độ sâu thực tế
+    x_s, y_s, z_s = get_clean_plate_samples(depth_map, plate_mask, food_mask, camera_h_ref)
 
-    plate_depth = depth_map.copy()
-    if template is not None:
-        offset_y, offset_x = template_match(depth_map, template)
-        matrix = np.array(
-            [
-                [1.0, 0.0, offset_x],
-                [0.0, 1.0, offset_y],
-            ],
-            dtype=np.float32,
-        )
-        warped = warp_affine(template, matrix, depth_map.shape)
-        plate_depth = np.where(warped > 0, warped, plate_depth)
+    num_anchors = len(x_s) if x_s is not None else 0
+    
+    print(f"[GEOMETRY-DEBUG] Plate Type: {plate_type}")
+    print(f"[GEOMETRY-DEBUG] Num Anchors: {num_anchors}")
+    # 2. Xử lý đĩa phẳng (Trường hợp đơn giản nhất)
+    if plate_type in ["plate_flat", None]:
+        depth_plate = np.full((img_h, img_w), camera_h_ref, dtype=np.float32)
+        plate_z_level = np.median(z_s) if (x_s is not None and len(z_s) > 0) else camera_h_ref
+        depth_plate[plate_mask > 0] = plate_z_level
+        return depth_plate
 
-    if plate_mask and plate_mask.get("bbox"):
-        x1, y1, x2, y2 = [int(v) for v in plate_mask["bbox"]]
-        x1, y1 = max(0, x1), max(0, y1)
-        x2, y2 = min(depth_map.shape[1], x2), min(depth_map.shape[0], y2)
-        region = plate_depth[y1:y2, x1:x2]
-        fill_value = float(np.median(region)) if region.size else float(np.mean(depth_map))
-        plate_depth[y1:y2, x1:x2] = fill_value
+    # 3. Load Template và tính toán Affine Transform (Xoay/Thu phóng)
+    
+    
+    ref_depth, ref_mask = load_template_data(template_dir, plate_type)
+    if ref_depth is None:
+        print("Fallback 1: ref_depth None")
+        # Fallback nếu không load được template
+        depth_plate = np.full((img_h, img_w), camera_h_ref, dtype=np.float32)
+        return depth_plate
 
-    return plate_depth
+    M = estimate_affine_from_shape(ref_mask, plate_mask, plate_type)
+    
+    if M is not None:
+        print(f"[GEOMETRY-DEBUG] Affine Matrix M: {M.flatten().tolist()}")
+        depth_warped = cv2.warpAffine(ref_depth, M, (img_w, img_h), flags=cv2.INTER_LINEAR)
+        
+        # 4. Hiệu chỉnh Z-Offset (Khớp cao độ thực tế)
+        if x_s is not None and len(x_s) > 15:
+            ref_vals = depth_warped[y_s, x_s]
+            valid_idx = (ref_vals > 0) & (plate_mask[y_s, x_s] > 0)
+            if np.any(valid_idx):
+                z_offset = np.median(z_s[valid_idx] - ref_vals[valid_idx])
+                print(f"[GEOMETRY-DEBUG] Z-Offset: {z_offset:.4f}")
+                depth_warped += z_offset
+    else:
+        # Fallback 2: Nếu không khớp được hình dạng
+        print("Fallback2: M None")
+        depth_warped = np.full((img_h, img_w), camera_h_ref - 0.5, dtype=np.float32)
+
+    # 5. Fusion & Smoothing
+    depth_plate = np.full((img_h, img_w), camera_h_ref, dtype=np.float32)
+    valid_mask = (plate_mask > 0) & (depth_warped > 0)
+    depth_plate[valid_mask] = depth_warped[valid_mask]
+    
+    # Ưu tiên các điểm anchor thực tế
+    if x_s is not None:
+        depth_plate[y_s, x_s] = z_s
+        
+    # Lọc mịn bề mặt để loại bỏ nhiễu răng cưa
+    depth_plate = cv2.bilateralFilter(depth_plate.astype(np.float32), d=7, sigmaColor=0.3, sigmaSpace=10)
+    depth_plate[plate_mask == 0] = camera_h_ref
+    if np.any(plate_mask > 0):
+        mean_plate_z = np.mean(depth_plate[plate_mask > 0])
+        print(f"[GEOMETRY-DEBUG] Final Plate Z Mean: {mean_plate_z:.4f}")
+    return depth_plate
 
 
 def fill_outside_food_bilateral(height_map: np.ndarray, food_mask: np.ndarray, plate_mask: np.ndarray) -> np.ndarray:
