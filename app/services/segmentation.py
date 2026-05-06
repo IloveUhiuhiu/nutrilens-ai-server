@@ -10,6 +10,7 @@ import gc
 import numpy as np
 from PIL import Image
 from typing import Any
+from infer_sam import SAM3LoRAInference
 from app.utils.image_processing import decode_image_bytes, crop_image, merge_masks_and_instances
 
 MODELS_DIR = Path(__file__).resolve().parents[2] / "models"
@@ -21,12 +22,27 @@ from infer_sam import SAM3LoRAInference
 
 logger = logging.getLogger(__name__)
 
+def _ensure_logging() -> None:
+    if not logging.getLogger().handlers:
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter("%(asctime)s - %(filename)s - %(funcName)s - %(message)s")
+        handler.setFormatter(formatter)
+        logging.getLogger().addHandler(handler)
+    logger.setLevel(logging.INFO)
+
+def _log_info(message: str) -> None:
+    _ensure_logging()
+    logger.info(message)
+
+def _log_error(message: str) -> None:
+    _ensure_logging()
+    logger.error(message)
+
 def load_sam3(config_path: str, weights_path: str, device: str, conf: float = 0.75) -> dict:
+    _log_info("loading sam3 on %s with conf=%s", device, conf)
     """
     Khởi tạo SAM3 LoRA và đóng gói vào bundle kèm ngưỡng tin cậy conf.
     """
-    logger.info("[DEBUG] Loading SAM3 LoRA model on %s with conf=%s", device, conf)
-    from infer_sam import SAM3LoRAInference
     
     # detection_threshold trong SAM3 tương đương với conf
     inferencer = SAM3LoRAInference(
@@ -43,21 +59,17 @@ def load_sam3(config_path: str, weights_path: str, device: str, conf: float = 0.
         "conf": conf,  # Lưu lại ngưỡng mặc định
     }
 
-# ==============================================================================
-# 2. MAIN SERVICE FUNCTION
-# ==============================================================================
-
 def segment_ingredients(
     image_bytes: bytes,
     ingredients_map: dict[str, list[str]],
     sam3_bundle: dict,
     food_boxes: list[dict]
 ) -> dict:
+    _log_info("enter segment_ingredients")
     """
     Phân đoạn nguyên liệu sử dụng ngưỡng conf từ bundle hoặc tham số ghi đè.
     """
     start = time.perf_counter()
-    logger.info("[DEBUG] Starting segmentation_service...")
     
     
     threshold = sam3_bundle["conf"]
@@ -67,17 +79,20 @@ def segment_ingredients(
     try:
         image_rgb = decode_image_bytes(image_bytes)
         full_image_shape = image_rgb.shape
-        
+
         inferencer = sam3_bundle["model"]
         inferencer.model.eval()
-        
+        _log_info("inferencer eval mode")
+
         with torch.no_grad():
+            _log_info("torch no_grad branch")
             for box in food_boxes:
                 box_id = box["id"]
                 bbox = box["bbox"]
                 target_ingredients = ingredients_map.get(box_id, [])
                 
                 if not target_ingredients:
+                    _log_info(f"no target ingredients for {box_id}")
                     segmentation_results[box_id] = []
                     continue
                 
@@ -89,12 +104,13 @@ def segment_ingredients(
                 
                 # Chạy inference trên file tạm
                 predictions = inferencer.predict(temp_path, text_prompts=prompts)
-                
+
                 masks_for_this_crop = []
                 for p_idx, prompt_text in enumerate(prompts):
                     res = predictions.get(p_idx)
                     
                     if res and res['num_detections'] > 0:
+                        _log_info(f"detections found for {box_id}:{prompt_text}")
                         masks = res.get('masks')
                         scores = res.get('scores')
                         
@@ -102,7 +118,10 @@ def segment_ingredients(
                             for m, score in zip(masks, scores):
                                 # Kiểm tra ngưỡng tin cậy cho từng instance
                                 if float(score) >= threshold:
+                                    _log_info(f"score pass threshold for {box_id}:{prompt_text}")
                                     masks_for_this_crop.append((prompt_text, m))
+                    else:
+                        _log_info(f"no detections for {box_id}:{prompt_text}")
                 
                 segmentation_results[box_id] = masks_for_this_crop
 
@@ -120,10 +139,10 @@ def segment_ingredients(
         }
 
     except Exception:
-        logger.exception("[ERROR] segmentation_service failed")
+        _log_error("segmentation_service failed")
         raise
     finally:
+        _log_info("segmentation_service finished")
         if os.path.exists(temp_path):
             os.remove(temp_path)
         gc.collect()
-        logger.info("[DEBUG] segmentation_service finished in %.2fs", time.perf_counter() - start)

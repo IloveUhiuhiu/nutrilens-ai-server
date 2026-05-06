@@ -12,9 +12,25 @@ from app.utils.image_processing import decode_image_bytes
 
 logger = logging.getLogger(__name__)
 
+def _ensure_logging() -> None:
+    if not logging.getLogger().handlers:
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter("%(asctime)s - %(filename)s - %(funcName)s - %(message)s")
+        handler.setFormatter(formatter)
+        logging.getLogger().addHandler(handler)
+    logger.setLevel(logging.INFO)
+
+def _log_info(message: str) -> None:
+    _ensure_logging()
+    logger.info(message)
+
+def _log_error(message: str) -> None:
+    _ensure_logging()
+    logger.error(message)
+
 def load_yolo_food(weights_path: str, device: str, conf: float = 0.5) -> dict:
     """Nạp mô hình YOLO nhận diện thực phẩm cho dự án NutriLens."""
-    logger.info("[DEBUG] Loading YOLO Food model on %s with conf=%s", device, conf)
+    _log_info("loading YOLO Food model on %s with conf=%s", device, conf)
     model = YOLO(weights_path)
     return {
         "model": model,
@@ -24,8 +40,9 @@ def load_yolo_food(weights_path: str, device: str, conf: float = 0.5) -> dict:
     }
 
 def load_yolo_plate(weights_path: str, device: str, conf: float = 0.9) -> dict:
+    _log_info("loading YOLO Plate model on %s with conf=%s", device, conf)
     """Nạp mô hình YOLO Segmentation cho vật chứa."""
-    logger.info("[DEBUG] Loading YOLO Plate model on %s with conf=%s", device, conf)
+
     model = YOLO(weights_path)
     return {
         "model": model,
@@ -35,6 +52,7 @@ def load_yolo_plate(weights_path: str, device: str, conf: float = 0.9) -> dict:
     }
 
 def _run_yolo(model_dict: dict, image: np.ndarray) -> Any:
+    _log_info("run yolo")
     """Thực hiện inference trên thiết bị %s."""
     model = model_dict["model"]
     # Chuyển sang BGR vì Ultralytics tối ưu trên định dạng của OpenCV
@@ -49,12 +67,15 @@ def _run_yolo(model_dict: dict, image: np.ndarray) -> Any:
     return results
 
 def _parse_food_boxes(results: Any) -> list[dict]:
+    _log_info("parse food boxes")
     boxes = []
     if not results or len(results) == 0:
+        _log_info("no food detection results")
         return boxes
     
     result = results[0]
     if result.boxes is None or len(result.boxes) == 0:
+        _log_info("empty food boxes branch")
         return boxes
 
     xyxy = result.boxes.xyxy.cpu().numpy()
@@ -72,12 +93,14 @@ def _parse_food_boxes(results: Any) -> list[dict]:
     return boxes
 
 def _process_plate_results(results: Any) -> dict:
+    _log_info("process plate results")
     """
     Xử lý kết quả Segmentation và chọn vật chứa có diện tích lớn nhất.
     """
     output = {"mask": None, "class": None, "bbox": None, "score": 0.0}
     
     if not results or len(results) == 0 or results[0].masks is None:
+        _log_info("no plate segmentation results")
         return output
 
     result = results[0]
@@ -118,19 +141,20 @@ def detect_food_and_plate(
     yolo_plate_bundle: dict,
     parallel: bool = True,
 ) -> dict:
-    start = time.perf_counter()
-    logger.info("[DEBUG] Starting detection_service...")
+    _log_info("start detection_service")
     
     try:
         image_rgb = decode_image_bytes(image_bytes)
         
         if parallel:
+            _log_info("parallel yolo inference branch")
             with ThreadPoolExecutor(max_workers=2) as executor:
                 food_future = executor.submit(_run_yolo, yolo_food_bundle, image_rgb)
                 plate_future = executor.submit(_run_yolo, yolo_plate_bundle, image_rgb)
                 food_raw = food_future.result()
                 plate_raw = plate_future.result()
         else:
+            _log_info("sequential yolo inference branch")
             food_raw = _run_yolo(yolo_food_bundle, image_rgb)
             plate_raw = _run_yolo(yolo_plate_bundle, image_rgb)
 
@@ -143,7 +167,7 @@ def detect_food_and_plate(
         }
 
     except Exception:
-        logger.exception("[ERROR] detection_service failed")
+        _log_error("detection_service failed")
         raise
     finally:
-        logger.info("[DEBUG] detection_service finished in %.2fs", time.perf_counter() - start)
+        _log_info("detection_service finished")

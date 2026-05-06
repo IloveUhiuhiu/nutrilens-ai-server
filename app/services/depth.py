@@ -9,6 +9,7 @@ import torch.nn.functional as F
 import cv2
 import numpy as np
 from typing import Any
+from depth_anything_v2.dpt import DepthAnythingV2
 from app.utils.image_processing import decode_image_bytes, inpaint_plate_depth
 
 MODELS_DIR = Path(__file__).resolve().parents[2] / "models"
@@ -22,6 +23,21 @@ from torchvision.transforms import Compose
 
 logger = logging.getLogger(__name__)
 
+def _ensure_logging() -> None:
+    if not logging.getLogger().handlers:
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter("%(asctime)s - %(filename)s - %(funcName)s - %(message)s")
+        handler.setFormatter(formatter)
+        logging.getLogger().addHandler(handler)
+    logger.setLevel(logging.INFO)
+
+def _log_info(message: str) -> None:
+    _ensure_logging()
+    logger.info(message)
+
+def _log_error(message: str) -> None:
+    _ensure_logging()
+    logger.error(message)
 
 def get_inference_transform() -> Compose:
     return Compose([
@@ -42,14 +58,14 @@ def load_depth_anything(weights_path: str, device: str, encoder: str = 'vits') -
     """
     Nạp model và bộ transform vào một Bundle duy nhất.
     """
-    logger.info("[DEBUG] Loading DepthAnythingV2 (%s) on %s", encoder, device)
+    _log_info("loading DepthAnythingV2 (%s) on %s", encoder, device)
     
     model_configs = {
         'vits': {'encoder': 'vits', 'features': 64, 'out_channels': [48, 96, 192, 384]},
         'vitb': {'encoder': 'vitb', 'features': 128, 'out_channels': [96, 192, 384, 768]},
     }
     
-    from depth_anything_v2.dpt import DepthAnythingV2
+    
     
     model = DepthAnythingV2(**{**model_configs[encoder], 'max_depth': 0.4})
     model.load_state_dict(torch.load(weights_path, map_location='cpu'))
@@ -63,6 +79,7 @@ def load_depth_anything(weights_path: str, device: str, encoder: str = 'vits') -
     }
 
 def _run_depth_inference(model_bundle: dict, image_rgb: np.ndarray) -> np.ndarray:
+    _log_info("enter _run_depth_inference")
     model = model_bundle["model"]
     transform = model_bundle["transform"]
     device = model_bundle["device"]
@@ -86,15 +103,15 @@ def _run_depth_inference(model_bundle: dict, image_rgb: np.ndarray) -> np.ndarra
 
 def estimate_depth(
     image_bytes: bytes,
-    plate_mask: np.ndarray,      # Mask đĩa (numpy)
-    food_mask: np.ndarray,       # Mask tổng hợp thức ăn (numpy)
-    plate_type: str | None,      # Loại đĩa để chọn Template
-    camera_h_ref: float,         # Chiều cao camera (cm)
-    depth_bundle: dict,          # Bundle chứa model và device
-    templates_dir: str,          # Đường dẫn folder templates
+    plate_mask: np.ndarray,
+    food_mask: np.ndarray,
+    plate_type: str | None,
+    camera_h_ref: float,
+    depth_bundle: dict,
+    templates_dir: str,
 ) -> dict:
+    _log_info("enter estimate_depth")
     start = time.perf_counter()
-    logger.info("[DEBUG] Starting depth_service with SOTA Inpainting...")
     
     try:
         image_rgb = decode_image_bytes(image_bytes)
@@ -112,43 +129,14 @@ def estimate_depth(
             camera_h_ref=camera_h_ref,
             template_dir=templates_dir
         )
-            
-
-        # --- PHẦN LOG THÊM VÀO ---
-        # 1. Tính mean depth của vùng thực phẩm (mặt trên)
-        if np.any(food_mask > 0):
-            food_mean = np.mean(depth_map[food_mask > 0])
-            print(f"[DEBUG] Food surface depth mean: {food_mean:.2f} cm")
-        else:
-            print("[DEBUG] Food mask is empty, cannot calculate food mean depth.")
-
-        # 2. Tính mean depth của mặt đĩa đã phục hồi (mặt sàn)
-        if np.any(plate_mask > 0):
-            plate_mean = np.mean(plate_depth[plate_mask > 0])
-            print(f"[DEBUG] Plate surface (inpainted) depth mean: {plate_mean:.2f} cm")
-            
-            # 3. Tính chiều cao trung bình thực tế
-            if np.any(food_mask > 0):
-                # Dùng np.maximum(..., 0) để đảm bảo không bị chiều cao âm do nhiễu sensor
-                height_food = np.maximum(plate_depth - depth_map, 0)
                 
-                # Chỉ tính trung bình trên vùng có thực phẩm
-                avg_h = np.mean(height_food[food_mask > 0])
-                print(f"[DEBUG] Estimated average food height: {avg_h:.2f} cm")
-                
-                # Log thêm giá trị max để check xem có điểm nào vọt lên bất thường không
-                max_h = np.max(height_food[food_mask > 0])
-                print(f"[DEBUG] Max food height detected: {max_h:.2f} cm")
-        else:
-            print(f"[DEBUG] Plate mask is empty, fallback camera_h_ref: {camera_h_ref:.2f} cm")
-            
         return {
             "depth_map": depth_map,     # Độ sâu mặt trên (food + plate)
             "plate_depth": plate_depth  # Độ sâu mặt sàn (đã khôi phục)
         }
         
     except Exception:
-        logger.exception("[ERROR] depth_service failed")
+        _log_error("depth_service failed")
         raise
     finally:
-        logger.info("[DEBUG] depth_service finished in %.2fs", time.perf_counter() - start)
+        _log_info("depth_service finished")

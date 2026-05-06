@@ -7,6 +7,26 @@ import numpy as np
 from scipy.ndimage import binary_erosion
 from app.utils.math_helpers import estimate_affine_from_shape, load_template_data
 from app.core.constants import MIN_PLATE_DEPTH_CM
+import logging
+
+
+logger = logging.getLogger(__name__)
+
+def _ensure_logging() -> None:
+    if not logging.getLogger().handlers:
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter("%(asctime)s - %(filename)s - %(funcName)s - %(message)s")
+        handler.setFormatter(formatter)
+        logging.getLogger().addHandler(handler)
+    logger.setLevel(logging.INFO)
+
+def _log_info(message: str) -> None:
+    _ensure_logging()
+    logger.info(message)
+
+def _log_error(message: str) -> None:
+    _ensure_logging()
+    logger.error(message)
 
 
 def resize_with_padding(image: np.ndarray, size: int) -> np.ndarray:
@@ -25,10 +45,8 @@ def resize_with_padding(image: np.ndarray, size: int) -> np.ndarray:
     return canvas
 
 
-import cv2
-import numpy as np
-
 def decode_image_bytes(image_bytes: bytes) -> np.ndarray:
+    _log_info("enter decode_image_bytes")
     """
     Giải mã image bytes với tùy chọn định dạng màu đầu ra.
     
@@ -39,6 +57,7 @@ def decode_image_bytes(image_bytes: bytes) -> np.ndarray:
         np.ndarray: Mảng numpy của ảnh hoặc mảng rỗng nếu lỗi.
     """
     if not image_bytes:
+        _log_info("empty image_bytes branch")
         return np.zeros((0, 0, 3), dtype=np.uint8)
 
     # 1. Chuyển bytes sang numpy array 1 chiều
@@ -48,6 +67,7 @@ def decode_image_bytes(image_bytes: bytes) -> np.ndarray:
     image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     
     if image is None:
+        _log_info("image decode failed branch")
         return np.zeros((0, 0, 3), dtype=np.uint8)
 
     
@@ -56,6 +76,7 @@ def decode_image_bytes(image_bytes: bytes) -> np.ndarray:
 
 
 def crop_image(image: np.ndarray, bbox: list[float] | tuple[float, float, float, float]) -> np.ndarray:
+    _log_info("enter crop_image")
     if image.size == 0:
         return image
     x1, y1, x2, y2 = [int(max(0, v)) for v in bbox]
@@ -97,6 +118,7 @@ def inpaint_plate_depth(
     camera_h_ref: float,
     template_dir: str = "templates" # Đường dẫn template trên server
 ) -> np.ndarray:
+    _log_info("enter inpaint_plate_depth")
     """
     Phiên bản inpaint chuyên sâu từ Notebook: Khớp hình dạng + Hiệu chỉnh Z + Lọc mịn.
     """
@@ -107,10 +129,9 @@ def inpaint_plate_depth(
 
     num_anchors = len(x_s) if x_s is not None else 0
     
-    print(f"[GEOMETRY-DEBUG] Plate Type: {plate_type}")
-    print(f"[GEOMETRY-DEBUG] Num Anchors: {num_anchors}")
     # 2. Xử lý đĩa phẳng (Trường hợp đơn giản nhất)
     if plate_type in ["plate_flat", None]:
+        _log_info("flat plate branch")
         depth_plate = np.full((img_h, img_w), camera_h_ref, dtype=np.float32)
         plate_z_level = np.median(z_s) if (x_s is not None and len(z_s) > 0) else camera_h_ref
         depth_plate[plate_mask > 0] = plate_z_level
@@ -121,7 +142,7 @@ def inpaint_plate_depth(
     
     ref_depth, ref_mask = load_template_data(template_dir, plate_type)
     if ref_depth is None:
-        print("Fallback 1: ref_depth None")
+        _log_info("template load failed branch")
         # Fallback nếu không load được template
         depth_plate = np.full((img_h, img_w), camera_h_ref, dtype=np.float32)
         return depth_plate
@@ -129,7 +150,7 @@ def inpaint_plate_depth(
     M = estimate_affine_from_shape(ref_mask, plate_mask, plate_type)
     
     if M is not None:
-        print(f"[GEOMETRY-DEBUG] Affine Matrix M: {M.flatten().tolist()}")
+        _log_info("affine fit branch")
         depth_warped = cv2.warpAffine(ref_depth, M, (img_w, img_h), flags=cv2.INTER_LINEAR)
         
         # 4. Hiệu chỉnh Z-Offset (Khớp cao độ thực tế)
@@ -138,11 +159,10 @@ def inpaint_plate_depth(
             valid_idx = (ref_vals > 0) & (plate_mask[y_s, x_s] > 0)
             if np.any(valid_idx):
                 z_offset = np.median(z_s[valid_idx] - ref_vals[valid_idx])
-                print(f"[GEOMETRY-DEBUG] Z-Offset: {z_offset:.4f}")
                 depth_warped += z_offset
     else:
+        _log_info("affine fit failed branch")
         # Fallback 2: Nếu không khớp được hình dạng
-        print("Fallback2: M None")
         depth_warped = np.full((img_h, img_w), camera_h_ref - 0.5, dtype=np.float32)
 
     # 5. Fusion & Smoothing
@@ -159,7 +179,6 @@ def inpaint_plate_depth(
     depth_plate[plate_mask == 0] = camera_h_ref
     if np.any(plate_mask > 0):
         mean_plate_z = np.mean(depth_plate[plate_mask > 0])
-        print(f"[GEOMETRY-DEBUG] Final Plate Z Mean: {mean_plate_z:.4f}")
     return depth_plate
 
 
@@ -268,6 +287,7 @@ def merge_masks_and_instances(
     full_image_shape: tuple[int, int] | tuple[int, int, int],
     overlap_thresh: float = 0.01,
 ) -> tuple[dict[str, np.ndarray], dict[str, list[np.ndarray]]]:
+    _log_info("enter merge_masks_and_instances")
     height, width = full_image_shape[:2]
     instance_ingredient_masks: dict[str, list[np.ndarray]] = {}
 
@@ -309,6 +329,7 @@ def get_clean_plate_samples(
     food_mask: np.ndarray,
     camera_h_ref: float,
 ) -> tuple[np.ndarray | None, np.ndarray | None, np.ndarray | None]:
+    _log_info("enter get_clean_plate_samples")
     kernel_food = np.ones((7, 7), np.uint8)
     food_dilated = cv2.dilate(food_mask.astype(np.uint8), kernel_food, iterations=1)
 
@@ -327,6 +348,7 @@ def get_clean_plate_samples(
     z_values = depth_map[y_idx, x_idx]
 
     if len(z_values) < 50:
+        _log_info("insufficient clean samples branch")
         return None, None, None
     return x_idx, y_idx, z_values
 

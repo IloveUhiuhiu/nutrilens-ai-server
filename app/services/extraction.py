@@ -7,19 +7,33 @@ import gc
 import numpy as np
 from PIL import Image
 from typing import Any
-
+from unsloth import FastVisionModel
 from app.utils.image_processing import crop_image, decode_image_bytes
 
 logger = logging.getLogger(__name__)
 
+def _ensure_logging() -> None:
+    if not logging.getLogger().handlers:
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter("%(asctime)s - %(filename)s - %(funcName)s - %(message)s")
+        handler.setFormatter(formatter)
+        logging.getLogger().addHandler(handler)
+    logger.setLevel(logging.INFO)
+
+def _log_info(message: str) -> None:
+    _ensure_logging()
+    logger.info(message)
+
+def _log_error(message: str) -> None:
+    _ensure_logging()
+    logger.error(message)
+
 def load_qwen3_vl(weights_path: str, device: str) -> dict:
+    _log_info("loading qwen3_vl on %s", device)
     """
     Nạp mô hình Qwen3-VL sử dụng tối ưu hóa Unsloth.
     Trả về một bundle gồm model và tokenizer.
     """
-    logger.info("[DEBUG] Loading Qwen3-VL (Unsloth 4-bit) on %s", device)
-    from unsloth import FastVisionModel
-    
     # Nạp model với cấu hình 4-bit để tiết kiệm VRAM cho server
     model, tokenizer = FastVisionModel.from_pretrained(
         model_name=weights_path,
@@ -35,6 +49,7 @@ def load_qwen3_vl(weights_path: str, device: str) -> dict:
     }
 
 def _run_vlm_inference(bundle: dict, crop_np: np.ndarray) -> list[str]:
+    _log_info("enter _run_vlm_inference")
     """
     Thực hiện nhận diện nguyên liệu cho một vùng ảnh đơn lẻ.
     """
@@ -70,8 +85,10 @@ def _run_vlm_inference(bundle: dict, crop_np: np.ndarray) -> list[str]:
     full_text = tokenizer.decode(generated_ids[0], skip_special_tokens=True)
     
     if "assistant" in full_text.lower():
+        _log_info("assistant branch in response")
         raw_response = full_text.lower().split("assistant")[-1].strip()
     else:
+        _log_info("no assistant branch in response")
         raw_response = full_text.lower().strip()
         
     # Làm sạch chuỗi văn bản
@@ -93,12 +110,12 @@ def extract_ingredients(
     food_boxes: list[dict],
     qwen3_bundle: dict,
 ) -> dict[str, list[str]]:
+    _log_info("enter extract_ingredients")
     """
     Duyệt qua các Box thực phẩm đã detect, cắt ảnh và dùng VLM để lấy nguyên liệu.
     Trả về: { "food_0": ["rice", "chicken"], "food_1": ["salad"] }
     """
     start = time.perf_counter()
-    logger.info("[DEBUG] Starting extraction_service...")
     
     try:
         # Giải mã ảnh gốc
@@ -107,11 +124,12 @@ def extract_ingredients(
         
         # Chế độ inference để tăng tốc và giảm bộ nhớ
         with torch.inference_mode():
+            _log_info("torch inference_mode branch")
             for box in food_boxes:
                 box_id = box["id"] 
                 bbox = box["bbox"]
                 
-                logger.info("[DEBUG] Extracting ingredients for %s...", box_id)
+                _log_info(f"extracting ingredients for {box_id}")
                 
                 # Cắt vùng ảnh chứa thực phẩm
                 crop = crop_image(image, bbox)
@@ -123,8 +141,8 @@ def extract_ingredients(
         return ingredient_map
         
     except Exception:
-        logger.exception("[ERROR] extraction_service failed")
+        _log_error("extraction_service failed")
         raise
     finally:
+        _log_info("extraction_service finished")
         gc.collect()
-        logger.info("[DEBUG] extraction_service finished in %.2fs", time.perf_counter() - start)

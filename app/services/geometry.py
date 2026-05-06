@@ -14,6 +14,22 @@ from app.utils.math_helpers import (
 
 logger = logging.getLogger(__name__)
 
+def _ensure_logging() -> None:
+    if not logging.getLogger().handlers:
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter("%(asctime)s - %(filename)s - %(funcName)s - %(message)s")
+        handler.setFormatter(formatter)
+        logging.getLogger().addHandler(handler)
+    logger.setLevel(logging.INFO)
+
+def _log_info(message: str) -> None:
+    _ensure_logging()
+    logger.info(message)
+
+def _log_error(message: str) -> None:
+    _ensure_logging()
+    logger.error(message)
+
 def compute_geometry(
     segments_dict: dict,
     depth_map: np.ndarray,       # Bản đồ độ sâu mặt trên thực phẩm (cm)
@@ -21,12 +37,8 @@ def compute_geometry(
     camera_height_ref: float,    # Chiều cao camera thực tế (cm)
     pixel_area_ref: float,       # Diện tích 1 pixel tại mặt sàn tham chiếu (cm2)
 ) -> list[dict]:
-    """
-    Tính toán thể tích thực phẩm dựa trên logic xếp chồng (Stacking) và 
-    phục hồi bề mặt bị che khuất (Depth Completion).
-    """
+    _log_info("enter compute_geometry")
     start = time.perf_counter()
-    logger.info("[DEBUG] Starting geometry_service...")
     
     try:
         # 1. Giải nén dữ liệu instance từ segmentation_service
@@ -40,7 +52,7 @@ def compute_geometry(
 
         n_instances = len(instance_masks)
         if n_instances == 0:
-            logger.warning("[WARN] No instances found for geometry calculation.")
+            _log_info("no instances found for geometry calculation")
             return []
 
         # 2. Xác định thứ tự xếp chồng (Top -> Bottom)
@@ -53,7 +65,7 @@ def compute_geometry(
         # TRƯỜNG HỢP 1: CÓ CHU TRÌNH (CYCLE) - Dùng Fallback (Chia đều chiều cao)
         # ======================================================================
         if is_cycle:
-            logger.warning("[WARN] Stacking cycle detected! Falling back to shared height mode.")
+            _log_info("stacking cycle detected: fallback mode")
             # Tổng chiều cao từ đĩa đến đỉnh thực phẩm
             height_global = np.clip(depth_plate - depth_map, 0, None)
             
@@ -82,7 +94,7 @@ def compute_geometry(
         # TRƯỜNG HỢP 2: NORMAL MODE - Pipeline chuẩn (Stacking + Completion)
         # ======================================================================
         else:
-            logger.info("[DEBUG] Running Normal Geometry Pipeline (Polynomial Fitting)...")
+            _log_info("normal geometry pipeline")
             depth_completed_ref = depth_map.copy()
             instance_depth_maps = {} # Lưu bề mặt (top surface) sau phục hồi của mỗi instance
             occlusion_mask = np.zeros_like(depth_map, dtype=bool)
@@ -142,7 +154,7 @@ def compute_geometry(
         return final_results
 
     except Exception:
-        logger.exception("[ERROR] geometry_service failed")
+        _log_error("geometry_service failed")
         raise
     finally:
-        logger.info("[DEBUG] geometry_service finished in %.2fs", time.perf_counter() - start)
+        _log_info("geometry_service finished")

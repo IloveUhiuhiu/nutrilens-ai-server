@@ -2,12 +2,29 @@ from __future__ import annotations
 
 import logging
 import time
-import difflib # Fix lỗi import
+import difflib 
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
+def _ensure_logging() -> None:
+    if not logging.getLogger().handlers:
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter("%(asctime)s - %(filename)s - %(funcName)s - %(message)s")
+        handler.setFormatter(formatter)
+        logging.getLogger().addHandler(handler)
+    logger.setLevel(logging.INFO)
+
+def _log_info(message: str) -> None:
+    _ensure_logging()
+    logger.info(message)
+
+def _log_error(message: str) -> None:
+    _ensure_logging()
+    logger.error(message)
+
 def find_best_ingredient_match(target_name, database_keys, similarity_cutoff=0.6):
+    _log_info("enter find_best_ingredient_match")
     """
     Tìm kiếm tên nguyên liệu phù hợp nhất.
     """
@@ -18,11 +35,13 @@ def find_best_ingredient_match(target_name, database_keys, similarity_cutoff=0.6
     
     # 1. Kiểm tra khớp hoàn toàn (sau khi đã chuẩn hóa)
     if target_name in db_map:
+        _log_info("exact match branch")
         return db_map[target_name]
     
     # 2. Substring Match: Rất quan trọng cho VLM (ví dụ: "boiled egg" -> "egg")
     for norm_key in db_map:
         if norm_key in target_name or target_name in norm_key:
+            _log_info("substring match branch")
             return db_map[norm_key]
 
     # 3. Sử dụng logic so khớp mờ
@@ -36,9 +55,11 @@ def find_best_ingredient_match(target_name, database_keys, similarity_cutoff=0.6
     return db_map[best_matches[0]] if best_matches else None
 
 def estimate_nutrition(geometry_results: list[dict], db_dict: dict) -> dict[str, Any]:
+    _log_info("enter estimate_nutrition")
     start = time.perf_counter()
     try:
         if not geometry_results:
+            _log_info("empty geometry_results branch")
             return {"ingredients": {}, "total": {
                 "mass_g": 0.0, "calories_kcal": 0.0, "protein_g": 0.0, "fat_g": 0.0, "carbs_g": 0.0
             }}
@@ -52,13 +73,14 @@ def estimate_nutrition(geometry_results: list[dict], db_dict: dict) -> dict[str,
         for item in geometry_results:
      
             ing_name = item.get("ingredient") 
-            if not ing_name: continue
+            if not ing_name:
+                _log_info("missing ingredient name branch")
+                continue
 
-            # FIX: Đổi 'cutoff' thành 'similarity_cutoff' để khớp với định nghĩa hàm
             matched_key = find_best_ingredient_match(ing_name, db_keys, similarity_cutoff=0.6)
             
             if not matched_key:
-                logger.warning(f"[WARN] No match found for ingredient: {ing_name}")
+                _log_info(f"no match found for ingredient: {ing_name}")
                 continue
 
             ing_info = db_dict[matched_key]
@@ -92,7 +114,7 @@ def estimate_nutrition(geometry_results: list[dict], db_dict: dict) -> dict[str,
         }
 
     except Exception:
-        logger.exception("[ERROR] nutrition_service failed")
+        _log_error("nutrition_service failed")
         raise
     finally:
-        logger.info("[DEBUG] nutrition_service finished in %.2fs", time.perf_counter() - start)
+        _log_info("nutrition_service finished")

@@ -4,29 +4,28 @@ import numpy as np
 from collections import deque
 from scipy.ndimage import binary_erosion
 import cv2
-def kahn_topological_sort(graph: dict[str, list[str]]) -> list[str]:
-    """Thuật toán Kahn chuẩn cho các node dạng chuỗi."""
-    indegree = {node: 0 for node in graph}
-    for deps in graph.values():
-        for dep in deps:
-            indegree[dep] = indegree.get(dep, 0) + 1
-            
-    queue = deque([node for node, deg in indegree.items() if deg == 0])
-    order = []
-    
-    while queue:
-        node = queue.popleft()
-        order.append(node)
-        for dep in graph.get(node, []):
-            indegree[dep] -= 1
-            if indegree[dep] == 0:
-                queue.append(dep)
-                
-    if len(order) != len(indegree):
-        raise ValueError("Cycle detected in dependency graph")
-    return order
+import logging
+
+logger = logging.getLogger(__name__)
+
+def _ensure_logging() -> None:
+    if not logging.getLogger().handlers:
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter("%(asctime)s - %(filename)s - %(funcName)s - %(message)s")
+        handler.setFormatter(formatter)
+        logging.getLogger().addHandler(handler)
+    logger.setLevel(logging.INFO)
+
+def _log_info(message: str) -> None:
+    _ensure_logging()
+    logger.info(message)
+
+def _log_error(message: str) -> None:
+    _ensure_logging()
+    logger.error(message)
 
 def infer_instance_order(instance_masks: list[np.ndarray], depth_food: np.ndarray) -> tuple[list[int], bool]:
+    _log_info("enter infer_instance_order")
     """
     Xác định thứ tự Top -> Bottom dựa trên độ đè và độ sâu (Matching Notebook).
     """
@@ -95,6 +94,7 @@ def infer_instance_order(instance_masks: list[np.ndarray], depth_food: np.ndarra
     return order, is_cycle
 
 def complete_depth_instance(mask, depth_food, depth_below, missing_mask):
+    _log_info("enter complete_depth_instance")
     """
     Sử dụng Polynomial Fitting bậc 2 để ước tính bề mặt bị che khuất.
     """
@@ -131,9 +131,11 @@ def complete_depth_instance(mask, depth_food, depth_below, missing_mask):
         
         return depth_completed
     except:
+        _log_info("complete_depth_instance fallback branch")
         return depth_food.copy()
 
 def compute_instance_heights(instance_masks, sorted_idx, instance_depth_maps, depth_plate):
+    _log_info("enter compute_instance_heights")
     """
     Tính chiều cao từng lớp bằng logic mặt sàn động (Bottom -> Top).
     """
@@ -155,38 +157,32 @@ def compute_instance_heights(instance_masks, sorted_idx, instance_depth_maps, de
 
     return height_instances
 
-def area_adaptive(pixel_area_ref: float, depth: float, camera_height_ref: float) -> float:
-    """Công thức tính diện tích thích nghi bù trừ phối cảnh."""
-    if camera_height_ref <= 0 or pixel_area_ref <= 0:
-        raise ValueError("camera_height_ref and pixel_area_ref must be positive")
-    # Sử dụng bình phương tỉ lệ độ sâu CM
-    return pixel_area_ref * (depth / camera_height_ref) ** 2
-
 def load_template_data(template_dir: str, plate_type: str) -> tuple[np.ndarray | None, np.ndarray | None]:
+    _log_info("enter load_template_data")
     """
     Nạp dữ liệu depth và mask từ thư mục template dựa trên loại đĩa.
     """
     target_dir = os.path.join(template_dir, plate_type)
     if not os.path.exists(target_dir):
-        print("Khong toi tai : ", target_dir)
+        _log_info(f"template directory not found: {target_dir}")
         return None, None
 
     try:
         files = os.listdir(target_dir)
         depth_file = [f for f in files if 'depth' in f.lower()][0]
         mask_file = [f for f in files if 'mask' in f.lower()][0]
-        print("depth_file", depth_file)
-        print("mask_file", mask_file)
+ 
         # Đọc depth (chia 100 để về đơn vị cm) và mask (grayscale)
         ref_depth = cv2.imread(os.path.join(target_dir, depth_file), cv2.IMREAD_UNCHANGED).astype(np.float32) / 100.0
         ref_mask = cv2.imread(os.path.join(target_dir, mask_file), cv2.IMREAD_GRAYSCALE)
         
         return ref_depth, ref_mask
     except Exception as e:
-        print("Looi ne: ", e)
+        _log_error(f"load_template_data exception: {e}")
         return None, None
 
 def get_contour(mask: np.ndarray):
+    _log_info("enter get_contour")
     """Lấy đường bao lớn nhất của mask."""
     cnts, _ = cv2.findContours(mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     if not cnts:
@@ -194,6 +190,7 @@ def get_contour(mask: np.ndarray):
     return max(cnts, key=cv2.contourArea).reshape(-1, 2).astype(np.float32)
 
 def fit_shape(mask: np.ndarray, plate_type: str):
+    _log_info("enter fit_shape")
     """Phân loại và khớp hình dạng học (Circle, Rect, Ellipse)."""
     cnt = get_contour(mask)
     if cnt is None or len(cnt) < 20:
@@ -219,6 +216,7 @@ def fit_shape(mask: np.ndarray, plate_type: str):
     return ("rect", np.array([cx, cy], dtype=np.float32), w, h, angle)
 
 def build_affine(c_ref, c_cur, angle_deg, sx=1.0, sy=1.0) -> np.ndarray:
+    _log_info("enter build_affine")
     """Xây dựng ma trận Affine 2x3 từ các tham số xoay, tỉ lệ và dịch chuyển."""
     theta = np.deg2rad(angle_deg)
     cos_t, sin_t = np.cos(theta), np.sin(theta)
@@ -234,6 +232,7 @@ def build_affine(c_ref, c_cur, angle_deg, sx=1.0, sy=1.0) -> np.ndarray:
     return np.hstack([A, t.reshape(2, 1)]).astype(np.float32)
 
 def estimate_affine_from_shape(ref_mask: np.ndarray, cur_mask: np.ndarray, plate_type: str) -> np.ndarray | None:
+    _log_info("enter estimate_affine_from_shape")
     """
     Ước tính ma trận biến đổi Affine giữa Template và thực tế dựa trên đặc điểm hình dạng.
     """
