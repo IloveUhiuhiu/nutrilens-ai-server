@@ -9,7 +9,6 @@ import torch.nn.functional as F
 import cv2
 import numpy as np
 from typing import Any
-from depth_anything_v2.dpt import DepthAnythingV2
 from app.utils.image_processing import decode_image_bytes, inpaint_plate_depth
 
 MODELS_DIR = Path(__file__).resolve().parents[2] / "models"
@@ -58,7 +57,7 @@ def load_depth_anything(weights_path: str, device: str, encoder: str = 'vits') -
     """
     Nạp model và bộ transform vào một Bundle duy nhất.
     """
-    _log_info("loading DepthAnythingV2 (%s) on %s", encoder, device)
+    _log_info(f"loading DepthAnythingV2 {encoder} on {device}")
     
     model_configs = {
         'vits': {'encoder': 'vits', 'features': 64, 'out_channels': [48, 96, 192, 384]},

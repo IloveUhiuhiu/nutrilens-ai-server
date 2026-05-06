@@ -29,7 +29,7 @@ def _log_error(message: str) -> None:
     logger.error(message)
 
 def load_qwen3_vl(weights_path: str, device: str) -> dict:
-    _log_info("loading qwen3_vl on %s", device)
+    _log_info(f"loading qwen3_vl on {device}")
     """
     Nạp mô hình Qwen3-VL sử dụng tối ưu hóa Unsloth.
     Trả về một bundle gồm model và tokenizer.

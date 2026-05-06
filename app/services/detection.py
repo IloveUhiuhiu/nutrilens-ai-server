@@ -30,7 +30,7 @@ def _log_error(message: str) -> None:
 
 def load_yolo_food(weights_path: str, device: str, conf: float = 0.5) -> dict:
     """Nạp mô hình YOLO nhận diện thực phẩm cho dự án NutriLens."""
-    _log_info("loading YOLO Food model on %s with conf=%s", device, conf)
+    _log_info(f"loading YOLO Food model on {device} with conf={conf}")
     model = YOLO(weights_path)
     return {
         "model": model,
@@ -40,7 +40,7 @@ def load_yolo_food(weights_path: str, device: str, conf: float = 0.5) -> dict:
     }
 
 def load_yolo_plate(weights_path: str, device: str, conf: float = 0.9) -> dict:
-    _log_info("loading YOLO Plate model on %s with conf=%s", device, conf)
+    _log_info(f"loading YOLO Plate model on {device} with conf={conf}")
     """Nạp mô hình YOLO Segmentation cho vật chứa."""
 
     model = YOLO(weights_path)

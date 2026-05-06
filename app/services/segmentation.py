@@ -10,7 +10,6 @@ import gc
 import numpy as np
 from PIL import Image
 from typing import Any
-from infer_sam import SAM3LoRAInference
 from app.utils.image_processing import decode_image_bytes, crop_image, merge_masks_and_instances
 
 MODELS_DIR = Path(__file__).resolve().parents[2] / "models"
@@ -39,7 +38,7 @@ def _log_error(message: str) -> None:
     logger.error(message)
 
 def load_sam3(config_path: str, weights_path: str, device: str, conf: float = 0.75) -> dict:
-    _log_info("loading sam3 on %s with conf=%s", device, conf)
+    _log_info(f"loading sam3 on {device} with conf={conf}")
     """
     Khởi tạo SAM3 LoRA và đóng gói vào bundle kèm ngưỡng tin cậy conf.
     """
