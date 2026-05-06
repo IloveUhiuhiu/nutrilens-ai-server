@@ -102,7 +102,7 @@ async def analyze_nutrition(
             )
 
             plate_type = detections["plate_mask"].get("class")
-            print(plate_type)
+         
             # 3. Trích xuất thành phần theo từng Box ID (Qwen3-VL)
             ingredients_map = _run_step(
                 "extraction.extract_ingredients",
