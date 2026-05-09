@@ -5,7 +5,7 @@ import time
 import torch
 from fastapi import APIRouter, File, Form, Request, UploadFile, HTTPException
 import numpy as np
-
+from pathlib import Path
 from app.schemas.response import NutritionResponse, NutritionSummary
 from app.services.depth import estimate_depth
 from app.services.detection import detect_food_and_plate
@@ -90,6 +90,7 @@ async def analyze_nutrition(
         
         # Lưu rgb
         image_rgb = decode_image_bytes(image_bytes)
+        dish_id = Path(file.filename).stem
         debugger.save_image_rgb(
             "01_original.jpg",
             image_rgb
@@ -98,6 +99,7 @@ async def analyze_nutrition(
         # 1. Lấy tài nguyên từ app.state (Đã nạp sẵn ở lifespan)
         models = request.app.state.models
         nutrition_db = request.app.state.nutrition_db
+        ground_truth = request.app.state.ground_truth
         device = request.app.state.device
         gpu_lock = request.app.state.gpu_lock
 
@@ -179,6 +181,22 @@ async def analyze_nutrition(
                 templates_dir=request.app.state.settings.templates_dir,
             )
 
+            merged_depth = depth_data["plate_depth"].copy()
+            food_mask = food_mask_combined > 0
+            merged_depth[food_mask] = depth_data["depth_map"][food_mask]
+
+
+            food_heights = (
+                depth_data["plate_depth"]
+                - depth_data["depth_map"]
+            )
+
+            food_heights = np.clip(
+                food_heights,
+                0,
+                None
+            )
+
             # Lưu depth map
             debugger.save_depth(
                 "06_depth_map.png",
@@ -201,7 +219,7 @@ async def analyze_nutrition(
             )
             geometry = geometry_data["geometry"]
             # Lưu thứ tự tính toán
-            debugger.save_topological_order_overlay(
+            topo_overlay = debugger.save_topological_order_overlay(
                 "08_topological_order.png",
                 image_rgb,
                 geometry_data["instance_masks"],
@@ -214,6 +232,7 @@ async def analyze_nutrition(
                 geometry
             )
 
+
             # 7. Tra cứu dinh dưỡng từ RAM Database (Fuzzy Matching)
             nutrition_results = _run_step(
                 "nutrition.estimate_nutrition",
@@ -225,6 +244,34 @@ async def analyze_nutrition(
             debugger.save_json(
                 "10_nutrition.json",
                 nutrition_results
+            )
+
+            debugger.save_dashboard(
+                filename="dashboard.png",
+
+                original_rgb=image_rgb,
+                
+                boxes_rgb=boxes_overlay,
+
+                plate_mask=detections["plate_mask"]["mask"],
+
+                ingredient_overlay=ingredient_overlay,
+
+                plate_depth=depth_data["plate_depth"],
+
+                merged_depth=merged_depth,
+
+                topo_overlay=topo_overlay,
+
+                nutrition_results=nutrition_results,
+
+                geometry_results=geometry,
+
+                food_heights=food_heights,
+
+                ground_truth = ground_truth,
+
+                dish_id = dish_id
             )
 
         items = _normalize_items(nutrition_results)
