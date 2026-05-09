@@ -16,10 +16,11 @@ class Settings(BaseSettings):
     device: Literal["auto", "cpu", "cuda"] = "auto"
     log_level: str = "INFO"
     nutrition_db_path: str = "app/db/nutrition_db.json"
+    ground_truth_path: str = "app/db/ground_truth.csv"
 
     # --- YOLO Detection (Food & Plate) ---
     yolo_food_weights: str = "weights/yolo/food_yolo.pt"
-    yolo_food_conf: float = 0.5
+    yolo_food_conf: float = 0.8
     
     yolo_plate_weights: str = "weights/yolo/plate_yolo_seg.pt"
     yolo_plate_conf: float = 0.8
@@ -30,7 +31,7 @@ class Settings(BaseSettings):
     # --- SAM3 LoRA Segmentation ---
     sam3_config_path: str = "app/services/sam3/food_config.yaml"
     sam3_weights: str = "weights/sam3/sam3_lora.pth"
-    sam3_conf: float = 0.75
+    sam3_conf: float = 0.7
 
     # --- Depth Estimation (DepthAnythingV2) ---
     depth_encoder: Literal["vits", "vitb", "vitl", "vitg"] = "vits"

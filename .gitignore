@@ -4,6 +4,7 @@ templates
 *.ipynb
 __pycache__/
 unsloth_compiled_cache/
+debug_outputs/
 *.pyc
 *.pyo
 *.log
