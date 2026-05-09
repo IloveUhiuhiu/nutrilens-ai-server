@@ -151,8 +151,13 @@ def compute_geometry(
                 "avg_height_cm": round(float(avg_h), 2)
             })
             
-        return final_results
-
+        return {
+            "geometry": final_results,
+            "topological_order": sorted_idx,
+            "cycle_detected": is_cycle,
+            "instance_masks": instance_masks,
+            "instance_labels": instance_labels
+        }
     except Exception:
         _log_error("geometry_service failed")
         raise

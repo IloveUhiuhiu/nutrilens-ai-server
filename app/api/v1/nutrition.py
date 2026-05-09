@@ -5,6 +5,7 @@ import time
 import torch
 from fastapi import APIRouter, File, Form, Request, UploadFile, HTTPException
 import numpy as np
+
 from app.schemas.response import NutritionResponse, NutritionSummary
 from app.services.depth import estimate_depth
 from app.services.detection import detect_food_and_plate
@@ -13,6 +14,7 @@ from app.services.geometry import compute_geometry
 from app.services.nutrition import estimate_nutrition
 from app.services.segmentation import segment_ingredients
 from app.utils.image_processing import decode_image_bytes
+from app.utils.debug_visualizer import DebugVisualizer
 import logging
 router = APIRouter(tags=["nutrition"])
 
@@ -83,7 +85,15 @@ async def analyze_nutrition(
     _log_info("enter analyze_nutrition")
     try:
         start = time.perf_counter()
+        debugger = DebugVisualizer()
         image_bytes = await file.read()
+        
+        # Lưu rgb
+        image_rgb = decode_image_bytes(image_bytes)
+        debugger.save_image_rgb(
+            "01_original.jpg",
+            image_rgb
+        )
 
         # 1. Lấy tài nguyên từ app.state (Đã nạp sẵn ở lifespan)
         models = request.app.state.models
@@ -101,6 +111,19 @@ async def analyze_nutrition(
                 models.yolo_plate,
             )
 
+            # Lưu box
+            debugger.save_detection_boxes(
+                "02_detection_boxes.jpg",
+                image_rgb,
+                detections["food_boxes"]
+            )
+
+            # Lưu mask vật chứa
+            if detections["plate_mask"]["mask"] is not None:
+                debugger.save_mask(
+                    "03_plate_mask.png",
+                    detections["plate_mask"]["mask"]
+                )
             plate_type = detections["plate_mask"].get("class")
          
             # 3. Trích xuất thành phần theo từng Box ID (Qwen3-VL)
@@ -110,6 +133,12 @@ async def analyze_nutrition(
                 image_bytes,
                 detections["food_boxes"],
                 models.qwen3_vl,
+            )
+
+            # Lưu danh sách thành phần
+            debugger.save_json(
+                "04_extracted_ingredients.json",
+                ingredients_map
             )
 
             # 4. Phân đoạn nguyên liệu chi tiết (SAM3 LoRA)
@@ -122,11 +151,13 @@ async def analyze_nutrition(
                 detections["food_boxes"],
             )
 
-            image_rgb = _run_step(
-                "image_processing.decode_image_bytes",
-                decode_image_bytes,
-                image_bytes,
+            # Lưu mask thành phần
+            debugger.save_global_masks_overlay(
+                "05_global_masks.png",
+                image_rgb,
+                segments["global_masks"]
             )
+       
 
             orig_h, orig_w = image_rgb.shape[:2]
             food_mask_combined = np.zeros((orig_h, orig_w), dtype=np.uint8)
@@ -148,8 +179,18 @@ async def analyze_nutrition(
                 templates_dir=request.app.state.settings.templates_dir,
             )
 
+            # Lưu depth map
+            debugger.save_depth(
+                "06_depth_map.png",
+                depth_data["depth_map"]
+            )
+            # Lưu depth phục hồi 
+            debugger.save_depth(
+                "07_plate_restored.png",
+                depth_data["plate_depth"]
+            )
             # 6. Tính toán hình học nâng cao (Stacking & Depth Completion)
-            geometry = _run_step(
+            geometry_data = _run_step(
                 "geometry.compute_geometry",
                 compute_geometry,
                 segments,
@@ -158,6 +199,20 @@ async def analyze_nutrition(
                 camera_height_ref=camera_height_ref,
                 pixel_area_ref=pixel_area_ref,
             )
+            geometry = geometry_data["geometry"]
+            # Lưu thứ tự tính toán
+            debugger.save_topological_order_overlay(
+                "08_topological_order.png",
+                image_rgb,
+                geometry_data["instance_masks"],
+                geometry_data["instance_labels"],
+                geometry_data["topological_order"]
+            )
+            # Lưu thể tích
+            debugger.save_json(
+                "09_geometry.json",
+                geometry
+            )
 
             # 7. Tra cứu dinh dưỡng từ RAM Database (Fuzzy Matching)
             nutrition_results = _run_step(
@@ -165,6 +220,11 @@ async def analyze_nutrition(
                 estimate_nutrition,
                 geometry,
                 nutrition_db.get("foods", {}),
+            )
+            # Lưu kết quả dinh dưỡng
+            debugger.save_json(
+                "10_nutrition.json",
+                nutrition_results
             )
 
         items = _normalize_items(nutrition_results)

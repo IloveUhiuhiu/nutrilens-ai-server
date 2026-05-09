@@ -46,7 +46,7 @@
       "carb": 0.014,
       "protein": 0.37,
       "id": 4,
-      "density": 0.355,
+      "density": 0.338,
       "source": "usda"
     },
     "potatoes": {
@@ -4865,7 +4865,7 @@
       "source": "usda"
     },
     "chia seeds": {
-      "cal": 4.86,
+      "cal": 0.8,
       "fat": 0.31,
       "carb": 0.42,
       "protein": 0.17,
