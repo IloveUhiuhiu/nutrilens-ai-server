@@ -4,7 +4,7 @@ import asyncio
 import logging
 import json
 from contextlib import asynccontextmanager
-
+import pandas as pd
 from fastapi import FastAPI
 
 from app.api.v1.nutrition import router as nutrition_router

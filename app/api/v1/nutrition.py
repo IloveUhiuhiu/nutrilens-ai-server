@@ -114,7 +114,7 @@ async def analyze_nutrition(
             )
 
             # Lưu box
-            debugger.save_detection_boxes(
+            boxes_overlay = debugger.save_detection_boxes(
                 "02_detection_boxes.jpg",
                 image_rgb,
                 detections["food_boxes"]
@@ -154,7 +154,7 @@ async def analyze_nutrition(
             )
 
             # Lưu mask thành phần
-            debugger.save_global_masks_overlay(
+            ingredient_overlay = debugger.save_global_masks_overlay(
                 "05_global_masks.png",
                 image_rgb,
                 segments["global_masks"]
@@ -186,9 +186,14 @@ async def analyze_nutrition(
             merged_depth[food_mask] = depth_data["depth_map"][food_mask]
 
 
-            food_heights = (
-                depth_data["plate_depth"]
-                - depth_data["depth_map"]
+            food_heights = np.zeros_like(
+                depth_data["depth_map"],
+                dtype=np.float32
+            )
+
+            food_heights[food_mask] = (
+                depth_data["plate_depth"][food_mask]
+                - depth_data["depth_map"][food_mask]
             )
 
             food_heights = np.clip(
@@ -232,6 +237,7 @@ async def analyze_nutrition(
                 geometry
             )
 
+ 
 
             # 7. Tra cứu dinh dưỡng từ RAM Database (Fuzzy Matching)
             nutrition_results = _run_step(

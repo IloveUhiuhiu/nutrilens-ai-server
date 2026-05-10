@@ -76,6 +76,7 @@ class DebugVisualizer:
             )
 
         self.save_image_rgb(filename, img)
+        return img
 
     def save_global_masks_overlay(
         self,
@@ -109,6 +110,7 @@ class DebugVisualizer:
             )
 
         self.save_image_rgb(filename, overlay)
+        return overlay
     
     def save_topological_order_overlay(
         self,
@@ -473,12 +475,25 @@ class DebugVisualizer:
             food_heights > 0
         ]
 
-        if len(valid_heights) > 0:
+        p_low = np.percentile(valid_heights, 1)
+        p_high = np.percentile(valid_heights, 99)
 
-            ax10.hist(
-                valid_heights.flatten(),
-                bins=40
-            )
+        # Clamp
+        valid_heights = np.clip(
+            valid_heights,
+            p_low,
+            p_high
+        )
+
+        ax10.hist(
+            valid_heights.flatten(),
+            bins=40
+        )
+
+        ax10.set_title(
+            f"Food Height Histogram\n"
+            f"Clamp [{p_low:.2f}, {p_high:.2f}] cm"
+        )
 
         ax10.set_title(
             "Food Height Histogram"
