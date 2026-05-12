@@ -11,10 +11,11 @@ from app.api.v1.nutrition import router as nutrition_router
 from app.core.config import Settings
 from app.core.logging import configure_logging
 from app.services import ModelBundle
-from app.services.depth import load_depth_anything
-from app.services.detection import load_yolo_food, load_yolo_plate
-from app.services.extraction import load_qwen3_vl
-from app.services.segmentation import load_sam3
+from app.services.depth_service import DepthService
+from app.services.detection_service import DetectionService
+from app.services.extraction_service import ExtractionService
+from app.services.segmentation_service import SegmentationService
+
 
 logger = logging.getLogger(__name__)
 
@@ -26,31 +27,34 @@ async def lifespan(app: FastAPI):
     configure_logging(settings.log_level)
     device = settings.device_resolved
     logger.info("[DEBUG] NutriLens AI Server starting on device: %s", device)
-
+    depth_service = DepthService()
+    detection_service = DetectionService()
+    extraction_service = ExtractionService()
+    segmentation_service = SegmentationService()
     # 2. Nạp các Model Bundles kèm tham số conf (Ngưỡng tin cậy)
     # Tách biệt weights và conf cho từng model để tối ưu độ chính xác
     models = ModelBundle(
-        yolo_food=load_yolo_food(
+        yolo_food=detection_service.load_yolo_food(
             settings.yolo_food_weights, 
             device, 
             conf=settings.yolo_food_conf
         ),
-        yolo_plate=load_yolo_plate(
+        yolo_plate=detection_service.load_yolo_plate(
             settings.yolo_plate_weights, 
             device, 
             conf=settings.yolo_plate_conf
         ),
-        qwen3_vl=load_qwen3_vl(
+        qwen3_vl=extraction_service.load_qwen3_vl(
             settings.qwen3vl_weights, 
             device
         ),
-        sam3=load_sam3(
+        sam3=segmentation_service.load_sam3(
             settings.sam3_config_path, 
             settings.sam3_weights, 
             device, 
             conf=settings.sam3_conf
         ),
-        depth_anything=load_depth_anything(
+        depth_anything=depth_service.load_depth_anything(
             settings.depthanything_weights, 
             device, 
             encoder=settings.depth_encoder  # 'vits' hoặc 'vitb'
