@@ -14,6 +14,24 @@ class DebugVisualizer:
         self.output_dir = Path(root_dir) / timestamp
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
+    def _safe_savefig(self, filename: str):
+        plt.tight_layout()
+        plt.savefig(
+            str(self.output_dir / filename),
+            dpi=250,
+            bbox_inches="tight"
+        )
+        plt.close()
+
+    def _safe_imshow(self, ax, image, title: str, cmap: str | None = None):
+        if image is None:
+            ax.axis("off")
+            ax.set_title(f"{title} (missing)")
+            return
+        ax.imshow(image, cmap=cmap)
+        ax.set_title(title)
+        ax.axis("off")
+
     def save_image_rgb(self, filename: str, image_rgb: np.ndarray):
         if image_rgb is None or image_rgb.size == 0:
             return
@@ -22,10 +40,16 @@ class DebugVisualizer:
         cv2.imwrite(str(self.output_dir / filename), image_bgr)
 
     def save_mask(self, filename: str, mask: np.ndarray):
+        if mask is None or mask.size == 0:
+            return
+
         mask_vis = (mask.astype(np.uint8) * 255)
         cv2.imwrite(str(self.output_dir / filename), mask_vis)
 
     def save_depth(self, filename: str, depth_map: np.ndarray):
+        if depth_map is None or depth_map.size == 0:
+            return
+
         plt.figure(figsize=(8, 8))
         plt.imshow(
             depth_map,
@@ -176,22 +200,16 @@ class DebugVisualizer:
     def save_dashboard(
         self,
         filename: str,
-
         original_rgb: np.ndarray,
         boxes_rgb: np.ndarray,
         plate_mask: np.ndarray,
         ingredient_overlay: np.ndarray,
-
         plate_depth: np.ndarray,
         merged_depth: np.ndarray,
-
         topo_overlay: np.ndarray,
-
         nutrition_results: dict,
         geometry_results: list[dict],
-
         food_heights: np.ndarray,
-
         ground_truth=None,
         dish_id: str | None = None,
     ):
@@ -213,102 +231,60 @@ class DebugVisualizer:
         # 1. ORIGINAL IMAGE
         # =========================================================
         ax1 = fig.add_subplot(gs[0, 0])
-
-        ax1.imshow(original_rgb)
-
-        ax1.set_title("Original Image")
-        ax1.axis("off")
+        self._safe_imshow(ax1, original_rgb, "Original Image")
 
         # =========================================================
         # 2. DETECTION BOXES
         # =========================================================
         ax2 = fig.add_subplot(gs[0, 1])
-
-        ax2.imshow(boxes_rgb)
-
-        ax2.set_title("Detection Boxes")
-        ax2.axis("off")
+        self._safe_imshow(ax2, boxes_rgb, "Detection Boxes")
 
         # =========================================================
         # 3. PLATE MASK
         # =========================================================
         ax3 = fig.add_subplot(gs[0, 2])
-
-        ax3.imshow(
-            plate_mask,
-            cmap="gray"
-        )
-
-        ax3.set_title("Plate Mask")
-        ax3.axis("off")
+        self._safe_imshow(ax3, plate_mask, "Plate Mask", cmap="gray")
 
         # =========================================================
         # 4. INGREDIENT MASKS
         # =========================================================
         ax4 = fig.add_subplot(gs[1, 0])
-
-        ax4.imshow(ingredient_overlay)
-
-        ax4.set_title("Ingredient Masks")
-        ax4.axis("off")
+        self._safe_imshow(ax4, ingredient_overlay, "Ingredient Masks")
 
         # =========================================================
         # 5. RESTORED PLATE DEPTH
         # =========================================================
         ax5 = fig.add_subplot(gs[1, 1])
-
-        im5 = ax5.imshow(
-            plate_depth,
-            cmap="inferno",
-            vmin=0,
-            vmax=40
-        )
-
-        ax5.set_title("Restored Plate Depth")
-        ax5.axis("off")
-
-        plt.colorbar(
-            im5,
-            ax=ax5,
-            fraction=0.046
-        )
+        if plate_depth is not None:
+            im5 = ax5.imshow(plate_depth, cmap="inferno", vmin=0, vmax=40)
+            ax5.set_title("Restored Plate Depth")
+            ax5.axis("off")
+            plt.colorbar(im5, ax=ax5, fraction=0.046)
+        else:
+            self._safe_imshow(ax5, None, "Restored Plate Depth")
 
         # =========================================================
         # 6. MERGED DEPTH
         # =========================================================
         ax6 = fig.add_subplot(gs[1, 2])
-
-        im6 = ax6.imshow(
-            merged_depth,
-            cmap="inferno",
-            vmin=0,
-            vmax=40
-        )
-
-        ax6.set_title("Merged Food + Plate Depth")
-        ax6.axis("off")
-
-        plt.colorbar(
-            im6,
-            ax=ax6,
-            fraction=0.046
-        )
+        if merged_depth is not None:
+            im6 = ax6.imshow(merged_depth, cmap="inferno", vmin=0, vmax=40)
+            ax6.set_title("Merged Food + Plate Depth")
+            ax6.axis("off")
+            plt.colorbar(im6, ax=ax6, fraction=0.046)
+        else:
+            self._safe_imshow(ax6, None, "Merged Food + Plate Depth")
 
         # =========================================================
         # 7. TOPOLOGICAL ORDER
         # =========================================================
         ax7 = fig.add_subplot(gs[2, 0])
-
-        ax7.imshow(topo_overlay)
-
-        ax7.set_title("Topological Order")
-        ax7.axis("off")
+        self._safe_imshow(ax7, topo_overlay, "Topological Order")
 
         # =========================================================
         # 8. NUTRITION TABLE
         # =========================================================
         ax8 = fig.add_subplot(gs[2, 1:])
-
         ax8.axis("off")
 
         lines = []
@@ -364,7 +340,6 @@ class DebugVisualizer:
         # 9. PREDICTION / GROUND TRUTH
         # =========================================================
         ax9 = fig.add_subplot(gs[3, 0])
-
         ax9.axis("off")
 
         metric_lines = []
@@ -470,52 +445,121 @@ class DebugVisualizer:
         # 10. HEIGHT HISTOGRAM
         # =========================================================
         ax10 = fig.add_subplot(gs[3, 1:])
+        if food_heights is None or food_heights.size == 0:
+            ax10.set_title("Food Height Histogram (no data)")
+            ax10.axis("off")
+        else:
+            valid_heights = food_heights[food_heights > 0]
+            if valid_heights.size == 0:
+                ax10.set_title("Food Height Histogram (no data)")
+                ax10.axis("off")
+            else:
+                p_low = np.percentile(valid_heights, 1)
+                p_high = np.percentile(valid_heights, 99)
+                valid_heights = np.clip(valid_heights, p_low, p_high)
+                ax10.hist(valid_heights.flatten(), bins=40)
+                ax10.set_title(
+                    f"Food Height Histogram\nClamp [{p_low:.2f}, {p_high:.2f}] cm"
+                )
+                ax10.set_xlabel("Height (cm)")
+                ax10.set_ylabel("Pixel Count")
 
-        valid_heights = food_heights[
-            food_heights > 0
-        ]
+        self._safe_savefig(filename)
 
-        p_low = np.percentile(valid_heights, 1)
-        p_high = np.percentile(valid_heights, 99)
-
-        # Clamp
-        valid_heights = np.clip(
-            valid_heights,
-            p_low,
-            p_high
+    def run_debug_visuals(
+        self,
+        dish_id: str,
+        image_rgb: np.ndarray,
+        detections: dict,
+        ingredients_map: dict,
+        segments: dict,
+        food_mask_combined: np.ndarray,
+        depth_data: dict,
+        geometry_data: dict,
+        nutrition_results: dict,
+        ground_truth,
+    ):
+        self.save_image_rgb(
+            "01_original.jpg",
+            image_rgb
         )
 
-        ax10.hist(
-            valid_heights.flatten(),
-            bins=40
+        boxes_overlay = self.save_detection_boxes(
+            "02_detection_boxes.jpg",
+            image_rgb,
+            detections["food_boxes"]
         )
 
-        ax10.set_title(
-            f"Food Height Histogram\n"
-            f"Clamp [{p_low:.2f}, {p_high:.2f}] cm"
+        if detections["plate_mask"]["mask"] is not None:
+            self.save_mask(
+                "03_plate_mask.png",
+                detections["plate_mask"]["mask"]
+            )
+
+        self.save_json(
+            "04_extracted_ingredients.json",
+            ingredients_map
         )
 
-        ax10.set_title(
-            "Food Height Histogram"
+        ingredient_overlay = self.save_global_masks_overlay(
+            "05_global_masks.png",
+            image_rgb,
+            segments["global_masks"]
         )
 
-        ax10.set_xlabel(
-            "Height (cm)"
+        merged_depth = depth_data["plate_depth"].copy()
+        food_mask = food_mask_combined > 0
+        merged_depth[food_mask] = depth_data["depth_map"][food_mask]
+
+        food_heights = np.zeros_like(
+            depth_data["depth_map"],
+            dtype=np.float32
+        )
+        food_heights[food_mask] = (
+            depth_data["plate_depth"][food_mask]
+            - depth_data["depth_map"][food_mask]
+        )
+        food_heights = np.clip(food_heights, 0, None)
+
+        self.save_depth(
+            "06_depth_map.png",
+            depth_data["depth_map"]
+        )
+        self.save_depth(
+            "07_plate_restored.png",
+            depth_data["plate_depth"]
         )
 
-        ax10.set_ylabel(
-            "Pixel Count"
+        geometry = geometry_data["geometry"]
+        topo_overlay = self.save_topological_order_overlay(
+            "08_topological_order.png",
+            image_rgb,
+            geometry_data["instance_masks"],
+            geometry_data["instance_labels"],
+            geometry_data["topological_order"]
+        )
+        self.save_json(
+            "09_geometry.json",
+            geometry
         )
 
-        # =========================================================
-        # SAVE
-        # =========================================================
-        plt.tight_layout()
-
-        plt.savefig(
-            str(self.output_dir / filename),
-            dpi=250,
-            bbox_inches="tight"
+        self.save_json(
+            "10_nutrition.json",
+            nutrition_results
         )
 
-        plt.close()
+        self.save_dashboard(
+            filename="dashboard.png",
+            original_rgb=image_rgb,
+            boxes_rgb=boxes_overlay,
+            plate_mask=detections["plate_mask"]["mask"],
+            ingredient_overlay=ingredient_overlay,
+            plate_depth=depth_data["plate_depth"],
+            merged_depth=merged_depth,
+            topo_overlay=topo_overlay,
+            nutrition_results=nutrition_results,
+            geometry_results=geometry,
+            food_heights=food_heights,
+            ground_truth=ground_truth,
+            dish_id=dish_id
+        )
