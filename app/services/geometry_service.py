@@ -3,7 +3,8 @@ from __future__ import annotations
 import time
 import numpy as np
 from collections import defaultdict
-from app.utils.depth import complete_depth_instance, compute_instance_heights
+from app.utils.processing import compute_instance_heights
+from app.utils.math.fitting import complete_depth_instance
 from app.utils.math.topology import infer_instance_order
 from app.services.base import ServiceBase
 

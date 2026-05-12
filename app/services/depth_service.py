@@ -8,7 +8,7 @@ import torch.nn.functional as F
 import cv2
 import numpy as np
 from app.utils.cv.image import decode_image_bytes
-from app.utils.depth import inpaint_plate_depth
+from app.utils.processing import inpaint_plate_depth
 from app.services.base import ServiceBase
 
 MODELS_DIR = Path(__file__).resolve().parents[2] / "models"

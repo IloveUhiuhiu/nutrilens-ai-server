@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 import numpy as np
 import cv2
-from scipy.ndimage import binary_erosion
 from app.core.constants import MIN_PLATE_DEPTH_CM
 from app.utils.common import get_logger
 from app.utils.cv.geometry import estimate_affine_from_shape
@@ -94,8 +93,6 @@ def inpaint_plate_depth(
     depth_plate = cv2.bilateralFilter(depth_plate.astype(np.float32), d=7, sigmaColor=0.3, sigmaSpace=10)
     depth_plate[plate_mask == 0] = camera_h_ref
     return depth_plate
-
-from app.utils.math.fitting import complete_depth_instance
 
 def compute_instance_heights(instance_masks, sorted_idx, instance_depth_maps, depth_plate):
     logger.info("enter compute_instance_heights")
