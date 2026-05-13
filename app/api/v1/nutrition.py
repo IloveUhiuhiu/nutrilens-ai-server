@@ -3,6 +3,7 @@ from __future__ import annotations
 import gc
 import time
 import torch
+from pathlib import Path
 from fastapi import APIRouter, File, Form, Request, UploadFile, HTTPException
 from app.schemas.response import NutritionResponse, NutritionSummary
 from app.services.depth_service import DepthService

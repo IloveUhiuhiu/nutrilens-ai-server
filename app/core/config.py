@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     depthanything_weights: str = "weights/depth/depth_anything_v2_vits.pth"
     templates_dir: str = "templates"
 
+    debug_visuals: bool = False
     @property
     def device_resolved(self) -> str:
         """Tự động xác định thiết bị tính toán nếu để là 'auto'."""
