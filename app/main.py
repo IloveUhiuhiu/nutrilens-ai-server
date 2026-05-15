@@ -3,9 +3,12 @@ from __future__ import annotations
 import asyncio
 import logging
 import json
+from pathlib import Path
 from contextlib import asynccontextmanager
 import pandas as pd
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 from app.api.v1.nutrition import router as nutrition_router
 from app.core.config import Settings
@@ -107,4 +110,19 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-app.include_router(nutrition_router, prefix="/v1")
+# Mount static files
+static_dir = Path(__file__).parent.parent / "static"
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
+# Serve index.html at root
+templates_dir = Path(__file__).parent.parent / "templates"
+
+@app.get("/", include_in_schema=False)
+async def root():
+    index_file = templates_dir / "index.html"
+    if index_file.exists():
+        return FileResponse(index_file)
+    return {"message": "Welcome to Nutrilens AI"}
+
+app.include_router(nutrition_router, prefix="/api/v1")

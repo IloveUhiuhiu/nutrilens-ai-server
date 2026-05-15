@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     # --- Depth Estimation (DepthAnythingV2) ---
     depth_encoder: Literal["vits", "vitb", "vitl", "vitg"] = "vits"
     depthanything_weights: str = "weights/depth/depth_anything_v2_vits.pth"
-    templates_dir: str = "templates"
+    templates_dir: str = "templates_plate"
 
     debug_visuals: bool = False
     @property

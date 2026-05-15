@@ -1,0 +1,4985 @@
+{
+    "metadata": {
+        "version": "1.2.0",
+        "description": "Nutrition database built from Nutrition5k dataset",
+        "units": {
+            "cal": "kcal/g",
+            "protein": "g",
+            "fat": "g",
+            "carb": "g",
+            "density": "g/cm³"
+        },
+        "last_updated": "2026-03-08",
+        "source": "Nutrition5k Dataset"
+    },
+    "foods": {
+        "cottage cheese": {
+            "cal": 0.98,
+            "fat": 0.043,
+            "carb": 0.034,
+            "protein": 0.11,
+            "id": 1,
+            "density": 0.649285,
+            "source": "aqua_calc"
+        },
+        "strawberries": {
+            "cal": 0.33,
+            "fat": 0.003,
+            "carb": 0.08,
+            "protein": 0.007,
+            "id": 2,
+            "density": 0.640241,
+            "source": "usda"
+        },
+        "garden salad": {
+            "cal": 0.646,
+            "fat": 0.034,
+            "carb": 0.032,
+            "protein": 0.061,
+            "id": 3,
+            "density": 0.38,
+            "source": "aqua_calc"
+        },
+        "bacon": {
+            "cal": 5.41,
+            "fat": 0.42,
+            "carb": 0.014,
+            "protein": 0.37,
+            "id": 4,
+            "density": 0.204783,
+            "source": "usda"
+        },
+        "potatoes": {
+            "cal": 0.77,
+            "fat": 0.001,
+            "carb": 0.17,
+            "protein": 0.02,
+            "id": 5,
+            "density": 0.763494,
+            "source": "usda"
+        },
+        "caesar salad": {
+            "cal": 0.44,
+            "fat": 0.021,
+            "carb": 0.043,
+            "protein": 0.032,
+            "id": 6,
+            "density": 0.266594,
+            "source": "aqua_calc"
+        },
+        "cauliflower": {
+            "cal": 0.25,
+            "fat": 0.003,
+            "carb": 0.05,
+            "protein": 0.018,
+            "id": 7,
+            "density": 0.589198,
+            "source": "usda"
+        },
+        "scrambled eggs": {
+            "cal": 1.48,
+            "fat": 0.11,
+            "carb": 0.016,
+            "protein": 0.1,
+            "id": 8,
+            "density": 0.510829,
+            "source": "usda"
+        },
+        "wild rice": {
+            "cal": 1.19,
+            "fat": 0.004,
+            "carb": 0.25,
+            "protein": 0.05,
+            "id": 9,
+            "density": 0.472745,
+            "source": "aqua_calc"
+        },
+        "steak": {
+            "cal": 2.71,
+            "fat": 0.19,
+            "carb": 0.0,
+            "protein": 0.25,
+            "id": 10,
+            "density": 0.707884,
+            "source": "aqua_calc"
+        },
+        "cheese pizza": {
+            "cal": 2.659,
+            "fat": 0.094,
+            "carb": 0.335,
+            "protein": 0.112,
+            "id": 11,
+            "density": 0.423018,
+            "source": "aqua_calc"
+        },
+        "olives": {
+            "cal": 1.15,
+            "fat": 0.107,
+            "carb": 0.063,
+            "protein": 0.008,
+            "id": 12,
+            "density": 1.41298,
+            "source": "usda"
+        },
+        "berries": {
+            "cal": 0.57,
+            "fat": 0.003,
+            "carb": 0.14,
+            "protein": 0.007,
+            "id": 13,
+            "density": 0.634,
+            "source": "usda"
+        },
+        "asparagus": {
+            "cal": 0.204,
+            "fat": 0.001,
+            "carb": 0.039,
+            "protein": 0.022,
+            "id": 14,
+            "density": 0.61404,
+            "source": "usda"
+        },
+        "hash browns": {
+            "cal": 3.26,
+            "fat": 0.22,
+            "carb": 0.32,
+            "protein": 0.026,
+            "id": 15,
+            "density": 0.317492,
+            "source": "aqua_calc"
+        },
+        "brussels sprouts": {
+            "cal": 0.43,
+            "fat": 0.003,
+            "carb": 0.09,
+            "protein": 0.034,
+            "id": 16,
+            "density": 0.578757,
+            "source": "usda"
+        },
+        "pasta salad": {
+            "cal": 2.015,
+            "fat": 0.119,
+            "carb": 0.173,
+            "protein": 0.059,
+            "id": 17,
+            "density": 0.282576,
+            "source": "usda"
+        },
+        "turkey": {
+            "cal": 1.89,
+            "fat": 0.07,
+            "carb": 0.001,
+            "protein": 0.29,
+            "id": 18,
+            "density": 1.284,
+            "source": "aqua_calc"
+        },
+        "bread": {
+            "cal": 2.654,
+            "fat": 0.042,
+            "carb": 0.423,
+            "protein": 0.135,
+            "id": 19,
+            "density": 0.168,
+            "source": "aqua_calc"
+        },
+        "duck": {
+            "cal": 3.37,
+            "fat": 0.28,
+            "carb": 0.0,
+            "protein": 0.19,
+            "id": 20,
+            "density": 0.5917,
+            "source": "usda"
+        },
+        "squash": {
+            "cal": 0.205,
+            "fat": 0.003,
+            "carb": 0.034,
+            "protein": 0.009,
+            "id": 21,
+            "density": 0.782808,
+            "source": "usda"
+        },
+        "guacamole": {
+            "cal": 2.0,
+            "fat": 0.171,
+            "carb": 0.086,
+            "protein": 0.029,
+            "id": 22,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "brown rice": {
+            "cal": 1.11,
+            "fat": 0.009,
+            "carb": 0.23,
+            "protein": 0.026,
+            "id": 23,
+            "density": 0.319667,
+            "source": "aqua_calc"
+        },
+        "artic char": {
+            "cal": 1.54,
+            "fat": 0.081,
+            "carb": 0.0,
+            "protein": 0.2,
+            "id": 24,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "beef": {
+            "cal": 2.5,
+            "fat": 0.15,
+            "carb": 0.0,
+            "protein": 0.26,
+            "id": 25,
+            "density": 0.804,
+            "source": "aqua_calc"
+        },
+        "white rice": {
+            "cal": 1.3,
+            "fat": 0.003,
+            "carb": 0.28,
+            "protein": 0.027,
+            "id": 26,
+            "density": 0.444866,
+            "source": "usda"
+        },
+        "broccoli": {
+            "cal": 0.35,
+            "fat": 0.004,
+            "carb": 0.07,
+            "protein": 0.024,
+            "id": 27,
+            "density": 0.407965,
+            "source": "usda"
+        },
+        "chicken": {
+            "cal": 1.65,
+            "fat": 0.036,
+            "carb": 0.0,
+            "protein": 0.31,
+            "id": 28,
+            "density": 0.76207,
+            "source": "aqua_calc"
+        },
+        "mixed greens": {
+            "cal": 0.28,
+            "fat": 0.004,
+            "carb": 0.053,
+            "protein": 0.022,
+            "id": 29,
+            "density": 0.068191,
+            "source": "aqua_calc"
+        },
+        "lettuce": {
+            "cal": 0.15,
+            "fat": 0.002,
+            "carb": 0.029,
+            "protein": 0.014,
+            "id": 30,
+            "density": 0.297024,
+            "source": "usda"
+        },
+        "cucumbers": {
+            "cal": 0.1,
+            "fat": 0.0,
+            "carb": 0.02,
+            "protein": 0.01,
+            "id": 31,
+            "density": 0.815537,
+            "source": "aqua_calc"
+        },
+        "tomatoes": {
+            "cal": 0.34,
+            "fat": 0.007,
+            "carb": 0.068,
+            "protein": 0.007,
+            "id": 32,
+            "density": 0.519303,
+            "source": "aqua_calc"
+        },
+        "bell peppers": {
+            "cal": 0.4,
+            "fat": 0.002,
+            "carb": 0.09,
+            "protein": 0.02,
+            "id": 33,
+            "density": 0.663245,
+            "source": "usda"
+        },
+        "celery": {
+            "cal": 0.16,
+            "fat": 0.002,
+            "carb": 0.034,
+            "protein": 0.007,
+            "id": 34,
+            "density": 0.484533,
+            "source": "usda"
+        },
+        "blue cheese": {
+            "cal": 3.53,
+            "fat": 0.29,
+            "carb": 0.023,
+            "protein": 0.21,
+            "id": 35,
+            "density": 0.5706,
+            "source": "usda"
+        },
+        "spinach raw": {
+            "cal": 0.23,
+            "fat": 0.004,
+            "carb": 0.036,
+            "protein": 0.029,
+            "id": 36,
+            "density": 0.073543,
+            "source": "usda"
+        },
+        "cantaloupe": {
+            "cal": 0.34,
+            "fat": 0.002,
+            "carb": 0.08,
+            "protein": 0.008,
+            "id": 37,
+            "density": 0.794392,
+            "source": "usda"
+        },
+        "pineapple": {
+            "cal": 0.5,
+            "fat": 0.001,
+            "carb": 0.13,
+            "protein": 0.005,
+            "id": 38,
+            "density": 0.804595,
+            "source": "aqua_calc"
+        },
+        "sausage": {
+            "cal": 3.446,
+            "fat": 0.273,
+            "carb": 0.042,
+            "protein": 0.193,
+            "id": 39,
+            "density": 0.722492,
+            "source": "aqua_calc"
+        },
+        "raspberries": {
+            "cal": 0.53,
+            "fat": 0.007,
+            "carb": 0.12,
+            "protein": 0.012,
+            "id": 40,
+            "density": 0.601573,
+            "source": "aqua_calc"
+        },
+        "blackberries": {
+            "cal": 0.43,
+            "fat": 0.005,
+            "carb": 0.092,
+            "protein": 0.014,
+            "id": 41,
+            "density": 0.40506,
+            "source": "usda"
+        },
+        "avocado": {
+            "cal": 1.6,
+            "fat": 0.15,
+            "carb": 0.09,
+            "protein": 0.02,
+            "id": 42,
+            "density": 0.987986,
+            "source": "usda"
+        },
+        "green beans": {
+            "cal": 0.31,
+            "fat": 0.001,
+            "carb": 0.07,
+            "protein": 0.018,
+            "id": 43,
+            "density": 0.439804,
+            "source": "usda"
+        },
+        "bean sprouts": {
+            "cal": 0.3,
+            "fat": 0.002,
+            "carb": 0.059,
+            "protein": 0.03,
+            "id": 44,
+            "density": 0.4861,
+            "source": "usda"
+        },
+        "carrot": {
+            "cal": 0.41,
+            "fat": 0.002,
+            "carb": 0.1,
+            "protein": 0.009,
+            "id": 45,
+            "density": 0.50367,
+            "source": "usda"
+        },
+        "mushroom": {
+            "cal": 0.22,
+            "fat": 0.003,
+            "carb": 0.033,
+            "protein": 0.031,
+            "id": 46,
+            "density": 0.687032,
+            "source": "usda"
+        },
+        "corn": {
+            "cal": 0.96,
+            "fat": 0.015,
+            "carb": 0.21,
+            "protein": 0.034,
+            "id": 47,
+            "density": 1.698509,
+            "source": "aqua_calc"
+        },
+        "ham": {
+            "cal": 1.45,
+            "fat": 0.06,
+            "carb": 0.015,
+            "protein": 0.21,
+            "id": 48,
+            "density": 0.568,
+            "source": "aqua_calc"
+        },
+        "fish": {
+            "cal": 0.9,
+            "fat": 0.13,
+            "carb": 0.0,
+            "protein": 0.184,
+            "id": 49,
+            "density": 0.597419,
+            "source": "aqua_calc"
+        },
+        "tofu": {
+            "cal": 0.73,
+            "fat": 0.048,
+            "carb": 0.019,
+            "protein": 0.08,
+            "id": 50,
+            "density": 1.327235,
+            "source": "aqua_calc"
+        },
+        "shrimp": {
+            "cal": 0.99,
+            "fat": 0.003,
+            "carb": 0.002,
+            "protein": 0.24,
+            "id": 51,
+            "density": 0.612,
+            "source": "aqua_calc"
+        },
+        "cheese": {
+            "cal": 4.02,
+            "fat": 0.33,
+            "carb": 0.013,
+            "protein": 0.25,
+            "id": 52,
+            "density": 0.476,
+            "source": "aqua_calc"
+        },
+        "nuts": {
+            "cal": 6.07,
+            "fat": 0.54,
+            "carb": 0.21,
+            "protein": 0.2,
+            "id": 53,
+            "density": 0.604,
+            "source": "aqua_calc"
+        },
+        "apple": {
+            "cal": 0.52,
+            "fat": 0.002,
+            "carb": 0.14,
+            "protein": 0.003,
+            "id": 54,
+            "density": 0.612642,
+            "source": "usda"
+        },
+        "banana": {
+            "cal": 0.89,
+            "fat": 0.003,
+            "carb": 0.23,
+            "protein": 0.011,
+            "id": 55,
+            "density": 0.636,
+            "source": "aqua_calc"
+        },
+        "kiwi": {
+            "cal": 0.61,
+            "fat": 0.005,
+            "carb": 0.15,
+            "protein": 0.011,
+            "id": 56,
+            "density": 0.7608,
+            "source": "usda"
+        },
+        "lemon": {
+            "cal": 0.29,
+            "fat": 0.003,
+            "carb": 0.09,
+            "protein": 0.011,
+            "id": 57,
+            "density": 0.8454,
+            "source": "usda"
+        },
+        "orange": {
+            "cal": 0.47,
+            "fat": 0.001,
+            "carb": 0.12,
+            "protein": 0.009,
+            "id": 58,
+            "density": 0.668573,
+            "source": "aqua_calc"
+        },
+        "oatmeal": {
+            "cal": 0.68,
+            "fat": 0.014,
+            "carb": 0.12,
+            "protein": 0.024,
+            "id": 59,
+            "density": 0.42791,
+            "source": "usda"
+        },
+        "tortilla": {
+            "cal": 2.18,
+            "fat": 0.029,
+            "carb": 0.45,
+            "protein": 0.06,
+            "id": 60,
+            "density": 0.468,
+            "source": "aqua_calc"
+        },
+        "potato chips": {
+            "cal": 5.36,
+            "fat": 0.35,
+            "carb": 0.53,
+            "protein": 0.07,
+            "id": 61,
+            "density": 0.1057,
+            "source": "usda"
+        },
+        "noodles": {
+            "cal": 1.38,
+            "fat": 0.021,
+            "carb": 0.25,
+            "protein": 0.045,
+            "id": 62,
+            "density": 0.6763,
+            "source": "usda"
+        },
+        "bean(seed)": {
+            "cal": 1.4,
+            "fat": 0.006,
+            "carb": 0.24,
+            "protein": 0.09,
+            "id": 63,
+            "density": 0.7693,
+            "source": "usda"
+        },
+        "alcohol": {
+            "cal": 0.431,
+            "fat": 0.0,
+            "carb": 0.036,
+            "protein": 0.005,
+            "id": 64,
+            "density": 0.88,
+            "source": "aqua_calc"
+        },
+        "grape juice": {
+            "cal": 0.67,
+            "fat": 0.004,
+            "carb": 0.17,
+            "protein": 0.006,
+            "id": 65,
+            "density": 1.048,
+            "source": "aqua_calc"
+        },
+        "ground beef": {
+            "cal": 3.321,
+            "fat": 0.295,
+            "carb": 0.0,
+            "protein": 0.142,
+            "id": 66,
+            "density": 0.956,
+            "source": "aqua_calc"
+        },
+        "syrup": {
+            "cal": 2.6,
+            "fat": 0.001,
+            "carb": 0.67,
+            "protein": 0.0,
+            "id": 67,
+            "density": 1.412,
+            "source": "aqua_calc"
+        },
+        "grapefruits": {
+            "cal": 0.42,
+            "fat": 0.001,
+            "carb": 0.11,
+            "protein": 0.008,
+            "id": 68,
+            "density": 0.7608,
+            "source": "usda"
+        },
+        "fruit punch": {
+            "cal": 0.45,
+            "fat": 0.0,
+            "carb": 0.125,
+            "protein": 0.0,
+            "id": 69,
+            "density": 1.0019,
+            "source": "usda"
+        },
+        "figs": {
+            "cal": 2.75,
+            "fat": 0.0,
+            "carb": 0.65,
+            "protein": 0.025,
+            "id": 70,
+            "density": 0.6763,
+            "source": "usda"
+        },
+        "macaroni and cheese": {
+            "cal": 1.64,
+            "fat": 0.05,
+            "carb": 0.23,
+            "protein": 0.07,
+            "id": 71,
+            "density": 0.8,
+            "source": "aqua_calc"
+        },
+        "kale": {
+            "cal": 0.49,
+            "fat": 0.007,
+            "carb": 0.09,
+            "protein": 0.033,
+            "id": 72,
+            "density": 0.159357,
+            "source": "aqua_calc"
+        },
+        "radishes": {
+            "cal": 0.16,
+            "fat": 0.001,
+            "carb": 0.034,
+            "protein": 0.007,
+            "id": 73,
+            "density": 0.316781,
+            "source": "usda"
+        },
+        "pasta": {
+            "cal": 1.316,
+            "fat": 0.011,
+            "carb": 0.248,
+            "protein": 0.051,
+            "id": 74,
+            "density": 0.394755,
+            "source": "aqua_calc"
+        },
+        "refried beans": {
+            "cal": 0.918,
+            "fat": 0.012,
+            "carb": 0.152,
+            "protein": 0.052,
+            "id": 75,
+            "density": 1.099,
+            "source": "usda"
+        },
+        "brisket": {
+            "cal": 1.552,
+            "fat": 0.072,
+            "carb": 0.0,
+            "protein": 0.21,
+            "id": 76,
+            "density": 1.036,
+            "source": "aqua_calc"
+        },
+        "almonds": {
+            "cal": 5.781,
+            "fat": 0.495,
+            "carb": 0.227,
+            "protein": 0.224,
+            "id": 77,
+            "density": 0.566976,
+            "source": "usda"
+        },
+        "protein powder": {
+            "cal": 4.0,
+            "fat": 0.033,
+            "carb": 0.1,
+            "protein": 0.8,
+            "id": 78,
+            "density": 0.88,
+            "source": "aqua_calc"
+        },
+        "okra": {
+            "cal": 0.328,
+            "fat": 0.002,
+            "carb": 0.072,
+            "protein": 0.019,
+            "id": 79,
+            "density": 0.6763,
+            "source": "usda"
+        },
+        "turkey bacon": {
+            "cal": 3.797,
+            "fat": 0.281,
+            "carb": 0.031,
+            "protein": 0.291,
+            "id": 80,
+            "density": 0.226338,
+            "source": "aqua_calc"
+        },
+        "pickles": {
+            "cal": 0.11,
+            "fat": 0.002,
+            "carb": 0.023,
+            "protein": 0.003,
+            "id": 81,
+            "density": 0.6551,
+            "source": "usda"
+        },
+        "pecans": {
+            "cal": 6.9,
+            "fat": 0.72,
+            "carb": 0.14,
+            "protein": 0.09,
+            "id": 82,
+            "density": 0.248775,
+            "source": "usda"
+        },
+        "muenster cheese": {
+            "cal": 3.675,
+            "fat": 0.296,
+            "carb": 0.011,
+            "protein": 0.239,
+            "id": 83,
+            "density": 1.1,
+            "source": "aqua_calc"
+        },
+        "brie cheese": {
+            "cal": 3.334,
+            "fat": 0.28,
+            "carb": 0.005,
+            "protein": 0.21,
+            "id": 84,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "apple juice": {
+            "cal": 0.46,
+            "fat": 0.001,
+            "carb": 0.11,
+            "protein": 0.001,
+            "id": 85,
+            "density": 1.048,
+            "source": "aqua_calc"
+        },
+        "raisin bran": {
+            "cal": 3.14,
+            "fat": 0.027,
+            "carb": 0.77,
+            "protein": 0.08,
+            "id": 86,
+            "density": 0.256,
+            "source": "aqua_calc"
+        },
+        "coleslaw": {
+            "cal": 1.523,
+            "fat": 0.097,
+            "carb": 0.148,
+            "protein": 0.01,
+            "id": 87,
+            "density": 0.8073,
+            "source": "usda"
+        },
+        "margarine": {
+            "cal": 7.17,
+            "fat": 0.81,
+            "carb": 0.007,
+            "protein": 0.002,
+            "id": 88,
+            "density": 0.9468,
+            "source": "usda"
+        },
+        "spaghetti": {
+            "cal": 1.58,
+            "fat": 0.009,
+            "carb": 0.31,
+            "protein": 0.06,
+            "id": 89,
+            "density": 0.592,
+            "source": "aqua_calc"
+        },
+        "ground pork": {
+            "cal": 3.93,
+            "fat": 0.33,
+            "carb": 0.014,
+            "protein": 0.23,
+            "id": 90,
+            "density": 0.916,
+            "source": "aqua_calc"
+        },
+        "herring": {
+            "cal": 0.859,
+            "fat": 0.059,
+            "carb": 0.032,
+            "protein": 0.047,
+            "id": 91,
+            "density": 1.036,
+            "source": "aqua_calc"
+        },
+        "wine": {
+            "cal": 0.85,
+            "fat": 0.0,
+            "carb": 0.026,
+            "protein": 0.001,
+            "id": 92,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "alfalfa": {
+            "cal": 0.29,
+            "fat": 0.007,
+            "carb": 0.038,
+            "protein": 0.04,
+            "id": 93,
+            "density": 0.1395,
+            "source": "usda"
+        },
+        "onions": {
+            "cal": 0.4,
+            "fat": 0.001,
+            "carb": 0.09,
+            "protein": 0.011,
+            "id": 94,
+            "density": 0.90969,
+            "source": "usda"
+        },
+        "artichokes": {
+            "cal": 0.47,
+            "fat": 0.002,
+            "carb": 0.11,
+            "protein": 0.033,
+            "id": 95,
+            "density": 0.270992,
+            "source": "aqua_calc"
+        },
+        "mussels": {
+            "cal": 1.718,
+            "fat": 0.045,
+            "carb": 0.07,
+            "protein": 0.238,
+            "id": 96,
+            "density": 0.636,
+            "source": "aqua_calc"
+        },
+        "falafel": {
+            "cal": 3.341,
+            "fat": 0.178,
+            "carb": 0.307,
+            "protein": 0.133,
+            "id": 97,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "multigrain bread": {
+            "cal": 2.857,
+            "fat": 0.092,
+            "carb": 0.49,
+            "protein": 0.041,
+            "id": 98,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "marshmallows": {
+            "cal": 3.18,
+            "fat": 0.002,
+            "carb": 0.81,
+            "protein": 0.018,
+            "id": 99,
+            "density": 0.1691,
+            "source": "usda"
+        },
+        "oats": {
+            "cal": 3.89,
+            "fat": 0.069,
+            "carb": 0.663,
+            "protein": 0.169,
+            "id": 100,
+            "density": 0.344,
+            "source": "aqua_calc"
+        },
+        "leeks": {
+            "cal": 0.61,
+            "fat": 0.003,
+            "carb": 0.14,
+            "protein": 0.015,
+            "id": 101,
+            "density": 0.44,
+            "source": "aqua_calc"
+        },
+        "snow peas": {
+            "cal": 0.81,
+            "fat": 0.004,
+            "carb": 0.14,
+            "protein": 0.05,
+            "id": 102,
+            "density": 0.592,
+            "source": "aqua_calc"
+        },
+        "pretzels": {
+            "cal": 3.803,
+            "fat": 0.026,
+            "carb": 0.804,
+            "protein": 0.101,
+            "id": 103,
+            "density": 0.1691,
+            "source": "usda"
+        },
+        "strudels": {
+            "cal": 3.182,
+            "fat": 0.108,
+            "carb": 0.5,
+            "protein": 0.05,
+            "id": 104,
+            "density": 0.52,
+            "source": "aqua_calc"
+        },
+        "grilled chicken": {
+            "cal": 2.262,
+            "fat": 0.149,
+            "carb": 0.001,
+            "protein": 0.226,
+            "id": 105,
+            "density": 0.741687,
+            "source": "aqua_calc"
+        },
+        "half and half": {
+            "cal": 1.3,
+            "fat": 0.12,
+            "carb": 0.043,
+            "protein": 0.03,
+            "id": 106,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "mixed nuts": {
+            "cal": 6.069,
+            "fat": 0.535,
+            "carb": 0.211,
+            "protein": 0.206,
+            "id": 107,
+            "density": 0.6,
+            "source": "aqua_calc"
+        },
+        "spring rolls": {
+            "cal": 1.543,
+            "fat": 0.08,
+            "carb": 0.043,
+            "protein": 0.162,
+            "id": 108,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "french toast": {
+            "cal": 2.292,
+            "fat": 0.109,
+            "carb": 0.248,
+            "protein": 0.078,
+            "id": 109,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "barbecue sauce": {
+            "cal": 1.72,
+            "fat": 0.006,
+            "carb": 0.41,
+            "protein": 0.008,
+            "id": 110,
+            "density": 1.1497,
+            "source": "usda"
+        },
+        "clams": {
+            "cal": 1.48,
+            "fat": 0.02,
+            "carb": 0.051,
+            "protein": 0.255,
+            "id": 111,
+            "density": 0.5706,
+            "source": "usda"
+        },
+        "honeydew melons": {
+            "cal": 0.36,
+            "fat": 0.001,
+            "carb": 0.09,
+            "protein": 0.005,
+            "id": 112,
+            "density": 0.882514,
+            "source": "usda"
+        },
+        "ketchup": {
+            "cal": 1.12,
+            "fat": 0.002,
+            "carb": 0.26,
+            "protein": 0.013,
+            "id": 113,
+            "density": 1.1497,
+            "source": "usda"
+        },
+        "polenta": {
+            "cal": 3.7,
+            "fat": 0.018,
+            "carb": 0.79,
+            "protein": 0.07,
+            "id": 114,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "lemonade": {
+            "cal": 0.4,
+            "fat": 0.0,
+            "carb": 0.1,
+            "protein": 0.001,
+            "id": 115,
+            "density": 1.0449,
+            "source": "usda"
+        },
+        "mayonnaise": {
+            "cal": 6.8,
+            "fat": 0.75,
+            "carb": 0.006,
+            "protein": 0.01,
+            "id": 116,
+            "density": 0.9299,
+            "source": "usda"
+        },
+        "tacos": {
+            "cal": 2.26,
+            "fat": 0.13,
+            "carb": 0.201,
+            "protein": 0.088,
+            "id": 117,
+            "density": 0.464,
+            "source": "aqua_calc"
+        },
+        "eggnog": {
+            "cal": 0.878,
+            "fat": 0.042,
+            "carb": 0.08,
+            "protein": 0.046,
+            "id": 118,
+            "density": 1.082,
+            "source": "usda"
+        },
+        "tabouli": {
+            "cal": 0.85,
+            "fat": 0.045,
+            "carb": 0.107,
+            "protein": 0.021,
+            "id": 119,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "gelatin": {
+            "cal": 0.618,
+            "fat": 0.0,
+            "carb": 0.141,
+            "protein": 0.012,
+            "id": 120,
+            "density": 1.016,
+            "source": "aqua_calc"
+        },
+        "watermelon": {
+            "cal": 0.3,
+            "fat": 0.002,
+            "carb": 0.076,
+            "protein": 0.006,
+            "id": 121,
+            "density": 0.842504,
+            "source": "usda"
+        },
+        "garlic": {
+            "cal": 1.49,
+            "fat": 0.005,
+            "carb": 0.33,
+            "protein": 0.064,
+            "id": 122,
+            "density": 0.5748,
+            "source": "usda"
+        },
+        "crawfish": {
+            "cal": 0.77,
+            "fat": 0.01,
+            "carb": 0.0,
+            "protein": 0.16,
+            "id": 123,
+            "density": 0.5706,
+            "source": "usda"
+        },
+        "walnuts": {
+            "cal": 6.533,
+            "fat": 0.642,
+            "carb": 0.139,
+            "protein": 0.151,
+            "id": 124,
+            "density": 0.31927,
+            "source": "usda"
+        },
+        "octopus": {
+            "cal": 1.637,
+            "fat": 0.021,
+            "carb": 0.044,
+            "protein": 0.297,
+            "id": 125,
+            "density": 0.448,
+            "source": "aqua_calc"
+        },
+        "mustard": {
+            "cal": 0.613,
+            "fat": 0.033,
+            "carb": 0.06,
+            "protein": 0.037,
+            "id": 126,
+            "density": 1.056,
+            "source": "aqua_calc"
+        },
+        "pastries": {
+            "cal": 5.508,
+            "fat": 0.384,
+            "carb": 0.452,
+            "protein": 0.072,
+            "id": 127,
+            "density": 0.948,
+            "source": "aqua_calc"
+        },
+        "egg whites": {
+            "cal": 0.52,
+            "fat": 0.002,
+            "carb": 0.007,
+            "protein": 0.1,
+            "id": 128,
+            "density": 0.669763,
+            "source": "usda"
+        },
+        "raisins": {
+            "cal": 2.99,
+            "fat": 0.005,
+            "carb": 0.79,
+            "protein": 0.031,
+            "id": 129,
+            "density": 0.6763,
+            "source": "usda"
+        },
+        "rye bread": {
+            "cal": 2.586,
+            "fat": 0.032,
+            "carb": 0.482,
+            "protein": 0.086,
+            "id": 130,
+            "density": 0.172,
+            "source": "aqua_calc"
+        },
+        "dark chocolate": {
+            "cal": 5.75,
+            "fat": 0.46,
+            "carb": 0.27,
+            "protein": 0.06,
+            "id": 131,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "croissants": {
+            "cal": 4.062,
+            "fat": 0.212,
+            "carb": 0.459,
+            "protein": 0.08,
+            "id": 132,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "shallots": {
+            "cal": 0.2,
+            "fat": 0.002,
+            "carb": 0.033,
+            "protein": 0.015,
+            "id": 133,
+            "density": 0.676,
+            "source": "aqua_calc"
+        },
+        "biscuits": {
+            "cal": 3.525,
+            "fat": 0.162,
+            "carb": 0.447,
+            "protein": 0.07,
+            "id": 134,
+            "density": 0.508,
+            "source": "aqua_calc"
+        },
+        "tilapia": {
+            "cal": 1.288,
+            "fat": 0.027,
+            "carb": 0.0,
+            "protein": 0.261,
+            "id": 135,
+            "density": 1.036,
+            "source": "aqua_calc"
+        },
+        "poached eggs": {
+            "cal": 1.425,
+            "fat": 0.092,
+            "carb": 0.008,
+            "protein": 0.125,
+            "id": 136,
+            "density": 0.5706,
+            "source": "usda"
+        },
+        "succotash": {
+            "cal": 0.99,
+            "fat": 0.01,
+            "carb": 0.2,
+            "protein": 0.05,
+            "id": 137,
+            "density": 0.606127,
+            "source": "aqua_calc"
+        },
+        "seafood": {
+            "cal": 2.044,
+            "fat": 0.081,
+            "carb": 0.018,
+            "protein": 0.285,
+            "id": 138,
+            "density": 0.88,
+            "source": "aqua_calc"
+        },
+        "egg rolls": {
+            "cal": 1.966,
+            "fat": 0.045,
+            "carb": 0.287,
+            "protein": 0.102,
+            "id": 139,
+            "density": 0.528,
+            "source": "aqua_calc"
+        },
+        "caesar dressing": {
+            "cal": 0.441,
+            "fat": 0.021,
+            "carb": 0.043,
+            "protein": 0.032,
+            "id": 140,
+            "density": 0.409393,
+            "source": "aqua_calc"
+        },
+        "tuna salad": {
+            "cal": 1.87,
+            "fat": 0.092,
+            "carb": 0.092,
+            "protein": 0.162,
+            "id": 141,
+            "density": 0.8665,
+            "source": "usda"
+        },
+        "india pale ale beer": {
+            "cal": 0.556,
+            "fat": 0.0,
+            "carb": 0.017,
+            "protein": 0.003,
+            "id": 142,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "veal": {
+            "cal": 1.72,
+            "fat": 0.076,
+            "carb": 0.0,
+            "protein": 0.244,
+            "id": 143,
+            "density": 1.036,
+            "source": "aqua_calc"
+        },
+        "sorbet": {
+            "cal": 1.24,
+            "fat": 0.005,
+            "carb": 0.267,
+            "protein": 0.019,
+            "id": 144,
+            "density": 0.844,
+            "source": "aqua_calc"
+        },
+        "bison": {
+            "cal": 1.79,
+            "fat": 0.08,
+            "carb": 0.0,
+            "protein": 0.25,
+            "id": 145,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "scallops": {
+            "cal": 1.059,
+            "fat": 0.006,
+            "carb": 0.059,
+            "protein": 0.2,
+            "id": 146,
+            "density": 0.5706,
+            "source": "usda"
+        },
+        "turkey breast": {
+            "cal": 1.891,
+            "fat": 0.071,
+            "carb": 0.0,
+            "protein": 0.288,
+            "id": 147,
+            "density": 0.856,
+            "source": "aqua_calc"
+        },
+        "parmesan cheese": {
+            "cal": 4.307,
+            "fat": 0.286,
+            "carb": 0.042,
+            "protein": 0.384,
+            "id": 148,
+            "density": 0.226082,
+            "source": "aqua_calc"
+        },
+        "sushi": {
+            "cal": 1.43,
+            "fat": 0.004,
+            "carb": 0.299,
+            "protein": 0.043,
+            "id": 149,
+            "density": 0.636,
+            "source": "aqua_calc"
+        },
+        "swordfish": {
+            "cal": 1.718,
+            "fat": 0.079,
+            "carb": 0.0,
+            "protein": 0.234,
+            "id": 150,
+            "density": 1.036,
+            "source": "aqua_calc"
+        },
+        "agave nectar": {
+            "cal": 3.1,
+            "fat": 0.005,
+            "carb": 0.76,
+            "protein": 0.001,
+            "id": 151,
+            "density": 1.3526,
+            "source": "usda"
+        },
+        "cabbage": {
+            "cal": 0.21,
+            "fat": 0.005,
+            "carb": 0.032,
+            "protein": 0.013,
+            "id": 152,
+            "density": 0.278517,
+            "source": "usda"
+        },
+        "bulgur": {
+            "cal": 3.42,
+            "fat": 0.013,
+            "carb": 0.76,
+            "protein": 0.12,
+            "id": 153,
+            "density": 0.366596,
+            "source": "usda"
+        },
+        "brown sugar": {
+            "cal": 3.8,
+            "fat": 0.0,
+            "carb": 0.98,
+            "protein": 0.001,
+            "id": 154,
+            "density": 0.467717,
+            "source": "usda"
+        },
+        "chicken thighs": {
+            "cal": 1.772,
+            "fat": 0.083,
+            "carb": 0.0,
+            "protein": 0.239,
+            "id": 155,
+            "density": 0.42995,
+            "source": "aqua_calc"
+        },
+        "paella": {
+            "cal": 1.834,
+            "fat": 0.091,
+            "carb": 0.141,
+            "protein": 0.104,
+            "id": 156,
+            "density": 0.772,
+            "source": "aqua_calc"
+        },
+        "colby cheese": {
+            "cal": 3.94,
+            "fat": 0.313,
+            "carb": 0.025,
+            "protein": 0.243,
+            "id": 157,
+            "density": 1.036,
+            "source": "aqua_calc"
+        },
+        "gumbo": {
+            "cal": 0.867,
+            "fat": 0.033,
+            "carb": 0.098,
+            "protein": 0.041,
+            "id": 158,
+            "density": 1.0313,
+            "source": "usda"
+        },
+        "apple cider": {
+            "cal": 0.462,
+            "fat": 0.001,
+            "carb": 0.113,
+            "protein": 0.001,
+            "id": 159,
+            "density": 1.0482,
+            "source": "usda"
+        },
+        "chow mein": {
+            "cal": 4.611,
+            "fat": 0.184,
+            "carb": 0.676,
+            "protein": 0.108,
+            "id": 160,
+            "density": 0.236,
+            "source": "aqua_calc"
+        },
+        "olive oil": {
+            "cal": 8.84,
+            "fat": 1.0,
+            "carb": 0.0,
+            "protein": 0.0,
+            "id": 161,
+            "density": 0.913,
+            "source": "usda"
+        },
+        "parsnips": {
+            "cal": 0.75,
+            "fat": 0.003,
+            "carb": 0.18,
+            "protein": 0.012,
+            "id": 162,
+            "density": 0.933668,
+            "source": "usda"
+        },
+        "kidney beans": {
+            "cal": 3.33,
+            "fat": 0.008,
+            "carb": 0.6,
+            "protein": 0.24,
+            "id": 163,
+            "density": 0.7777,
+            "source": "usda"
+        },
+        "chowders": {
+            "cal": 0.99,
+            "fat": 0.062,
+            "carb": 0.076,
+            "protein": 0.031,
+            "id": 164,
+            "density": 1.0778,
+            "source": "usda"
+        },
+        "skim milk": {
+            "cal": 0.34,
+            "fat": 0.001,
+            "carb": 0.049,
+            "protein": 0.034,
+            "id": 165,
+            "density": 1.0313,
+            "source": "usda"
+        },
+        "grapefruit juice": {
+            "cal": 0.389,
+            "fat": 0.001,
+            "carb": 0.091,
+            "protein": 0.005,
+            "id": 166,
+            "density": 0.690602,
+            "source": "usda"
+        },
+        "tamales": {
+            "cal": 1.528,
+            "fat": 0.06,
+            "carb": 0.181,
+            "protein": 0.062,
+            "id": 167,
+            "density": 0.416,
+            "source": "aqua_calc"
+        },
+        "lasagna": {
+            "cal": 1.35,
+            "fat": 0.05,
+            "carb": 0.154,
+            "protein": 0.072,
+            "id": 168,
+            "density": 1.0567,
+            "source": "usda"
+        },
+        "whole wheat bread": {
+            "cal": 2.468,
+            "fat": 0.033,
+            "carb": 0.421,
+            "protein": 0.13,
+            "id": 169,
+            "density": 0.196,
+            "source": "aqua_calc"
+        },
+        "gravy": {
+            "cal": 0.791,
+            "fat": 0.059,
+            "carb": 0.052,
+            "protein": 0.02,
+            "id": 170,
+            "density": 0.984,
+            "source": "aqua_calc"
+        },
+        "almond butter": {
+            "cal": 6.086,
+            "fat": 0.555,
+            "carb": 0.187,
+            "protein": 0.209,
+            "id": 171,
+            "density": 1.084,
+            "source": "aqua_calc"
+        },
+        "cherry pie": {
+            "cal": 2.694,
+            "fat": 0.122,
+            "carb": 0.387,
+            "protein": 0.028,
+            "id": 172,
+            "density": 0.788,
+            "source": "aqua_calc"
+        },
+        "chestnuts": {
+            "cal": 1.308,
+            "fat": 0.014,
+            "carb": 0.281,
+            "protein": 0.021,
+            "id": 173,
+            "density": 0.604,
+            "source": "aqua_calc"
+        },
+        "bread crumbs": {
+            "cal": 3.95,
+            "fat": 0.051,
+            "carb": 0.713,
+            "protein": 0.132,
+            "id": 174,
+            "density": 0.4565,
+            "source": "usda"
+        },
+        "apple pie": {
+            "cal": 2.367,
+            "fat": 0.11,
+            "carb": 0.345,
+            "protein": 0.018,
+            "id": 175,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "french dressing": {
+            "cal": 4.532,
+            "fat": 0.442,
+            "carb": 0.156,
+            "protein": 0.007,
+            "id": 176,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "tempeh": {
+            "cal": 1.929,
+            "fat": 0.109,
+            "carb": 0.093,
+            "protein": 0.188,
+            "id": 177,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "pies": {
+            "cal": 2.367,
+            "fat": 0.111,
+            "carb": 0.345,
+            "protein": 0.019,
+            "id": 178,
+            "density": 0.788,
+            "source": "aqua_calc"
+        },
+        "eggs": {
+            "cal": 1.555,
+            "fat": 0.105,
+            "carb": 0.012,
+            "protein": 0.125,
+            "id": 179,
+            "density": 1.028,
+            "source": "aqua_calc"
+        },
+        "rice noodles": {
+            "cal": 1.09,
+            "fat": 0.002,
+            "carb": 0.25,
+            "protein": 0.009,
+            "id": 180,
+            "density": 0.169265,
+            "source": "usda"
+        },
+        "milk shakes": {
+            "cal": 1.121,
+            "fat": 0.029,
+            "carb": 0.18,
+            "protein": 0.039,
+            "id": 181,
+            "density": 0.96,
+            "source": "aqua_calc"
+        },
+        "soy yogurt": {
+            "cal": 1.014,
+            "fat": 0.019,
+            "carb": 0.173,
+            "protein": 0.037,
+            "id": 182,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "chips": {
+            "cal": 5.363,
+            "fat": 0.35,
+            "carb": 0.529,
+            "protein": 0.07,
+            "id": 183,
+            "density": 0.084,
+            "source": "aqua_calc"
+        },
+        "ravioli": {
+            "cal": 0.771,
+            "fat": 0.015,
+            "carb": 0.138,
+            "protein": 0.025,
+            "id": 184,
+            "density": 1.0398,
+            "source": "usda"
+        },
+        "collards": {
+            "cal": 0.313,
+            "fat": 0.006,
+            "carb": 0.053,
+            "protein": 0.03,
+            "id": 185,
+            "density": 0.1522,
+            "source": "usda"
+        },
+        "green peas": {
+            "cal": 0.774,
+            "fat": 0.004,
+            "carb": 0.136,
+            "protein": 0.05,
+            "id": 186,
+            "density": 0.5664,
+            "source": "usda"
+        },
+        "chickpeas": {
+            "cal": 1.64,
+            "fat": 0.026,
+            "carb": 0.27,
+            "protein": 0.09,
+            "id": 187,
+            "density": 1.687763,
+            "source": "usda"
+        },
+        "carrot cake": {
+            "cal": 4.153,
+            "fat": 0.099,
+            "carb": 0.786,
+            "protein": 0.05,
+            "id": 188,
+            "density": 0.584,
+            "source": "aqua_calc"
+        },
+        "vinegar": {
+            "cal": 0.0,
+            "fat": 0.0,
+            "carb": 0.0,
+            "protein": 0.0,
+            "id": 189,
+            "density": 1.016,
+            "source": "aqua_calc"
+        },
+        "hamburgers": {
+            "cal": 2.95,
+            "fat": 0.141,
+            "carb": 0.241,
+            "protein": 0.168,
+            "id": 190,
+            "density": 1.032,
+            "source": "aqua_calc"
+        },
+        "cheesecake": {
+            "cal": 3.21,
+            "fat": 0.223,
+            "carb": 0.253,
+            "protein": 0.057,
+            "id": 191,
+            "density": 0.764,
+            "source": "aqua_calc"
+        },
+        "yam": {
+            "cal": 1.241,
+            "fat": 0.002,
+            "carb": 0.294,
+            "protein": 0.016,
+            "id": 192,
+            "density": 0.499399,
+            "source": "aqua_calc"
+        },
+        "hot dogs": {
+            "cal": 2.902,
+            "fat": 0.255,
+            "carb": 0.042,
+            "protein": 0.098,
+            "id": 193,
+            "density": 0.62,
+            "source": "aqua_calc"
+        },
+        "fried rice": {
+            "cal": 1.577,
+            "fat": 0.022,
+            "carb": 0.299,
+            "protein": 0.047,
+            "id": 194,
+            "density": 0.40695,
+            "source": "aqua_calc"
+        },
+        "wafers": {
+            "cal": 4.334,
+            "fat": 0.144,
+            "carb": 0.726,
+            "protein": 0.068,
+            "id": 195,
+            "density": 0.256,
+            "source": "aqua_calc"
+        },
+        "cod": {
+            "cal": 0.847,
+            "fat": 0.005,
+            "carb": 0.0,
+            "protein": 0.189,
+            "id": 196,
+            "density": 1.036,
+            "source": "aqua_calc"
+        },
+        "salads": {
+            "cal": 1.523,
+            "fat": 0.097,
+            "carb": 0.148,
+            "protein": 0.01,
+            "id": 197,
+            "density": 1.056,
+            "source": "aqua_calc"
+        },
+        "breadsticks": {
+            "cal": 4.083,
+            "fat": 0.092,
+            "carb": 0.691,
+            "protein": 0.123,
+            "id": 198,
+            "density": 0.1944,
+            "source": "usda"
+        },
+        "swiss cheese": {
+            "cal": 3.799,
+            "fat": 0.282,
+            "carb": 0.052,
+            "protein": 0.276,
+            "id": 199,
+            "density": 0.916,
+            "source": "aqua_calc"
+        },
+        "buttermilk": {
+            "cal": 0.402,
+            "fat": 0.009,
+            "carb": 0.048,
+            "protein": 0.033,
+            "id": 200,
+            "density": 1.0313,
+            "source": "usda"
+        },
+        "blueberries": {
+            "cal": 0.572,
+            "fat": 0.003,
+            "carb": 0.144,
+            "protein": 0.007,
+            "id": 201,
+            "density": 0.691442,
+            "source": "usda"
+        },
+        "enchiladas": {
+            "cal": 1.681,
+            "fat": 0.092,
+            "carb": 0.158,
+            "protein": 0.061,
+            "id": 202,
+            "density": 0.904,
+            "source": "aqua_calc"
+        },
+        "chili": {
+            "cal": 0.4,
+            "fat": 0.004,
+            "carb": 0.089,
+            "protein": 0.018,
+            "id": 203,
+            "density": 0.107746,
+            "source": "usda"
+        },
+        "pork chops": {
+            "cal": 2.308,
+            "fat": 0.141,
+            "carb": 0.0,
+            "protein": 0.239,
+            "id": 204,
+            "density": 0.5706,
+            "source": "usda"
+        },
+        "corn on the cob": {
+            "cal": 1.061,
+            "fat": 0.024,
+            "carb": 0.22,
+            "protein": 0.031,
+            "id": 205,
+            "density": 0.649077,
+            "source": "aqua_calc"
+        },
+        "muffins": {
+            "cal": 3.77,
+            "fat": 0.159,
+            "carb": 0.533,
+            "protein": 0.046,
+            "id": 206,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "fried chicken": {
+            "cal": 2.461,
+            "fat": 0.118,
+            "carb": 0.019,
+            "protein": 0.304,
+            "id": 207,
+            "density": 0.5706,
+            "source": "usda"
+        },
+        "ice cream cones": {
+            "cal": 4.189,
+            "fat": 0.071,
+            "carb": 0.79,
+            "protein": 0.079,
+            "id": 208,
+            "density": 0.032953,
+            "source": "gemini"
+        },
+        "pastrami": {
+            "cal": 1.458,
+            "fat": 0.058,
+            "carb": 0.004,
+            "protein": 0.216,
+            "id": 209,
+            "density": 0.5917,
+            "source": "usda"
+        },
+        "chocolate milk": {
+            "cal": 0.831,
+            "fat": 0.034,
+            "carb": 0.102,
+            "protein": 0.032,
+            "id": 210,
+            "density": 1.0482,
+            "source": "usda"
+        },
+        "plums": {
+            "cal": 0.457,
+            "fat": 0.003,
+            "carb": 0.115,
+            "protein": 0.007,
+            "id": 211,
+            "density": 0.6551,
+            "source": "usda"
+        },
+        "burgers": {
+            "cal": 2.95,
+            "fat": 0.141,
+            "carb": 0.241,
+            "protein": 0.168,
+            "id": 212,
+            "density": 1.192,
+            "source": "aqua_calc"
+        },
+        "pears": {
+            "cal": 0.572,
+            "fat": 0.001,
+            "carb": 0.152,
+            "protein": 0.004,
+            "id": 213,
+            "density": 0.87903,
+            "source": "usda"
+        },
+        "seeds": {
+            "cal": 5.582,
+            "fat": 0.492,
+            "carb": 0.108,
+            "protein": 0.309,
+            "id": 214,
+            "density": 0.5453,
+            "source": "usda"
+        },
+        "squid": {
+            "cal": 1.751,
+            "fat": 0.07,
+            "carb": 0.081,
+            "protein": 0.178,
+            "id": 215,
+            "density": 0.676,
+            "source": "aqua_calc"
+        },
+        "tostadas": {
+            "cal": 1.48,
+            "fat": 0.078,
+            "carb": 0.132,
+            "protein": 0.071,
+            "id": 216,
+            "density": 0.516,
+            "source": "aqua_calc"
+        },
+        "lamb": {
+            "cal": 2.941,
+            "fat": 0.211,
+            "carb": 0.0,
+            "protein": 0.247,
+            "id": 217,
+            "density": 0.5706,
+            "source": "usda"
+        },
+        "brazil nuts": {
+            "cal": 6.574,
+            "fat": 0.663,
+            "carb": 0.121,
+            "protein": 0.142,
+            "id": 218,
+            "density": 0.5622,
+            "source": "usda"
+        },
+        "macaroni": {
+            "cal": 3.725,
+            "fat": 0.015,
+            "carb": 0.754,
+            "protein": 0.127,
+            "id": 219,
+            "density": 0.524,
+            "source": "aqua_calc"
+        },
+        "pita bread": {
+            "cal": 2.75,
+            "fat": 0.011,
+            "carb": 0.558,
+            "protein": 0.088,
+            "id": 220,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "vegetable oil": {
+            "cal": 8.864,
+            "fat": 1.0,
+            "carb": 0.0,
+            "protein": 0.0,
+            "id": 221,
+            "density": 0.913,
+            "source": "usda"
+        },
+        "pine nuts": {
+            "cal": 6.646,
+            "fat": 0.685,
+            "carb": 0.126,
+            "protein": 0.132,
+            "id": 222,
+            "density": 0.572,
+            "source": "aqua_calc"
+        },
+        "macadamia nuts": {
+            "cal": 7.188,
+            "fat": 0.75,
+            "carb": 0.139,
+            "protein": 0.079,
+            "id": 223,
+            "density": 0.5579,
+            "source": "usda"
+        },
+        "potato salad": {
+            "cal": 1.429,
+            "fat": 0.08,
+            "carb": 0.111,
+            "protein": 0.028,
+            "id": 224,
+            "density": 1.1624,
+            "source": "usda"
+        },
+        "veggie burgers": {
+            "cal": 1.771,
+            "fat": 0.061,
+            "carb": 0.141,
+            "protein": 0.159,
+            "id": 225,
+            "density": 0.5283,
+            "source": "usda"
+        },
+        "pasta sauce": {
+            "cal": 0.292,
+            "fat": 0.002,
+            "carb": 0.069,
+            "protein": 0.013,
+            "id": 226,
+            "density": 0.848,
+            "source": "aqua_calc"
+        },
+        "calamari": {
+            "cal": 1.751,
+            "fat": 0.07,
+            "carb": 0.081,
+            "protein": 0.178,
+            "id": 227,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "cornmeal": {
+            "cal": 3.7,
+            "fat": 0.018,
+            "carb": 0.793,
+            "protein": 0.07,
+            "id": 228,
+            "density": 0.6636,
+            "source": "usda"
+        },
+        "bologna": {
+            "cal": 2.452,
+            "fat": 0.206,
+            "carb": 0.007,
+            "protein": 0.151,
+            "id": 229,
+            "density": 0.584,
+            "source": "aqua_calc"
+        },
+        "frostings": {
+            "cal": 4.217,
+            "fat": 0.163,
+            "carb": 0.686,
+            "protein": 0.0,
+            "id": 230,
+            "density": 1.1159,
+            "source": "usda"
+        },
+        "deprecated": {
+            "cal": 0.93,
+            "fat": 0.001,
+            "carb": 0.21,
+            "protein": 0.025,
+            "id": 470,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "oysters": {
+            "cal": 1.989,
+            "fat": 0.128,
+            "carb": 0.117,
+            "protein": 0.088,
+            "id": 232,
+            "density": 0.728,
+            "source": "aqua_calc"
+        },
+        "vodka": {
+            "cal": 2.306,
+            "fat": 0.0,
+            "carb": 0.0,
+            "protein": 0.0,
+            "id": 233,
+            "density": 0.9468,
+            "source": "usda"
+        },
+        "smoothies": {
+            "cal": 0.383,
+            "fat": 0.0,
+            "carb": 0.084,
+            "protein": 0.013,
+            "id": 234,
+            "density": 0.912,
+            "source": "aqua_calc"
+        },
+        "pecan pie": {
+            "cal": 4.123,
+            "fat": 0.218,
+            "carb": 0.525,
+            "protein": 0.049,
+            "id": 235,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "roast beef": {
+            "cal": 1.698,
+            "fat": 0.059,
+            "carb": 0.0,
+            "protein": 0.291,
+            "id": 236,
+            "density": 0.804,
+            "source": "aqua_calc"
+        },
+        "hot chocolate": {
+            "cal": 0.77,
+            "fat": 0.023,
+            "carb": 0.109,
+            "protein": 0.035,
+            "id": 237,
+            "density": 1.0567,
+            "source": "usda"
+        },
+        "hominy": {
+            "cal": 0.721,
+            "fat": 0.009,
+            "carb": 0.143,
+            "protein": 0.015,
+            "id": 238,
+            "density": 0.624,
+            "source": "aqua_calc"
+        },
+        "custard": {
+            "cal": 1.175,
+            "fat": 0.04,
+            "carb": 0.172,
+            "protein": 0.04,
+            "id": 239,
+            "density": 1.032,
+            "source": "aqua_calc"
+        },
+        "smoked salmon": {
+            "cal": 1.173,
+            "fat": 0.043,
+            "carb": 0.0,
+            "protein": 0.184,
+            "id": 240,
+            "density": 0.5706,
+            "source": "usda"
+        },
+        "scones": {
+            "cal": 3.525,
+            "fat": 0.162,
+            "carb": 0.447,
+            "protein": 0.07,
+            "id": 241,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "tortellini": {
+            "cal": 3.072,
+            "fat": 0.072,
+            "carb": 0.47,
+            "protein": 0.138,
+            "id": 242,
+            "density": 0.456,
+            "source": "aqua_calc"
+        },
+        "mozzarella cheese": {
+            "cal": 2.776,
+            "fat": 0.171,
+            "carb": 0.032,
+            "protein": 0.28,
+            "id": 243,
+            "density": 0.827473,
+            "source": "aqua_calc"
+        },
+        "chicken breast": {
+            "cal": 1.652,
+            "fat": 0.036,
+            "carb": 0.0,
+            "protein": 0.311,
+            "id": 244,
+            "density": 0.624151,
+            "source": "aqua_calc"
+        },
+        "wheat bread": {
+            "cal": 2.468,
+            "fat": 0.033,
+            "carb": 0.421,
+            "protein": 0.13,
+            "id": 245,
+            "density": 0.132299,
+            "source": "aqua_calc"
+        },
+        "baked beans": {
+            "cal": 1.529,
+            "fat": 0.05,
+            "carb": 0.216,
+            "protein": 0.057,
+            "id": 246,
+            "density": 1.068,
+            "source": "aqua_calc"
+        },
+        "blueberry pie": {
+            "cal": 2.456,
+            "fat": 0.119,
+            "carb": 0.33,
+            "protein": 0.027,
+            "id": 247,
+            "density": 0.788,
+            "source": "aqua_calc"
+        },
+        "hard boiled eggs": {
+            "cal": 1.555,
+            "fat": 0.105,
+            "carb": 0.012,
+            "protein": 0.125,
+            "id": 248,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "cashews": {
+            "cal": 5.534,
+            "fat": 0.432,
+            "carb": 0.309,
+            "protein": 0.178,
+            "id": 249,
+            "density": 0.5495,
+            "source": "usda"
+        },
+        "rolls": {
+            "cal": 3.089,
+            "fat": 0.065,
+            "carb": 0.521,
+            "protein": 0.107,
+            "id": 250,
+            "density": 0.684,
+            "source": "aqua_calc"
+        },
+        "tortilla chips": {
+            "cal": 4.642,
+            "fat": 0.153,
+            "carb": 0.737,
+            "protein": 0.086,
+            "id": 251,
+            "density": 0.2663,
+            "source": "usda"
+        },
+        "broth": {
+            "cal": 2.64,
+            "fat": 0.147,
+            "carb": 0.185,
+            "protein": 0.165,
+            "id": 252,
+            "density": 1.016,
+            "source": "aqua_calc"
+        },
+        "tahini": {
+            "cal": 5.956,
+            "fat": 0.535,
+            "carb": 0.211,
+            "protein": 0.17,
+            "id": 253,
+            "density": 1.016,
+            "source": "aqua_calc"
+        },
+        "mashed potatoes": {
+            "cal": 0.907,
+            "fat": 0.029,
+            "carb": 0.151,
+            "protein": 0.017,
+            "id": 254,
+            "density": 0.888,
+            "source": "aqua_calc"
+        },
+        "nougat": {
+            "cal": 3.99,
+            "fat": 0.016,
+            "carb": 0.924,
+            "protein": 0.034,
+            "id": 255,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "fish oil": {
+            "cal": 9.033,
+            "fat": 1.01,
+            "carb": 0.0,
+            "protein": 0.0,
+            "id": 256,
+            "density": 0.92,
+            "source": "aqua_calc"
+        },
+        "brownies": {
+            "cal": 4.661,
+            "fat": 0.288,
+            "carb": 0.498,
+            "protein": 0.062,
+            "id": 257,
+            "density": 1.43626,
+            "source": "usda"
+        },
+        "popcorn": {
+            "cal": 3.745,
+            "fat": 0.043,
+            "carb": 0.74,
+            "protein": 0.11,
+            "id": 258,
+            "density": 0.032,
+            "source": "aqua_calc"
+        },
+        "corned beef": {
+            "cal": 2.508,
+            "fat": 0.19,
+            "carb": 0.005,
+            "protein": 0.179,
+            "id": 259,
+            "density": 0.5706,
+            "source": "usda"
+        },
+        "iced tea": {
+            "cal": 0.373,
+            "fat": 0.001,
+            "carb": 0.093,
+            "protein": 0.0,
+            "id": 260,
+            "density": 1.0482,
+            "source": "usda"
+        },
+        "pumpkins": {
+            "cal": 0.259,
+            "fat": 0.001,
+            "carb": 0.065,
+            "protein": 0.01,
+            "id": 261,
+            "density": 0.492,
+            "source": "aqua_calc"
+        },
+        "yogurt": {
+            "cal": 0.589,
+            "fat": 0.004,
+            "carb": 0.036,
+            "protein": 0.1,
+            "id": 262,
+            "density": 0.435804,
+            "source": "usda"
+        },
+        "mousse": {
+            "cal": 2.249,
+            "fat": 0.16,
+            "carb": 0.16,
+            "protein": 0.041,
+            "id": 263,
+            "density": 0.7185,
+            "source": "usda"
+        },
+        "bagels": {
+            "cal": 2.5,
+            "fat": 0.015,
+            "carb": 0.49,
+            "protein": 0.101,
+            "id": 264,
+            "density": 0.218172,
+            "source": "aqua_calc"
+        },
+        "sardines": {
+            "cal": 2.031,
+            "fat": 0.111,
+            "carb": 0.0,
+            "protein": 0.243,
+            "id": 265,
+            "density": 1.036,
+            "source": "aqua_calc"
+        },
+        "pot pies": {
+            "cal": 1.982,
+            "fat": 0.113,
+            "carb": 0.189,
+            "protein": 0.049,
+            "id": 266,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "coconuts": {
+            "cal": 3.537,
+            "fat": 0.333,
+            "carb": 0.152,
+            "protein": 0.033,
+            "id": 267,
+            "density": 1.016,
+            "source": "aqua_calc"
+        },
+        "soft serve ice creams": {
+            "cal": 2.234,
+            "fat": 0.13,
+            "carb": 0.222,
+            "protein": 0.041,
+            "id": 268,
+            "density": 0.728,
+            "source": "aqua_calc"
+        },
+        "onion rings": {
+            "cal": 4.106,
+            "fat": 0.253,
+            "carb": 0.438,
+            "protein": 0.039,
+            "id": 269,
+            "density": 0.204,
+            "source": "aqua_calc"
+        },
+        "cocoa": {
+            "cal": 2.237,
+            "fat": 0.135,
+            "carb": 0.573,
+            "protein": 0.198,
+            "id": 270,
+            "density": 0.3381,
+            "source": "usda"
+        },
+        "peaches": {
+            "cal": 0.393,
+            "fat": 0.003,
+            "carb": 0.095,
+            "protein": 0.009,
+            "id": 271,
+            "density": 0.6509,
+            "source": "usda"
+        },
+        "cupcakes": {
+            "cal": 3.055,
+            "fat": 0.036,
+            "carb": 0.672,
+            "protein": 0.042,
+            "id": 272,
+            "density": 0.317,
+            "source": "usda"
+        },
+        "sandwiches": {
+            "cal": 2.329,
+            "fat": 0.13,
+            "carb": 0.179,
+            "protein": 0.11,
+            "id": 273,
+            "density": 0.268509,
+            "source": "gemini"
+        },
+        "trail mix": {
+            "cal": 4.62,
+            "fat": 0.286,
+            "carb": 0.454,
+            "protein": 0.139,
+            "id": 274,
+            "density": 0.5917,
+            "source": "usda"
+        },
+        "frozen yogurt": {
+            "cal": 1.633,
+            "fat": 0.059,
+            "carb": 0.245,
+            "protein": 0.041,
+            "id": 275,
+            "density": 0.492965,
+            "source": "usda"
+        },
+        "chocolate cake": {
+            "cal": 3.707,
+            "fat": 0.15,
+            "carb": 0.534,
+            "protein": 0.052,
+            "id": 276,
+            "density": 0.284,
+            "source": "aqua_calc"
+        },
+        "chimichangas": {
+            "cal": 2.441,
+            "fat": 0.112,
+            "carb": 0.249,
+            "protein": 0.112,
+            "id": 277,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "beer": {
+            "cal": 0.431,
+            "fat": 0.0,
+            "carb": 0.036,
+            "protein": 0.005,
+            "id": 278,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "omelets": {
+            "cal": 1.54,
+            "fat": 0.117,
+            "carb": 0.006,
+            "protein": 0.104,
+            "id": 279,
+            "density": 0.5706,
+            "source": "usda"
+        },
+        "souffle": {
+            "cal": 1.691,
+            "fat": 0.13,
+            "carb": 0.06,
+            "protein": 0.079,
+            "id": 280,
+            "density": 0.4,
+            "source": "aqua_calc"
+        },
+        "edamame": {
+            "cal": 1.22,
+            "fat": 0.051,
+            "carb": 0.098,
+            "protein": 0.11,
+            "id": 281,
+            "density": 0.6551,
+            "source": "usda"
+        },
+        "energy drinks": {
+            "cal": 0.459,
+            "fat": 0.001,
+            "carb": 0.12,
+            "protein": 0.003,
+            "id": 282,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "salad dressing": {
+            "cal": 4.799,
+            "fat": 0.467,
+            "carb": 0.165,
+            "protein": 0.008,
+            "id": 283,
+            "density": 0.992,
+            "source": "aqua_calc"
+        },
+        "ribs": {
+            "cal": 3.513,
+            "fat": 0.281,
+            "carb": 0.0,
+            "protein": 0.227,
+            "id": 284,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "trout": {
+            "cal": 1.409,
+            "fat": 0.06,
+            "carb": 0.0,
+            "protein": 0.201,
+            "id": 285,
+            "density": 1.036,
+            "source": "aqua_calc"
+        },
+        "romano cheese": {
+            "cal": 3.874,
+            "fat": 0.273,
+            "carb": 0.036,
+            "protein": 0.318,
+            "id": 286,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "toast": {
+            "cal": 3.131,
+            "fat": 0.042,
+            "carb": 0.555,
+            "protein": 0.13,
+            "id": 287,
+            "density": 0.135987,
+            "source": "aqua_calc"
+        },
+        "empanadas": {
+            "cal": 3.355,
+            "fat": 0.18,
+            "carb": 0.312,
+            "protein": 0.111,
+            "id": 288,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "ranch dressing": {
+            "cal": 4.837,
+            "fat": 0.505,
+            "carb": 0.068,
+            "protein": 0.01,
+            "id": 289,
+            "density": 1.016,
+            "source": "aqua_calc"
+        },
+        "cheddar cheese": {
+            "cal": 4.019,
+            "fat": 0.33,
+            "carb": 0.013,
+            "protein": 0.248,
+            "id": 290,
+            "density": 0.476,
+            "source": "aqua_calc"
+        },
+        "salt": {
+            "cal": 0.0,
+            "fat": 0.0,
+            "carb": 0.0,
+            "protein": 0.0,
+            "id": 291,
+            "density": 1.2173,
+            "source": "usda"
+        },
+        "spreads": {
+            "cal": 2.357,
+            "fat": 0.171,
+            "carb": 0.12,
+            "protein": 0.079,
+            "id": 292,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "sandwich cookies": {
+            "cal": 4.697,
+            "fat": 0.202,
+            "carb": 0.704,
+            "protein": 0.056,
+            "id": 293,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "granola": {
+            "cal": 4.693,
+            "fat": 0.204,
+            "carb": 0.647,
+            "protein": 0.1,
+            "id": 294,
+            "density": 0.516,
+            "source": "aqua_calc"
+        },
+        "provolone cheese": {
+            "cal": 3.519,
+            "fat": 0.266,
+            "carb": 0.022,
+            "protein": 0.253,
+            "id": 295,
+            "density": 1.036,
+            "source": "aqua_calc"
+        },
+        "sundaes": {
+            "cal": 1.799,
+            "fat": 0.053,
+            "carb": 0.302,
+            "protein": 0.037,
+            "id": 296,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "pepperoni": {
+            "cal": 4.936,
+            "fat": 0.438,
+            "carb": 0.0,
+            "protein": 0.231,
+            "id": 297,
+            "density": 0.5917,
+            "source": "usda"
+        },
+        "focaccia": {
+            "cal": 2.496,
+            "fat": 0.079,
+            "carb": 0.355,
+            "protein": 0.089,
+            "id": 298,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "soy milk": {
+            "cal": 0.534,
+            "fat": 0.017,
+            "carb": 0.061,
+            "protein": 0.033,
+            "id": 299,
+            "density": 1.0313,
+            "source": "usda"
+        },
+        "egg yolks": {
+            "cal": 3.228,
+            "fat": 0.267,
+            "carb": 0.036,
+            "protein": 0.159,
+            "id": 300,
+            "density": 1.0271,
+            "source": "usda"
+        },
+        "english muffins": {
+            "cal": 2.355,
+            "fat": 0.018,
+            "carb": 0.458,
+            "protein": 0.078,
+            "id": 301,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "pie crust": {
+            "cal": 2.367,
+            "fat": 0.11,
+            "carb": 0.345,
+            "protein": 0.018,
+            "id": 302,
+            "density": 0.544,
+            "source": "aqua_calc"
+        },
+        "chocolate chip cookies": {
+            "cal": 4.874,
+            "fat": 0.281,
+            "carb": 0.569,
+            "protein": 0.058,
+            "id": 303,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "puddings": {
+            "cal": 1.197,
+            "fat": 0.032,
+            "carb": 0.198,
+            "protein": 0.032,
+            "id": 304,
+            "density": 1.1,
+            "source": "aqua_calc"
+        },
+        "fudge": {
+            "cal": 4.114,
+            "fat": 0.103,
+            "carb": 0.762,
+            "protein": 0.024,
+            "id": 305,
+            "density": 1.344,
+            "source": "aqua_calc"
+        },
+        "croutons": {
+            "cal": 4.081,
+            "fat": 0.067,
+            "carb": 0.723,
+            "protein": 0.12,
+            "id": 306,
+            "density": 0.111613,
+            "source": "aqua_calc"
+        },
+        "stuffing": {
+            "cal": 3.854,
+            "fat": 0.035,
+            "carb": 0.767,
+            "protein": 0.11,
+            "id": 307,
+            "density": 0.844,
+            "source": "aqua_calc"
+        },
+        "lamb chops": {
+            "cal": 2.941,
+            "fat": 0.211,
+            "carb": 0.0,
+            "protein": 0.247,
+            "id": 308,
+            "density": 0.5706,
+            "source": "usda"
+        },
+        "rum": {
+            "cal": 2.313,
+            "fat": 0.0,
+            "carb": 0.0,
+            "protein": 0.0,
+            "id": 309,
+            "density": 0.9468,
+            "source": "usda"
+        },
+        "corn chips": {
+            "cal": 5.18,
+            "fat": 0.281,
+            "carb": 0.632,
+            "protein": 0.06,
+            "id": 310,
+            "density": 0.184,
+            "source": "aqua_calc"
+        },
+        "granola bars": {
+            "cal": 4.712,
+            "fat": 0.2,
+            "carb": 0.653,
+            "protein": 0.1,
+            "id": 311,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "pepper": {
+            "cal": 0.4,
+            "fat": 0.002,
+            "carb": 0.093,
+            "protein": 0.02,
+            "id": 312,
+            "density": 0.21419,
+            "source": "usda"
+        },
+        "peanut butter": {
+            "cal": 5.895,
+            "fat": 0.503,
+            "carb": 0.194,
+            "protein": 0.251,
+            "id": 313,
+            "density": 1.0905,
+            "source": "usda"
+        },
+        "sourdough bread": {
+            "cal": 2.889,
+            "fat": 0.018,
+            "carb": 0.562,
+            "protein": 0.119,
+            "id": 314,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "corn dogs": {
+            "cal": 2.629,
+            "fat": 0.109,
+            "carb": 0.32,
+            "protein": 0.099,
+            "id": 315,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "roast chicken": {
+            "cal": 2.237,
+            "fat": 0.13,
+            "carb": 0.0,
+            "protein": 0.235,
+            "id": 316,
+            "density": 0.944,
+            "source": "aqua_calc"
+        },
+        "flounder": {
+            "cal": 0.703,
+            "fat": 0.019,
+            "carb": 0.0,
+            "protein": 0.124,
+            "id": 317,
+            "density": 1.036,
+            "source": "aqua_calc"
+        },
+        "flour": {
+            "cal": 3.641,
+            "fat": 0.01,
+            "carb": 0.76,
+            "protein": 0.102,
+            "id": 318,
+            "density": 0.528,
+            "source": "aqua_calc"
+        },
+        "feta cheese": {
+            "cal": 2.641,
+            "fat": 0.211,
+            "carb": 0.042,
+            "protein": 0.138,
+            "id": 319,
+            "density": 0.414946,
+            "source": "usda"
+        },
+        "black beans": {
+            "cal": 1.32,
+            "fat": 0.005,
+            "carb": 0.237,
+            "protein": 0.089,
+            "id": 320,
+            "density": 6.293279,
+            "source": "usda"
+        },
+        "water": {
+            "cal": 0.0,
+            "fat": 0.0,
+            "carb": 0.0,
+            "protein": 0.0,
+            "id": 321,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "garlic bread": {
+            "cal": 3.501,
+            "fat": 0.167,
+            "carb": 0.421,
+            "protein": 0.082,
+            "id": 322,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "salami": {
+            "cal": 3.347,
+            "fat": 0.26,
+            "carb": 0.024,
+            "protein": 0.22,
+            "id": 323,
+            "density": 0.62,
+            "source": "aqua_calc"
+        },
+        "chocolate": {
+            "cal": 5.461,
+            "fat": 0.314,
+            "carb": 0.607,
+            "protein": 0.049,
+            "id": 324,
+            "density": 0.732,
+            "source": "aqua_calc"
+        },
+        "nectarines": {
+            "cal": 0.442,
+            "fat": 0.003,
+            "carb": 0.107,
+            "protein": 0.011,
+            "id": 325,
+            "density": 0.6551,
+            "source": "usda"
+        },
+        "chicken soup": {
+            "cal": 0.355,
+            "fat": 0.012,
+            "carb": 0.034,
+            "protein": 0.025,
+            "id": 326,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "root beer": {
+            "cal": 0.415,
+            "fat": 0.0,
+            "carb": 0.108,
+            "protein": 0.0,
+            "id": 327,
+            "density": 1.0482,
+            "source": "usda"
+        },
+        "sugar": {
+            "cal": 3.88,
+            "fat": 0.0,
+            "carb": 1.0,
+            "protein": 0.0,
+            "id": 328,
+            "density": 0.796,
+            "source": "aqua_calc"
+        },
+        "pate nutrition": {
+            "cal": 3.182,
+            "fat": 0.281,
+            "carb": 0.015,
+            "protein": 0.141,
+            "id": 329,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "haddock": {
+            "cal": 0.904,
+            "fat": 0.006,
+            "carb": 0.0,
+            "protein": 0.2,
+            "id": 330,
+            "density": 0.5706,
+            "source": "usda"
+        },
+        "pancakes": {
+            "cal": 2.266,
+            "fat": 0.096,
+            "carb": 0.284,
+            "protein": 0.063,
+            "id": 331,
+            "density": 0.66,
+            "source": "aqua_calc"
+        },
+        "salmon": {
+            "cal": 1.78,
+            "fat": 0.08,
+            "carb": 0.0,
+            "protein": 0.24,
+            "id": 332,
+            "density": 0.742997,
+            "source": "aqua_calc"
+        },
+        "potato bread": {
+            "cal": 2.658,
+            "fat": 0.031,
+            "carb": 0.469,
+            "protein": 0.128,
+            "id": 333,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "white bread": {
+            "cal": 2.649,
+            "fat": 0.032,
+            "carb": 0.489,
+            "protein": 0.091,
+            "id": 334,
+            "density": 0.168,
+            "source": "aqua_calc"
+        },
+        "eggplant": {
+            "cal": 0.248,
+            "fat": 0.002,
+            "carb": 0.059,
+            "protein": 0.01,
+            "id": 335,
+            "density": 0.675,
+            "source": "usda"
+        },
+        "peanuts": {
+            "cal": 5.675,
+            "fat": 0.492,
+            "carb": 0.161,
+            "protein": 0.253,
+            "id": 336,
+            "density": 0.6171,
+            "source": "usda"
+        },
+        "waffles": {
+            "cal": 2.903,
+            "fat": 0.143,
+            "carb": 0.327,
+            "protein": 0.079,
+            "id": 337,
+            "density": 0.210775,
+            "source": "aqua_calc"
+        },
+        "vinaigrette": {
+            "cal": 4.655,
+            "fat": 0.518,
+            "carb": 0.026,
+            "protein": 0.0,
+            "id": 338,
+            "density": 1.505517,
+            "source": "aqua_calc"
+        },
+        "grits": {
+            "cal": 0.59,
+            "fat": 0.002,
+            "carb": 0.13,
+            "protein": 0.014,
+            "id": 339,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "lo mein": {
+            "cal": 1.22,
+            "fat": 0.024,
+            "carb": 0.2,
+            "protein": 0.048,
+            "id": 340,
+            "density": 0.8454,
+            "source": "usda"
+        },
+        "cream": {
+            "cal": 3.363,
+            "fat": 0.366,
+            "carb": 0.027,
+            "protein": 0.028,
+            "id": 341,
+            "density": 0.98,
+            "source": "aqua_calc"
+        },
+        "turnips": {
+            "cal": 0.217,
+            "fat": 0.001,
+            "carb": 0.051,
+            "protein": 0.007,
+            "id": 342,
+            "density": 0.839832,
+            "source": "usda"
+        },
+        "cranberry juice": {
+            "cal": 0.453,
+            "fat": 0.001,
+            "carb": 0.111,
+            "protein": 0.003,
+            "id": 343,
+            "density": 1.0482,
+            "source": "usda"
+        },
+        "peach": {
+            "cal": 0.388,
+            "fat": 0.003,
+            "carb": 0.095,
+            "protein": 0.009,
+            "id": 344,
+            "density": 0.6509,
+            "source": "usda"
+        },
+        "roast pork": {
+            "cal": 2.918,
+            "fat": 0.212,
+            "carb": 0.0,
+            "protein": 0.235,
+            "id": 345,
+            "density": 1.036,
+            "source": "aqua_calc"
+        },
+        "turnover": {
+            "cal": 1.781,
+            "fat": 0.081,
+            "carb": 0.256,
+            "protein": 0.015,
+            "id": 346,
+            "density": 0.696,
+            "source": "aqua_calc"
+        },
+        "baby carrots": {
+            "cal": 0.41,
+            "fat": 0.002,
+            "carb": 0.1,
+            "protein": 0.009,
+            "id": 347,
+            "density": 0.541,
+            "source": "usda"
+        },
+        "egg salad": {
+            "cal": 2.12,
+            "fat": 0.184,
+            "carb": 0.024,
+            "protein": 0.081,
+            "id": 348,
+            "density": 0.9383,
+            "source": "usda"
+        },
+        "mangos": {
+            "cal": 0.606,
+            "fat": 0.004,
+            "carb": 0.15,
+            "protein": 0.008,
+            "id": 349,
+            "density": 1.266757,
+            "source": "usda"
+        },
+        "miso soup": {
+            "cal": 0.245,
+            "fat": 0.012,
+            "carb": 0.015,
+            "protein": 0.024,
+            "id": 350,
+            "density": 1.0356,
+            "source": "usda"
+        },
+        "mackerel": {
+            "cal": 2.62,
+            "fat": 0.18,
+            "carb": 0.0,
+            "protein": 0.24,
+            "id": 351,
+            "density": 1.036,
+            "source": "aqua_calc"
+        },
+        "calzones": {
+            "cal": 3.08,
+            "fat": 0.21,
+            "carb": 0.13,
+            "protein": 0.16,
+            "id": 352,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "burritos": {
+            "cal": 1.8,
+            "fat": 0.068,
+            "carb": 0.23,
+            "protein": 0.07,
+            "id": 353,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "soy nuts": {
+            "cal": 4.49,
+            "fat": 0.22,
+            "carb": 0.29,
+            "protein": 0.43,
+            "id": 354,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "crackers": {
+            "cal": 5.1,
+            "fat": 0.26,
+            "carb": 0.61,
+            "protein": 0.066,
+            "id": 355,
+            "density": 0.2113,
+            "source": "usda"
+        },
+        "french fries": {
+            "cal": 3.12,
+            "fat": 0.15,
+            "carb": 0.41,
+            "protein": 0.034,
+            "id": 356,
+            "density": 0.2536,
+            "source": "usda"
+        },
+        "lentils": {
+            "cal": 1.14,
+            "fat": 0.004,
+            "carb": 0.2,
+            "protein": 0.09,
+            "id": 357,
+            "density": 21.059017,
+            "source": "usda"
+        },
+        "mixed vegetables": {
+            "cal": 0.32,
+            "fat": 0.003,
+            "carb": 0.069,
+            "protein": 0.017,
+            "id": 358,
+            "density": 0.768,
+            "source": "aqua_calc"
+        },
+        "honey": {
+            "cal": 3.04,
+            "fat": 0.0,
+            "carb": 0.82,
+            "protein": 0.003,
+            "id": 359,
+            "density": 1.4329,
+            "source": "usda"
+        },
+        "risotto": {
+            "cal": 1.22,
+            "fat": 0.039,
+            "carb": 0.16,
+            "protein": 0.043,
+            "id": 360,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "roast turkey": {
+            "cal": 1.89,
+            "fat": 0.074,
+            "carb": 0.001,
+            "protein": 0.29,
+            "id": 361,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "ice creams": {
+            "cal": 2.07,
+            "fat": 0.11,
+            "carb": 0.24,
+            "protein": 0.035,
+            "id": 362,
+            "density": 0.5706,
+            "source": "usda"
+        },
+        "meatloaf": {
+            "cal": 1.81,
+            "fat": 0.099,
+            "carb": 0.077,
+            "protein": 0.15,
+            "id": 363,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "sunflower seeds": {
+            "cal": 5.46,
+            "fat": 0.5,
+            "carb": 0.15,
+            "protein": 0.19,
+            "id": 364,
+            "density": 0.608,
+            "source": "aqua_calc"
+        },
+        "quiche": {
+            "cal": 3.71,
+            "fat": 0.31,
+            "carb": 0.099,
+            "protein": 0.13,
+            "id": 365,
+            "density": 0.676,
+            "source": "aqua_calc"
+        },
+        "sauerkraut": {
+            "cal": 0.19,
+            "fat": 0.001,
+            "carb": 0.043,
+            "protein": 0.009,
+            "id": 366,
+            "density": 0.6,
+            "source": "aqua_calc"
+        },
+        "lime": {
+            "cal": 0.3,
+            "fat": 0.002,
+            "carb": 0.105,
+            "protein": 0.007,
+            "id": 367,
+            "density": 0.8454,
+            "source": "usda"
+        },
+        "donuts": {
+            "cal": 4.21,
+            "fat": 0.23,
+            "carb": 0.48,
+            "protein": 0.061,
+            "id": 368,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "fritters": {
+            "cal": 2.76,
+            "fat": 0.2,
+            "carb": 0.2,
+            "protein": 0.046,
+            "id": 369,
+            "density": 0.208,
+            "source": "aqua_calc"
+        },
+        "mahi mahi": {
+            "cal": 1.09,
+            "fat": 0.009,
+            "carb": 0.0,
+            "protein": 0.24,
+            "id": 370,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "dumplings": {
+            "cal": 2.3,
+            "fat": 0.054,
+            "carb": 0.39,
+            "protein": 0.062,
+            "id": 371,
+            "density": 1.052,
+            "source": "aqua_calc"
+        },
+        "chilaquiles": {
+            "cal": 1.95,
+            "fat": 0.12,
+            "carb": 0.12,
+            "protein": 0.089,
+            "id": 372,
+            "density": 0.422335,
+            "source": "usda"
+        },
+        "snapper": {
+            "cal": 1.28,
+            "fat": 0.017,
+            "carb": 0.0,
+            "protein": 0.26,
+            "id": 373,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "peas": {
+            "cal": 0.84,
+            "fat": 0.002,
+            "carb": 0.16,
+            "protein": 0.054,
+            "id": 374,
+            "density": 0.6763,
+            "source": "usda"
+        },
+        "fruit salad": {
+            "cal": 0.59,
+            "fat": 0.003,
+            "carb": 0.15,
+            "protein": 0.008,
+            "id": 375,
+            "density": 0.634,
+            "source": "usda"
+        },
+        "naan": {
+            "cal": 2.91,
+            "fat": 0.057,
+            "carb": 0.5,
+            "protein": 0.096,
+            "id": 376,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "quinoa": {
+            "cal": 1.2,
+            "fat": 0.019,
+            "carb": 0.21,
+            "protein": 0.044,
+            "id": 377,
+            "density": 0.419623,
+            "source": "usda"
+        },
+        "catfish": {
+            "cal": 1.44,
+            "fat": 0.072,
+            "carb": 0.0,
+            "protein": 0.18,
+            "id": 378,
+            "density": 0.5706,
+            "source": "usda"
+        },
+        "lima beans": {
+            "cal": 1.15,
+            "fat": 0.004,
+            "carb": 0.21,
+            "protein": 0.078,
+            "id": 379,
+            "density": 0.66,
+            "source": "aqua_calc"
+        },
+        "pizza": {
+            "cal": 2.66,
+            "fat": 0.097,
+            "carb": 0.33,
+            "protein": 0.11,
+            "id": 380,
+            "density": 0.405366,
+            "source": "aqua_calc"
+        },
+        "gouda cheese": {
+            "cal": 3.56,
+            "fat": 0.27,
+            "carb": 0.022,
+            "protein": 0.25,
+            "id": 381,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "cheeseburgers": {
+            "cal": 2.69,
+            "fat": 0.14,
+            "carb": 0.2,
+            "protein": 0.15,
+            "id": 382,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "italian dressing": {
+            "cal": 2.31,
+            "fat": 0.205,
+            "carb": 0.119,
+            "protein": 0.004,
+            "id": 383,
+            "density": 0.992,
+            "source": "aqua_calc"
+        },
+        "coffee": {
+            "cal": 0.0,
+            "fat": 0.0,
+            "carb": 0.0,
+            "protein": 0.0,
+            "id": 384,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "curries": {
+            "cal": 1.04,
+            "fat": 0.046,
+            "carb": 0.032,
+            "protein": 0.12,
+            "id": 385,
+            "density": 0.8454,
+            "source": "usda"
+        },
+        "eel": {
+            "cal": 2.36,
+            "fat": 0.15,
+            "carb": 0.0,
+            "protein": 0.24,
+            "id": 386,
+            "density": 1.036,
+            "source": "aqua_calc"
+        },
+        "candies": {
+            "cal": 3.94,
+            "fat": 0.002,
+            "carb": 0.98,
+            "protein": 0.0,
+            "id": 387,
+            "density": 0.6763,
+            "source": "usda"
+        },
+        "fried eggs": {
+            "cal": 1.96,
+            "fat": 0.15,
+            "carb": 0.008,
+            "protein": 0.14,
+            "id": 388,
+            "density": 0.576,
+            "source": "aqua_calc"
+        },
+        "chicken drumsticks": {
+            "cal": 1.84,
+            "fat": 0.09,
+            "carb": 0.0,
+            "protein": 0.24,
+            "id": 389,
+            "density": 0.5706,
+            "source": "usda"
+        },
+        "margarita": {
+            "cal": 1.0,
+            "fat": 0.0,
+            "carb": 0.099,
+            "protein": 0.001,
+            "id": 390,
+            "density": 1.016,
+            "source": "aqua_calc"
+        },
+        "cobbler": {
+            "cal": 1.99,
+            "fat": 0.063,
+            "carb": 0.35,
+            "protein": 0.02,
+            "id": 391,
+            "density": 1.0567,
+            "source": "usda"
+        },
+        "pepperoni pizza": {
+            "cal": 2.82,
+            "fat": 0.12,
+            "carb": 0.32,
+            "protein": 0.12,
+            "id": 392,
+            "density": 0.435083,
+            "source": "aqua_calc"
+        },
+        "teriyaki sauce": {
+            "cal": 0.89,
+            "fat": 0.0,
+            "carb": 0.16,
+            "protein": 0.059,
+            "id": 393,
+            "density": 1.082,
+            "source": "usda"
+        },
+        "gorgonzola cheese": {
+            "cal": 3.53,
+            "fat": 0.29,
+            "carb": 0.023,
+            "protein": 0.21,
+            "id": 394,
+            "density": 0.5706,
+            "source": "usda"
+        },
+        "string cheese": {
+            "cal": 3.0,
+            "fat": 0.22,
+            "carb": 0.022,
+            "protein": 0.22,
+            "id": 395,
+            "density": 0.964,
+            "source": "aqua_calc"
+        },
+        "wheat beer": {
+            "cal": 0.43,
+            "fat": 0.0,
+            "carb": 0.036,
+            "protein": 0.005,
+            "id": 396,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "gyros": {
+            "cal": 1.85,
+            "fat": 0.1,
+            "carb": 0.11,
+            "protein": 0.12,
+            "id": 397,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "champagne": {
+            "cal": 0.82,
+            "fat": 0.0,
+            "carb": 0.026,
+            "protein": 0.001,
+            "id": 398,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "raisin bread": {
+            "cal": 2.74,
+            "fat": 0.044,
+            "carb": 0.52,
+            "protein": 0.079,
+            "id": 399,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "cornbread": {
+            "cal": 2.66,
+            "fat": 0.071,
+            "carb": 0.44,
+            "protein": 0.067,
+            "id": 400,
+            "density": 0.376,
+            "source": "aqua_calc"
+        },
+        "wraps": {
+            "cal": 3.25,
+            "fat": 0.071,
+            "carb": 0.56,
+            "protein": 0.087,
+            "id": 401,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "tuna": {
+            "cal": 1.3,
+            "fat": 0.006,
+            "carb": 0.0,
+            "protein": 0.29,
+            "id": 402,
+            "density": 0.476748,
+            "source": "usda"
+        },
+        "fruit cocktail": {
+            "cal": 0.73,
+            "fat": 0.001,
+            "carb": 0.19,
+            "protein": 0.004,
+            "id": 403,
+            "density": 1.048,
+            "source": "aqua_calc"
+        },
+        "potato skins": {
+            "cal": 3.4,
+            "fat": 0.26,
+            "carb": 0.15,
+            "protein": 0.13,
+            "id": 404,
+            "density": 0.468,
+            "source": "aqua_calc"
+        },
+        "seaweed": {
+            "cal": 0.38,
+            "fat": 0.003,
+            "carb": 0.084,
+            "protein": 0.024,
+            "id": 405,
+            "density": 0.34,
+            "source": "aqua_calc"
+        },
+        "sherbet": {
+            "cal": 1.44,
+            "fat": 0.02,
+            "carb": 0.3,
+            "protein": 0.011,
+            "id": 406,
+            "density": 0.6256,
+            "source": "usda"
+        },
+        "horseradish": {
+            "cal": 0.48,
+            "fat": 0.007,
+            "carb": 0.11,
+            "protein": 0.012,
+            "id": 407,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "jambalaya": {
+            "cal": 1.56,
+            "fat": 0.074,
+            "carb": 0.15,
+            "protein": 0.071,
+            "id": 408,
+            "density": 1.0313,
+            "source": "usda"
+        },
+        "greek salad": {
+            "cal": 1.13,
+            "fat": 0.094,
+            "carb": 0.047,
+            "protein": 0.032,
+            "id": 409,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "goulash": {
+            "cal": 1.07,
+            "fat": 0.039,
+            "carb": 0.1,
+            "protein": 0.076,
+            "id": 410,
+            "density": 1.0778,
+            "source": "usda"
+        },
+        "stews": {
+            "cal": 1.06,
+            "fat": 0.032,
+            "carb": 0.082,
+            "protein": 0.11,
+            "id": 411,
+            "density": 1.0778,
+            "source": "usda"
+        },
+        "havarti cheese": {
+            "cal": 3.71,
+            "fat": 0.3,
+            "carb": 0.028,
+            "protein": 0.23,
+            "id": 412,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "pilaf": {
+            "cal": 1.592,
+            "fat": 0.049,
+            "carb": 0.256,
+            "protein": 0.025,
+            "id": 413,
+            "density": 0.872,
+            "source": "aqua_calc"
+        },
+        "chutney": {
+            "cal": 1.2,
+            "fat": 0.08,
+            "carb": 0.1,
+            "protein": 0.05,
+            "id": 414,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "cereal": {
+            "cal": 3.76,
+            "fat": 0.067,
+            "carb": 0.73,
+            "protein": 0.12,
+            "id": 415,
+            "density": 0.094114,
+            "source": "usda"
+        },
+        "ground chicken": {
+            "cal": 1.89,
+            "fat": 0.11,
+            "carb": 0.0,
+            "protein": 0.23,
+            "id": 416,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "fajitas": {
+            "cal": 2.0,
+            "fat": 0.079,
+            "carb": 0.18,
+            "protein": 0.14,
+            "id": 417,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "chicken wings": {
+            "cal": 3.28,
+            "fat": 0.24,
+            "carb": 0.098,
+            "protein": 0.17,
+            "id": 418,
+            "density": 0.592,
+            "source": "aqua_calc"
+        },
+        "hard cider": {
+            "cal": 0.56,
+            "fat": 0.0,
+            "carb": 0.059,
+            "protein": 0.0,
+            "id": 419,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "ice pop": {
+            "cal": 0.79,
+            "fat": 0.002,
+            "carb": 0.19,
+            "protein": 0.0,
+            "id": 420,
+            "density": 1.084,
+            "source": "aqua_calc"
+        },
+        "ground turkey": {
+            "cal": 2.58,
+            "fat": 0.17,
+            "carb": 0.0,
+            "protein": 0.25,
+            "id": 421,
+            "density": 0.702333,
+            "source": "aqua_calc"
+        },
+        "crab": {
+            "cal": 0.83,
+            "fat": 0.007,
+            "carb": 0.0,
+            "protein": 0.18,
+            "id": 422,
+            "density": 0.5706,
+            "source": "usda"
+        },
+        "plate only": {
+            "cal": 0.0,
+            "fat": 0.0,
+            "carb": 0.0,
+            "protein": 0.0,
+            "id": 423,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "prunes": {
+            "cal": 2.4,
+            "fat": 0.004,
+            "carb": 0.64,
+            "protein": 0.022,
+            "id": 424,
+            "density": 0.6763,
+            "source": "usda"
+        },
+        "goat cheese": {
+            "cal": 2.64,
+            "fat": 0.21,
+            "carb": 0.0,
+            "protein": 0.19,
+            "id": 425,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "tomato soup": {
+            "cal": 0.35,
+            "fat": 0.002,
+            "carb": 0.074,
+            "protein": 0.007,
+            "id": 426,
+            "density": 1.0356,
+            "source": "usda"
+        },
+        "muesli": {
+            "cal": 3.52,
+            "fat": 0.033,
+            "carb": 0.76,
+            "protein": 0.11,
+            "id": 427,
+            "density": 0.347,
+            "source": "usda"
+        },
+        "white wine": {
+            "cal": 0.82,
+            "fat": 0.0,
+            "carb": 0.026,
+            "protein": 0.001,
+            "id": 428,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "gnocchi": {
+            "cal": 2.01,
+            "fat": 0.012,
+            "carb": 0.41,
+            "protein": 0.06,
+            "id": 429,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "apricots": {
+            "cal": 0.48,
+            "fat": 0.004,
+            "carb": 0.11,
+            "protein": 0.014,
+            "id": 430,
+            "density": 0.6551,
+            "source": "usda"
+        },
+        "licorice": {
+            "cal": 3.5,
+            "fat": 0.023,
+            "carb": 0.8,
+            "protein": 0.026,
+            "id": 431,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "red potatoes": {
+            "cal": 0.89,
+            "fat": 0.001,
+            "carb": 0.2,
+            "protein": 0.023,
+            "id": 432,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "roasted potatoes": {
+            "cal": 1.41,
+            "fat": 0.068,
+            "carb": 0.18,
+            "protein": 0.021,
+            "id": 433,
+            "density": 0.708499,
+            "source": "aqua_calc"
+        },
+        "sour cream": {
+            "cal": 1.98,
+            "fat": 0.19,
+            "carb": 0.046,
+            "protein": 0.024,
+            "id": 434,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "jerky": {
+            "cal": 4.1,
+            "fat": 0.26,
+            "carb": 0.11,
+            "protein": 0.33,
+            "id": 435,
+            "density": 0.3804,
+            "source": "usda"
+        },
+        "coffee creamer": {
+            "cal": 1.32,
+            "fat": 0.099,
+            "carb": 0.112,
+            "protein": 0.01,
+            "id": 436,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "sweet potato": {
+            "cal": 0.76,
+            "fat": 0.0,
+            "carb": 0.18,
+            "protein": 0.01,
+            "id": 437,
+            "density": 0.830651,
+            "source": "aqua_calc"
+        },
+        "chicken nuggets": {
+            "cal": 3.07,
+            "fat": 0.2,
+            "carb": 0.15,
+            "protein": 0.16,
+            "id": 438,
+            "density": 0.5917,
+            "source": "usda"
+        },
+        "anchovies": {
+            "cal": 2.1,
+            "fat": 0.097,
+            "carb": 0.0,
+            "protein": 0.29,
+            "id": 439,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "grapes": {
+            "cal": 0.69,
+            "fat": 0.002,
+            "carb": 0.18,
+            "protein": 0.007,
+            "id": 440,
+            "density": 0.950567,
+            "source": "aqua_calc"
+        },
+        "butter": {
+            "cal": 7.17,
+            "fat": 0.81,
+            "carb": 0.001,
+            "protein": 0.008,
+            "id": 441,
+            "density": 0.9595,
+            "source": "usda"
+        },
+        "hummus": {
+            "cal": 1.66,
+            "fat": 0.096,
+            "carb": 0.14,
+            "protein": 0.079,
+            "id": 442,
+            "density": 1.04,
+            "source": "aqua_calc"
+        },
+        "crispbread": {
+            "cal": 3.66,
+            "fat": 0.013,
+            "carb": 0.82,
+            "protein": 0.079,
+            "id": 443,
+            "density": 0.232,
+            "source": "aqua_calc"
+        },
+        "dates": {
+            "cal": 2.82,
+            "fat": 0.004,
+            "carb": 0.75,
+            "protein": 0.025,
+            "id": 444,
+            "density": 0.6763,
+            "source": "usda"
+        },
+        "papayas": {
+            "cal": 0.43,
+            "fat": 0.003,
+            "carb": 0.11,
+            "protein": 0.005,
+            "id": 445,
+            "density": 0.6974,
+            "source": "usda"
+        },
+        "stout beer": {
+            "cal": 0.45,
+            "fat": 0.0,
+            "carb": 0.015,
+            "protein": 0.002,
+            "id": 446,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "nutrition bars": {
+            "cal": 4.0,
+            "fat": 0.098,
+            "carb": 0.4,
+            "protein": 0.38,
+            "id": 447,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "jalapenos": {
+            "cal": 0.29,
+            "fat": 0.004,
+            "carb": 0.065,
+            "protein": 0.009,
+            "id": 448,
+            "density": 0.634,
+            "source": "usda"
+        },
+        "cappuccino": {
+            "cal": 0.42,
+            "fat": 0.016,
+            "carb": 0.042,
+            "protein": 0.026,
+            "id": 449,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "buns": {
+            "cal": 2.79,
+            "fat": 0.039,
+            "carb": 0.5,
+            "protein": 0.098,
+            "id": 450,
+            "density": 0.42,
+            "source": "aqua_calc"
+        },
+        "taco shells": {
+            "cal": 4.76,
+            "fat": 0.22,
+            "carb": 0.63,
+            "protein": 0.064,
+            "id": 451,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "maple syrup": {
+            "cal": 2.6,
+            "fat": 0.001,
+            "carb": 0.65,
+            "protein": 0.001,
+            "id": 452,
+            "density": 1.332,
+            "source": "aqua_calc"
+        },
+        "rice cakes": {
+            "cal": 3.885,
+            "fat": 0.028,
+            "carb": 0.81,
+            "protein": 0.082,
+            "id": 454,
+            "density": 0.1268,
+            "source": "usda"
+        },
+        "cookies": {
+            "cal": 4.92,
+            "fat": 0.25,
+            "carb": 0.65,
+            "protein": 0.051,
+            "id": 455,
+            "density": 0.298583,
+            "source": "aqua_calc"
+        },
+        "barley": {
+            "cal": 1.23,
+            "fat": 0.004,
+            "carb": 0.28,
+            "protein": 0.023,
+            "id": 456,
+            "density": 0.6636,
+            "source": "usda"
+        },
+        "sun dried tomatoes": {
+            "cal": 2.58,
+            "fat": 0.03,
+            "carb": 0.56,
+            "protein": 0.14,
+            "id": 457,
+            "density": 0.2325,
+            "source": "usda"
+        },
+        "cereal bars": {
+            "cal": 3.42,
+            "fat": 0.009,
+            "carb": 0.78,
+            "protein": 0.059,
+            "id": 459,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "nectar": {
+            "cal": 0.316,
+            "fat": 0.0,
+            "carb": 0.082,
+            "protein": 0.066,
+            "id": 460,
+            "density": 1.048,
+            "source": "aqua_calc"
+        },
+        "samosas": {
+            "cal": 2.62,
+            "fat": 0.17,
+            "carb": 0.24,
+            "protein": 0.035,
+            "id": 461,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "pork": {
+            "cal": 2.38,
+            "fat": 0.14,
+            "carb": 0.0,
+            "protein": 0.26,
+            "id": 462,
+            "density": 0.60098,
+            "source": "aqua_calc"
+        },
+        "beets": {
+            "cal": 0.44,
+            "fat": 0.002,
+            "carb": 0.1,
+            "protein": 0.017,
+            "id": 463,
+            "density": 0.5706,
+            "source": "usda"
+        },
+        "baked potatoes": {
+            "cal": 0.93,
+            "fat": 0.001,
+            "carb": 0.21,
+            "protein": 0.025,
+            "id": 464,
+            "density": 0.5495,
+            "source": "usda"
+        },
+        "american cheese": {
+            "cal": 3.12,
+            "fat": 0.23,
+            "carb": 0.088,
+            "protein": 0.17,
+            "id": 465,
+            "density": 0.476,
+            "source": "aqua_calc"
+        },
+        "pistachios": {
+            "cal": 5.69,
+            "fat": 0.46,
+            "carb": 0.28,
+            "protein": 0.21,
+            "id": 466,
+            "density": 0.5199,
+            "source": "usda"
+        },
+        "relish": {
+            "cal": 1.3,
+            "fat": 0.005,
+            "carb": 0.35,
+            "protein": 0.004,
+            "id": 467,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "camembert cheese": {
+            "cal": 3.0,
+            "fat": 0.24,
+            "carb": 0.005,
+            "protein": 0.2,
+            "id": 468,
+            "density": 1.0398,
+            "source": "usda"
+        },
+        "carp": {
+            "cal": 1.28,
+            "fat": 0.027,
+            "carb": 0.0,
+            "protein": 0.26,
+            "id": 469,
+            "density": 1.036,
+            "source": "aqua_calc"
+        },
+        "cherry tomatoes": {
+            "cal": 0.18,
+            "fat": 0.002,
+            "carb": 0.039,
+            "protein": 0.009,
+            "id": 471,
+            "density": 0.981181,
+            "source": "aqua_calc"
+        },
+        "couscous": {
+            "cal": 1.12,
+            "fat": 0.002,
+            "carb": 0.23,
+            "protein": 0.038,
+            "id": 472,
+            "density": 0.357225,
+            "source": "usda"
+        },
+        "cranberries": {
+            "cal": 0.46,
+            "fat": 0.001,
+            "carb": 0.12,
+            "protein": 0.005,
+            "id": 473,
+            "density": 0.731615,
+            "source": "usda"
+        },
+        "quesadillas": {
+            "cal": 3.68,
+            "fat": 0.23,
+            "carb": 0.24,
+            "protein": 0.16,
+            "id": 474,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "salsa": {
+            "cal": 0.29,
+            "fat": 0.002,
+            "carb": 0.066,
+            "protein": 0.015,
+            "id": 475,
+            "density": 0.639892,
+            "source": "usda"
+        },
+        "almond milk": {
+            "cal": 0.23,
+            "fat": 0.01,
+            "carb": 0.032,
+            "protein": 0.004,
+            "id": 476,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "light beer": {
+            "cal": 0.29,
+            "fat": 0.0,
+            "carb": 0.016,
+            "protein": 0.002,
+            "id": 477,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "sweet rolls": {
+            "cal": 2.73,
+            "fat": 0.063,
+            "carb": 0.46,
+            "protein": 0.086,
+            "id": 478,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "challah": {
+            "cal": 2.87,
+            "fat": 0.06,
+            "carb": 0.48,
+            "protein": 0.095,
+            "id": 479,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "ice cream soda": {
+            "cal": 0.51,
+            "fat": 0.0,
+            "carb": 0.13,
+            "protein": 0.0,
+            "id": 480,
+            "density": 0.812,
+            "source": "aqua_calc"
+        },
+        "flatbread": {
+            "cal": 2.75,
+            "fat": 0.012,
+            "carb": 0.56,
+            "protein": 0.091,
+            "id": 481,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "rice": {
+            "cal": 1.3,
+            "fat": 0.003,
+            "carb": 0.28,
+            "protein": 0.027,
+            "id": 482,
+            "density": 0.6678,
+            "source": "usda"
+        },
+        "water chestnuts": {
+            "cal": 0.3,
+            "fat": 0.001,
+            "carb": 0.068,
+            "protein": 0.009,
+            "id": 483,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "chicken salad": {
+            "cal": 2.27,
+            "fat": 0.16,
+            "carb": 0.029,
+            "protein": 0.17,
+            "id": 484,
+            "density": 0.53498,
+            "source": "usda"
+        },
+        "zucchini": {
+            "cal": 0.15,
+            "fat": 0.004,
+            "carb": 0.027,
+            "protein": 0.011,
+            "id": 485,
+            "density": 0.554118,
+            "source": "aqua_calc"
+        },
+        "cakes": {
+            "cal": 3.91,
+            "fat": 0.18,
+            "carb": 0.56,
+            "protein": 0.03,
+            "id": 486,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "crepes": {
+            "cal": 1.65,
+            "fat": 0.083,
+            "carb": 0.16,
+            "protein": 0.059,
+            "id": 487,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "mexican cheese": {
+            "cal": 3.58,
+            "fat": 0.29,
+            "carb": 0.018,
+            "protein": 0.24,
+            "id": 488,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "lobster": {
+            "cal": 1.43,
+            "fat": 0.019,
+            "carb": 0.031,
+            "protein": 0.26,
+            "id": 489,
+            "density": 0.612,
+            "source": "aqua_calc"
+        },
+        "tea": {
+            "cal": 0.01,
+            "fat": 0.0,
+            "carb": 0.003,
+            "protein": 0.0,
+            "id": 490,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "nachos": {
+            "cal": 2.24,
+            "fat": 0.17,
+            "carb": 0.048,
+            "protein": 0.12,
+            "id": 491,
+            "density": 0.5706,
+            "source": "usda"
+        },
+        "taco salad": {
+            "cal": 1.57,
+            "fat": 0.085,
+            "carb": 0.14,
+            "protein": 0.07,
+            "id": 492,
+            "density": 0.516,
+            "source": "aqua_calc"
+        },
+        "lager": {
+            "cal": 0.43,
+            "fat": 0.0,
+            "carb": 0.036,
+            "protein": 0.005,
+            "id": 493,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "jams": {
+            "cal": 2.78,
+            "fat": 0.001,
+            "carb": 0.69,
+            "protein": 0.004,
+            "id": 494,
+            "density": 1.3526,
+            "source": "usda"
+        },
+        "cream cheese": {
+            "cal": 3.5,
+            "fat": 0.34,
+            "carb": 0.055,
+            "protein": 0.062,
+            "id": 495,
+            "density": 0.349899,
+            "source": "aqua_calc"
+        },
+        "capers": {
+            "cal": 0.23,
+            "fat": 0.009,
+            "carb": 0.049,
+            "protein": 0.024,
+            "id": 496,
+            "density": 0.5816,
+            "source": "usda"
+        },
+        "halibut": {
+            "cal": 1.11,
+            "fat": 0.016,
+            "carb": 0.0,
+            "protein": 0.23,
+            "id": 497,
+            "density": 1.036,
+            "source": "aqua_calc"
+        },
+        "orange juice": {
+            "cal": 0.47,
+            "fat": 0.001,
+            "carb": 0.11,
+            "protein": 0.007,
+            "id": 498,
+            "density": 1.0482,
+            "source": "usda"
+        },
+        "latte": {
+            "cal": 0.44,
+            "fat": 0.017,
+            "carb": 0.044,
+            "protein": 0.029,
+            "id": 499,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "taquitos": {
+            "cal": 2.86,
+            "fat": 0.13,
+            "carb": 0.34,
+            "protein": 0.093,
+            "id": 500,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "cherries": {
+            "cal": 0.63,
+            "fat": 0.002,
+            "carb": 0.16,
+            "protein": 0.011,
+            "id": 501,
+            "density": 0.584,
+            "source": "aqua_calc"
+        },
+        "milk": {
+            "cal": 0.51,
+            "fat": 0.019,
+            "carb": 0.05,
+            "protein": 0.035,
+            "id": 502,
+            "density": 1.032,
+            "source": "aqua_calc"
+        },
+        "applesauce": {
+            "cal": 0.68,
+            "fat": 0.002,
+            "carb": 0.17,
+            "protein": 0.002,
+            "id": 503,
+            "density": 1.0398,
+            "source": "usda"
+        },
+        "vegetable juice": {
+            "cal": 0.22,
+            "fat": 0.003,
+            "carb": 0.039,
+            "protein": 0.009,
+            "id": 504,
+            "density": 1.0482,
+            "source": "usda"
+        },
+        "meatballs": {
+            "cal": 2.86,
+            "fat": 0.22,
+            "carb": 0.081,
+            "protein": 0.14,
+            "id": 505,
+            "density": 0.992,
+            "source": "aqua_calc"
+        },
+        "pinto beans": {
+            "cal": 1.43,
+            "fat": 0.007,
+            "carb": 0.26,
+            "protein": 0.09,
+            "id": 506,
+            "density": 0.7228,
+            "source": "usda"
+        },
+        "mandarin oranges": {
+            "cal": 0.53,
+            "fat": 0.003,
+            "carb": 0.13,
+            "protein": 0.008,
+            "id": 507,
+            "density": 0.638929,
+            "source": "usda"
+        },
+        "soy sauce": {
+            "cal": 0.53,
+            "fat": 0.006,
+            "carb": 0.049,
+            "protein": 0.081,
+            "id": 508,
+            "density": 1.082,
+            "source": "usda"
+        },
+        "tempura": {
+            "cal": 1.05,
+            "fat": 0.039,
+            "carb": 0.11,
+            "protein": 0.065,
+            "id": 509,
+            "density": 0.268,
+            "source": "aqua_calc"
+        },
+        "chicken apple sausage": {
+            "cal": 1.6,
+            "fat": 0.1,
+            "carb": 0.03,
+            "protein": 0.14,
+            "id": 510,
+            "density": 0.848612,
+            "source": "aqua_calc"
+        },
+        "spinach cooked": {
+            "cal": 0.23,
+            "fat": 0.0,
+            "carb": 0.04,
+            "protein": 0.03,
+            "id": 511,
+            "density": 0.13361,
+            "source": "usda"
+        },
+        "kimchi": {
+            "cal": 0.3,
+            "fat": 0.001,
+            "carb": 0.057,
+            "protein": 0.016,
+            "id": 512,
+            "density": 0.428377,
+            "source": "usda"
+        },
+        "millet": {
+            "cal": 1.19,
+            "fat": 0.01,
+            "carb": 0.237,
+            "protein": 0.035,
+            "id": 513,
+            "density": 0.305154,
+            "source": "usda"
+        },
+        "wheat berries": {
+            "cal": 0.91,
+            "fat": 0.005,
+            "carb": 0.191,
+            "protein": 0.042,
+            "id": 514,
+            "density": 0.824,
+            "source": "aqua_calc"
+        },
+        "arugula": {
+            "cal": 0.25,
+            "fat": 0.007,
+            "carb": 0.037,
+            "protein": 0.026,
+            "id": 515,
+            "density": 0.094135,
+            "source": "usda"
+        },
+        "rosemary": {
+            "cal": 1.31,
+            "fat": 0.057,
+            "carb": 0.2,
+            "protein": 0.029,
+            "id": 516,
+            "density": 0.116,
+            "source": "aqua_calc"
+        },
+        "chard": {
+            "cal": 0.19,
+            "fat": 0.002,
+            "carb": 0.037,
+            "protein": 0.018,
+            "id": 517,
+            "density": 0.219226,
+            "source": "usda"
+        },
+        "thyme": {
+            "cal": 1.01,
+            "fat": 0.017,
+            "carb": 0.24,
+            "protein": 0.06,
+            "id": 518,
+            "density": 0.164,
+            "source": "aqua_calc"
+        },
+        "oregano": {
+            "cal": 2.7,
+            "fat": 0.04,
+            "carb": 0.69,
+            "protein": 0.09,
+            "id": 519,
+            "density": 0.2029,
+            "source": "usda"
+        },
+        "lemon juice": {
+            "cal": 0.17,
+            "fat": 0.0,
+            "carb": 0.056,
+            "protein": 0.004,
+            "id": 520,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "basil": {
+            "cal": 0.24,
+            "fat": 0.0,
+            "carb": 0.02,
+            "protein": 0.04,
+            "id": 521,
+            "density": 0.1014,
+            "source": "usda"
+        },
+        "tatsoi": {
+            "cal": 0.22,
+            "fat": 0.003,
+            "carb": 0.039,
+            "protein": 0.022,
+            "id": 522,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "cilantro": {
+            "cal": 0.228,
+            "fat": 0.005,
+            "carb": 0.037,
+            "protein": 0.022,
+            "id": 523,
+            "density": 0.0676,
+            "source": "usda"
+        },
+        "parsley": {
+            "cal": 0.371,
+            "fat": 0.008,
+            "carb": 0.064,
+            "protein": 0.029,
+            "id": 524,
+            "density": 0.037095,
+            "source": "usda"
+        },
+        "bok choy": {
+            "cal": 0.13,
+            "fat": 0.002,
+            "carb": 0.022,
+            "protein": 0.015,
+            "id": 525,
+            "density": 0.4332,
+            "source": "usda"
+        },
+        "mustard greens": {
+            "cal": 0.27,
+            "fat": 0.004,
+            "carb": 0.047,
+            "protein": 0.029,
+            "id": 526,
+            "density": 0.2367,
+            "source": "usda"
+        },
+        "chive": {
+            "cal": 0.3,
+            "fat": 0.007,
+            "carb": 0.044,
+            "protein": 0.033,
+            "id": 527,
+            "density": 0.2029,
+            "source": "usda"
+        },
+        "celery root": {
+            "cal": 0.42,
+            "fat": 0.003,
+            "carb": 0.092,
+            "protein": 0.015,
+            "id": 528,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "chayote squash": {
+            "cal": 0.24,
+            "fat": 0.005,
+            "carb": 0.051,
+            "protein": 0.006,
+            "id": 529,
+            "density": 0.729633,
+            "source": "aqua_calc"
+        },
+        "endive": {
+            "cal": 0.17,
+            "fat": 0.002,
+            "carb": 0.034,
+            "protein": 0.013,
+            "id": 530,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "pumpkin seeds": {
+            "cal": 4.46,
+            "fat": 0.19,
+            "carb": 0.54,
+            "protein": 0.19,
+            "id": 531,
+            "density": 0.5,
+            "source": "aqua_calc"
+        },
+        "pesto": {
+            "cal": 5.62,
+            "fat": 0.549,
+            "carb": 0.08,
+            "protein": 0.121,
+            "id": 532,
+            "density": 1.082,
+            "source": "usda"
+        },
+        "orzo": {
+            "cal": 2.25,
+            "fat": 0.009,
+            "carb": 0.458,
+            "protein": 0.079,
+            "id": 533,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "country rice": {
+            "cal": 1.52,
+            "fat": 0.068,
+            "carb": 0.316,
+            "protein": 0.039,
+            "id": 534,
+            "density": 0.515094,
+            "source": "aqua_calc"
+        },
+        "green onions": {
+            "cal": 0.32,
+            "fat": 0.002,
+            "carb": 0.07,
+            "protein": 0.018,
+            "id": 535,
+            "density": 0.054506,
+            "source": "usda"
+        },
+        "banana with peel": {
+            "cal": 0.556,
+            "fat": 0.002,
+            "carb": 0.144,
+            "protein": 0.007,
+            "id": 536,
+            "density": 0.565293,
+            "source": "aqua_calc"
+        },
+        "orange with peel": {
+            "cal": 0.294,
+            "fat": 0.001,
+            "carb": 0.075,
+            "protein": 0.006,
+            "id": 537,
+            "density": 0.72,
+            "source": "aqua_calc"
+        },
+        "jicama": {
+            "cal": 0.38,
+            "fat": 0.001,
+            "carb": 0.09,
+            "protein": 0.007,
+            "id": 538,
+            "density": 0.036796,
+            "source": "usda"
+        },
+        "nopales": {
+            "cal": 0.16,
+            "fat": 0.001,
+            "carb": 0.033,
+            "protein": 0.014,
+            "id": 539,
+            "density": 0.634,
+            "source": "usda"
+        },
+        "ginger": {
+            "cal": 0.8,
+            "fat": 0.008,
+            "carb": 0.18,
+            "protein": 0.018,
+            "id": 540,
+            "density": 0.404,
+            "source": "aqua_calc"
+        },
+        "tomatillo": {
+            "cal": 0.32,
+            "fat": 0.01,
+            "carb": 0.06,
+            "protein": 0.01,
+            "id": 541,
+            "density": 0.5579,
+            "source": "usda"
+        },
+        "white beans": {
+            "cal": 1.39,
+            "fat": 0.004,
+            "carb": 0.251,
+            "protein": 0.097,
+            "id": 542,
+            "density": 1.160411,
+            "source": "usda"
+        },
+        "chia seeds": {
+            "cal": 0.8,
+            "fat": 0.31,
+            "carb": 0.42,
+            "protein": 0.17,
+            "id": 543,
+            "density": 0.110958,
+            "source": "usda"
+        },
+        "corn starch": {
+            "cal": 3.8,
+            "fat": 0.001,
+            "carb": 0.914,
+            "protein": 0.003,
+            "id": 544,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "greek yogurt": {
+            "cal": 0.59,
+            "fat": 0.004,
+            "carb": 0.036,
+            "protein": 0.1,
+            "id": 545,
+            "density": 1.0356,
+            "source": "usda"
+        },
+        "balsamic vinegar": {
+            "cal": 0.88,
+            "fat": 0.0,
+            "carb": 0.17,
+            "protein": 0.005,
+            "id": 546,
+            "density": 1.0778,
+            "source": "usda"
+        },
+        "corn nuts": {
+            "cal": 4.36,
+            "fat": 0.14,
+            "carb": 0.72,
+            "protein": 0.09,
+            "id": 547,
+            "density": 0.384,
+            "source": "aqua_calc"
+        },
+        "coconut milk": {
+            "cal": 2.3,
+            "fat": 0.24,
+            "carb": 0.06,
+            "protein": 0.023,
+            "id": 548,
+            "density": 1.0144,
+            "source": "usda"
+        },
+        "pizza dough": {
+            "cal": 2.355,
+            "fat": 0.047,
+            "carb": 0.417,
+            "protein": 0.054,
+            "id": 549,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "fennel": {
+            "cal": 0.31,
+            "fat": 0.002,
+            "carb": 0.07,
+            "protein": 0.012,
+            "id": 550,
+            "density": 0.368,
+            "source": "aqua_calc"
+        },
+        "pizza sauce": {
+            "cal": 0.29,
+            "fat": 0.002,
+            "carb": 0.07,
+            "protein": 0.013,
+            "id": 551,
+            "density": 0.45,
+            "source": "usda"
+        },
+        "pomegranate": {
+            "cal": 0.83,
+            "fat": 0.012,
+            "carb": 0.19,
+            "protein": 0.017,
+            "id": 552,
+            "density": 0.7397,
+            "source": "usda"
+        },
+        "nut cheese": {
+            "cal": 2.1,
+            "fat": 0.101,
+            "carb": 0.04,
+            "protein": 0.256,
+            "id": 553,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "soy sausage": {
+            "cal": 2.02,
+            "fat": 0.144,
+            "carb": 0.063,
+            "protein": 0.16,
+            "id": 554,
+            "density": 1.0,
+            "source": "usda"
+        },
+        "oil": {
+            "cal": 8.864,
+            "fat": 1.0,
+            "carb": 0.0,
+            "protein": 0.0,
+            "id": 555,
+            "density": 0.912,
+            "source": "aqua_calc"
+        }
+    }
+}

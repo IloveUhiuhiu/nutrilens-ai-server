@@ -1,27 +1,54 @@
 from __future__ import annotations
 
+import base64
 import json
 import cv2
 import numpy as np
 from pathlib import Path
 from datetime import datetime
+from io import BytesIO
 from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
 
 class DebugVisualizer:
-    def __init__(self, root_dir: str = "debug_outputs"):
+    def __init__(self, root_dir: str = "debug_outputs", to_memory: bool = True):
+        self.to_memory = to_memory  # Also return to frontend
+        self.images_bytes: dict[str, bytes] = {}  # For frontend
+        self.texts: dict[str, str] = {}  # For frontend
+        
+        # ALWAYS create disk output directory
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.output_dir = Path(root_dir) / timestamp
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        print(f"[DebugVisualizer] Output directory: {self.output_dir}")
 
     def _safe_savefig(self, filename: str):
+        """Save figure to both memory (for frontend) and disk"""
         plt.tight_layout()
-        plt.savefig(
-            str(self.output_dir / filename),
-            dpi=250,
-            bbox_inches="tight"
-        )
+        
+        # Save to disk (always)
+        disk_path = str(self.output_dir / filename)
+        plt.savefig(disk_path, dpi=150, bbox_inches="tight")
+        
+        # Save to memory (for frontend)
+        if self.to_memory:
+            buf = BytesIO()
+            plt.savefig(buf, format='png', dpi=150, bbox_inches="tight")
+            buf.seek(0)
+            self.images_bytes[filename] = buf.getvalue()
+        
         plt.close()
+
+    def _save_or_store_image(self, filename: str, data: bytes):
+        """Save image bytes to both disk and memory"""
+        # Save to disk (always)
+        disk_path = self.output_dir / filename
+        with open(disk_path, "wb") as f:
+            f.write(data)
+        
+        # Save to memory (for frontend)
+        if self.to_memory:
+            self.images_bytes[filename] = data
 
     def _safe_imshow(self, ax, image, title: str, cmap: str | None = None):
         if image is None:
@@ -37,14 +64,18 @@ class DebugVisualizer:
             return
 
         image_bgr = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2BGR)
-        cv2.imwrite(str(self.output_dir / filename), image_bgr)
+        is_success, buffer = cv2.imencode(".png", image_bgr)
+        if is_success:
+            self._save_or_store_image(filename, buffer.tobytes())
 
     def save_mask(self, filename: str, mask: np.ndarray):
         if mask is None or mask.size == 0:
             return
 
         mask_vis = (mask.astype(np.uint8) * 255)
-        cv2.imwrite(str(self.output_dir / filename), mask_vis)
+        is_success, buffer = cv2.imencode(".png", mask_vis)
+        if is_success:
+            self._save_or_store_image(filename, buffer.tobytes())
 
     def save_depth(self, filename: str, depth_map: np.ndarray):
         if depth_map is None or depth_map.size == 0:
@@ -59,21 +90,57 @@ class DebugVisualizer:
         )
         plt.colorbar(label="Depth (cm)")
         plt.axis("off")
-        plt.tight_layout()
-        plt.savefig(
-            str(self.output_dir / filename),
-            bbox_inches="tight",
-            pad_inches=0
-        )
+        plt.title(filename)
+        
+        # Save to disk (always)
+        disk_path = str(self.output_dir / filename)
+        plt.savefig(disk_path, bbox_inches="tight", pad_inches=0, dpi=150)
+        
+        # Save to memory (for frontend)
+        if self.to_memory:
+            buf = BytesIO()
+            plt.savefig(buf, format='png', bbox_inches="tight", pad_inches=0, dpi=150)
+            buf.seek(0)
+            self.images_bytes[filename] = buf.getvalue()
+        
         plt.close()
 
     def save_text(self, filename: str, content: str):
-        with open(self.output_dir / filename, "w", encoding="utf-8") as f:
+        """Save text to both disk and memory"""
+        # Save to disk (always)
+        disk_path = self.output_dir / filename
+        with open(disk_path, "w", encoding="utf-8") as f:
             f.write(content)
+        
+        # Save to memory (for frontend)
+        if self.to_memory:
+            self.texts[filename] = content
 
     def save_json(self, filename: str, data):
-        with open(self.output_dir / filename, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
+        """Save JSON to both disk and memory"""
+        content = json.dumps(data, indent=2, ensure_ascii=False)
+        
+        # Save to disk (always)
+        disk_path = self.output_dir / filename
+        with open(disk_path, "w", encoding="utf-8") as f:
+            f.write(content)
+        
+        # Save to memory (for frontend)
+        if self.to_memory:
+            self.texts[filename] = content
+
+    def get_results_as_dict(self) -> dict:
+        """Returns all stored debug info as a dictionary with base64 encoded images."""
+        return {
+            "images": {
+                Path(key).stem: base64.b64encode(value).decode("utf-8")
+                for key, value in self.images_bytes.items()
+            },
+            "texts": {
+                Path(key).stem: value
+                for key, value in self.texts.items()
+            }
+        }
 
     def save_detection_boxes(self, filename: str, image_rgb: np.ndarray, boxes: list[dict]):
         img = image_rgb.copy()
@@ -138,7 +205,7 @@ class DebugVisualizer:
     
     def save_topological_order_overlay(
         self,
-        filename: str,
+        filename: str | None,
         image_rgb: np.ndarray,
         instance_masks: list[np.ndarray],
         instance_labels: list[str],
@@ -194,7 +261,8 @@ class DebugVisualizer:
                 2
             )
 
-        self.save_image_rgb(filename, overlay)
+        if filename:
+            self.save_image_rgb(filename, overlay)
         return overlay
 
     def save_dashboard(
