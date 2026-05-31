@@ -9,14 +9,20 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env", 
         env_file_encoding="utf-8",
-        case_sensitive=False 
+        case_sensitive=False,
+        extra="ignore",
     )
 
     # --- Cấu hình chung ---
     device: Literal["auto", "cpu", "cuda"] = "auto"
     log_level: str = "INFO"
-    nutrition_db_path: str = "app/db/nutrition_db.json"
     ground_truth_path: str = "app/db/ground_truth.csv"
+
+    # --- Backend Internal API ---
+    backend_base_url: str = "http://127.0.0.1:8000"
+    backend_internal_api_key: str = ""
+    backend_ingredients_path: str = "/api/v1/nutrients/internal/ingredients/"
+    backend_api_timeout: float = 10.0
 
     # --- YOLO Detection (Food & Plate) ---
     yolo_food_weights: str = "weights/yolo/food_yolo.pt"
@@ -39,6 +45,15 @@ class Settings(BaseSettings):
     templates_dir: str = "templates"
 
     debug_visuals: bool = False
+
+    # --- Response / Storage ---
+    model_version: str = "seg-nutrition-v1"
+    mask_local_dir: str = "logs/masks"
+    cloudinary_cloud_name: str = ""
+    cloudinary_api_key: str = ""
+    cloudinary_api_secret: str = ""
+    cloudinary_mask_folder: str = "inference/masks"
+
     @property
     def device_resolved(self) -> str:
         """Tự động xác định thiết bị tính toán nếu để là 'auto'."""

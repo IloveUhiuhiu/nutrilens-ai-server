@@ -23,6 +23,24 @@ The analysis is performed through six tightly coupled stages:
 ## Configuration
 Environment variables are stored in `.env`. Set `DEVICE=auto` to use CUDA if available.
 
+Nutrition data is loaded from NutriLens backend internal API:
+
+```env
+BACKEND_BASE_URL=http://127.0.0.1:8000
+BACKEND_INTERNAL_API_KEY=
+BACKEND_INGREDIENTS_PATH=/api/v1/nutrients/internal/ingredients/
+BACKEND_API_TIMEOUT=10
+```
+
+The AI server maps backend fields as follows:
+
+- `density` -> `density`
+- `cal_per_100g / 100` -> `cal`
+- `protein_per_100g / 100` -> `protein`
+- `fat_per_100g / 100` -> `fat`
+- `carb_per_100g / 100` -> `carbs`
+- `id` -> `physical_data_id`
+
 ## Running the API
 ```bash
 python -m venv .venv
@@ -37,11 +55,74 @@ pytest
 ```
 
 ## API
-`POST /v1/nutrition/analyze`
+`POST /v1/analyze`
 
 Form data:
-- `file`: image upload  
-- `camera_height_ref`: float  
-- `pixel_area_ref`: float  
+- `image`: image upload
+- `depth_map`: optional depth map upload (`.npy`, `.png`, `.exr`, ...)
+- `job_id`: backend inference job id
+- `camera_metadata`: JSON string with camera height, intrinsics/pixel area, and optional `depth` metadata
 
-Returns nutrition totals and per-ingredient estimates.
+If `depth_map` is present, the server uses client depth. Otherwise it keeps the original Depth Anything V2 flow.
+
+Example `camera_metadata`:
+
+```json
+{
+  "device_model": "iPhone 15",
+  "camera_type": "wide",
+  "camera_height_mm": 400,
+  "intrinsics": {
+    "fx": 2850.2,
+    "fy": 2851.7,
+    "cx": 2016.0,
+    "cy": 1512.0
+  },
+  "depth": {
+    "depth_unit": "meter",
+    "source": "client_depth_model",
+    "width_px": 4032,
+    "height_px": 3024
+  }
+}
+```
+
+Returns the backend contract:
+
+```json
+{
+  "model_version": "seg-nutrition-v1",
+  "latency_ms": 1240,
+  "totals": {
+    "calories": 520.5,
+    "protein": 28.4,
+    "carbs": 62.1,
+    "fat": 15.7,
+    "weight": 430.0
+  },
+  "components": [
+    {
+      "component_id": "comp_001",
+      "component_name": "Cơm trắng",
+      "physical_data_id": "igr_abcd1234",
+      "mask_path": "https://res.cloudinary.com/.../comp_001.png",
+      "volume": 180.5,
+      "weight": 235.0,
+      "calories": 305.5,
+      "protein": 5.2,
+      "carbs": 67.1,
+      "fat": 0.6
+    }
+  ]
+}
+```
+
+Cloudinary mask upload env:
+
+```env
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+CLOUDINARY_MASK_FOLDER=inference/masks
+MASK_LOCAL_DIR=logs/masks
+```

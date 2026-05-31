@@ -38,7 +38,16 @@ class GeometryService(ServiceBase):
             n_instances = len(instance_masks)
             if n_instances == 0:
                 self._log_info("no instances found for geometry calculation")
-                return {}
+                return {
+                    "geometry": [],
+                    "topological_order": [],
+                    "cycle_detected": False,
+                    "instance_masks": [],
+                    "instance_labels": [],
+                    "instance_geometry": [],
+                }
+
+            instance_results = []
 
             # 2. Xác định thứ tự xếp chồng (Top -> Bottom)
             # sorted_idx: List chỉ số instance từ Trên xuống Dưới
@@ -74,6 +83,12 @@ class GeometryService(ServiceBase):
                     results_agg[name]["volume"] += vol
                     results_agg[name]["sum_height"] += np.sum(shared_height[mask])
                     results_agg[name]["pixels"] += np.sum(mask)
+                    instance_results.append({
+                        "instance_index": i,
+                        "ingredient": name,
+                        "volume_cm3": round(float(vol), 2),
+                        "avg_height_cm": round(float(np.mean(shared_height[mask])) if np.sum(mask) > 0 else 0.0, 2),
+                    })
 
             # ======================================================================
             # TRƯỜNG HỢP 2: NORMAL MODE - Pipeline chuẩn (Stacking + Completion)
@@ -125,6 +140,12 @@ class GeometryService(ServiceBase):
                     results_agg[name]["volume"] += vol
                     results_agg[name]["sum_height"] += np.sum(h_i[mask_i])
                     results_agg[name]["pixels"] += np.sum(mask_i)
+                    instance_results.append({
+                        "instance_index": i,
+                        "ingredient": name,
+                        "volume_cm3": round(float(vol), 2),
+                        "avg_height_cm": round(float(np.mean(h_i[mask_i])) if np.sum(mask_i) > 0 else 0.0, 2),
+                    })
 
             # 4. Chuyển đổi sang format response cuối cùng
             final_results = []
@@ -142,6 +163,7 @@ class GeometryService(ServiceBase):
                 "cycle_detected": is_cycle,
                 "instance_masks": instance_masks,
                 "instance_labels": instance_labels,
+                "instance_geometry": instance_results,
             }
         except Exception:
             self._log_error("geometry_service failed")

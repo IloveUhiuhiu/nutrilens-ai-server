@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import numpy as np
 from app.utils.cv.image import decode_image_bytes
-from app.utils.visualization.debug import DebugVisualizer
 from app.exceptions import InferenceError
 
 from app.services.detection_service import DetectionService
@@ -43,6 +42,8 @@ class NutritionPipeline:
         camera_height_ref: float,
         pixel_area_ref: float,
         templates_dir: str,
+        depth_bytes: bytes | None = None,
+        depth_metadata: dict | None = None,
     ) -> dict:
         image_rgb = decode_image_bytes(image_bytes)
         detections = self._call(
@@ -74,17 +75,31 @@ class NutritionPipeline:
             food_mask_combined = np.maximum(food_mask_combined, mask)
 
         plate_type = detections["plate_mask"].get("class")
-        depth_data = self._call(
-            "depth",
-            self.depth.estimate_depth,
-            image_bytes=image_bytes,
-            plate_mask=detections["plate_mask"]["mask"],
-            food_mask=food_mask_combined,
-            plate_type=plate_type,
-            camera_h_ref=camera_height_ref,
-            depth_bundle=models.depth_anything,
-            templates_dir=templates_dir,
-        )
+        if depth_bytes:
+            depth_data = self._call(
+                "depth",
+                self.depth.prepare_client_depth,
+                depth_bytes=depth_bytes,
+                depth_metadata=depth_metadata or {},
+                image_bytes=image_bytes,
+                plate_mask=detections["plate_mask"]["mask"],
+                food_mask=food_mask_combined,
+                plate_type=plate_type,
+                camera_h_ref=camera_height_ref,
+                templates_dir=templates_dir,
+            )
+        else:
+            depth_data = self._call(
+                "depth",
+                self.depth.estimate_depth,
+                image_bytes=image_bytes,
+                plate_mask=detections["plate_mask"]["mask"],
+                food_mask=food_mask_combined,
+                plate_type=plate_type,
+                camera_h_ref=camera_height_ref,
+                depth_bundle=models.depth_anything,
+                templates_dir=templates_dir,
+            )
 
         geometry_data = self._call(
             "geometry",
