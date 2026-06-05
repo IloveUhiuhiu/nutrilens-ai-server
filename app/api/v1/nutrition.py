@@ -9,15 +9,14 @@ from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
 
 from app.exceptions import AppError, ValidationError
 from app.schemas.request import AnalyzeNutritionInput, parse_json_form
-from app.schemas.response import BackendNutritionResponse
+from app.schemas.response import AIAnalysisResponse
 from app.services.camera_metadata_service import CameraMetadataService
 from app.services.depth_service import DepthService
 from app.services.detection_service import DetectionService
 from app.services.extraction_service import ExtractionService
 from app.services.geometry_service import GeometryService
 from app.services.nutrition_pipeline import NutritionPipeline
-from app.services.nutrition_service import NutritionService
-from app.services.response_builder import BackendNutritionResponseBuilder
+from app.services.response_builder import AIAnalysisResponseBuilder
 from app.services.segmentation_service import SegmentationService
 from app.services.storage_service import CloudinaryStorage
 
@@ -50,7 +49,6 @@ extraction_service = ExtractionService()
 segmentation_service = SegmentationService()
 depth_service = DepthService()
 geometry_service = GeometryService()
-nutrition_service = NutritionService()
 camera_metadata_service = CameraMetadataService()
 pipeline = NutritionPipeline(
     detection_service,
@@ -58,18 +56,17 @@ pipeline = NutritionPipeline(
     segmentation_service,
     depth_service,
     geometry_service,
-    nutrition_service,
 )
 
 
-@router.post("/analyze", response_model=BackendNutritionResponse)
+@router.post("/analyze", response_model=AIAnalysisResponse)
 async def analyze_nutrition(
     request: Request,
     image: UploadFile = File(...),
     job_id: str = Form(...),
     camera_metadata: str = Form(...),
     depth_map: UploadFile | None = File(default=None),
-) -> BackendNutritionResponse:
+) -> AIAnalysisResponse:
     """Chức năng: API phân tích dinh dưỡng. Đầu vào: multipart ảnh/depth/metadata. Đầu ra: response BE."""
     try:
         start = time.perf_counter()
@@ -88,7 +85,6 @@ async def analyze_nutrition(
         )
 
         models = request.app.state.models
-        nutrition_db = request.app.state.nutrition_db
         device = request.app.state.device
         gpu_lock = request.app.state.gpu_lock
 
@@ -98,7 +94,6 @@ async def analyze_nutrition(
                 pipeline.run_pipeline,
                 image_bytes=analyze_input.image_bytes,
                 models=models,
-                nutrition_db=nutrition_db,
                 camera_height_ref=camera_height_ref,
                 pixel_area_ref=pixel_area_ref,
                 templates_dir=request.app.state.settings.templates_dir,
@@ -108,14 +103,13 @@ async def analyze_nutrition(
             if getattr(request.app.state.settings, "debug_visuals", False):
                 _run_debug_visuals(request, analyze_input.dish_id, pipeline_data)
 
-        response = BackendNutritionResponseBuilder(
+        response = AIAnalysisResponseBuilder(
             CloudinaryStorage(request.app.state.settings)
         ).build(
             pipeline_data=pipeline_data,
             model_version=request.app.state.settings.model_version,
             latency_ms=int((time.perf_counter() - start) * 1000),
             job_id=analyze_input.dish_id,
-            nutrition_db=nutrition_db,
         )
 
         if device == "cuda":
@@ -179,6 +173,4 @@ def _run_debug_visuals(request: Request, dish_id: str, pipeline_data: dict) -> N
         food_mask_combined=pipeline_data["food_mask_combined"],
         depth_data=pipeline_data["depth_data"],
         geometry_data=pipeline_data["geometry_data"],
-        nutrition_results=pipeline_data["nutrition_results"],
-        ground_truth=request.app.state.ground_truth,
     )

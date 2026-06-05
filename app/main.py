@@ -3,7 +3,6 @@ from __future__ import annotations
 import asyncio
 import logging
 from contextlib import asynccontextmanager
-import pandas as pd
 from fastapi import FastAPI
 
 from app.api.v1.nutrition import router as nutrition_router
@@ -13,7 +12,6 @@ from app.services import ModelBundle
 from app.services.depth_service import DepthService
 from app.services.detection_service import DetectionService
 from app.services.extraction_service import ExtractionService
-from app.services.nutrition_repository import NutritionRepository
 from app.services.segmentation_service import SegmentationService
 
 
@@ -62,30 +60,10 @@ async def lifespan(app: FastAPI):
         device=device,
     )
 
-    # 3. Nạp Nutrition Database vào RAM (Chỉ thực hiện 1 lần duy nhất)
-    logger.info("[DEBUG] Pre-loading Nutrition Database from backend internal API")
-    nutrition_db = NutritionRepository(settings).load()
-
-    # 4. Nạp GT Database vào RAM (Chỉ thực hiện 1 lần duy nhất)
-    logger.info("[DEBUG] Pre-loading Ground Truth from %s", settings.ground_truth_path)
-    try:
-        ground_truth = pd.read_csv(
-            settings.ground_truth_path,
-            encoding="utf-8"
-        )
-
-    except Exception as e:
-        logger.error("[ERROR] Failed to load nutrition database: %s", e)
-
-        # fallback tránh crash
-        ground_truth = pd.DataFrame()
-
     # 4. Lưu trữ trạng thái vào app.state để truy cập từ Router
     app.state.settings = settings
     app.state.device = device
     app.state.models = models
-    app.state.nutrition_db = nutrition_db
-    app.state.ground_truth = ground_truth
     app.state.gpu_lock = asyncio.Lock() # Đảm bảo an toàn tài nguyên GPU khi xử lý đa luồng
 
     yield

@@ -1,31 +1,18 @@
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
-class BackendNutritionTotals(BaseModel):
-    calories: float = Field(..., ge=0)
-    protein: float = Field(..., ge=0)
-    carbs: float = Field(..., ge=0)
-    fat: float = Field(..., ge=0)
-    weight: float = Field(..., ge=0)
-
-
-class BackendNutritionComponent(BaseModel):
+class AIAnalysisComponent(BaseModel):
     component_id: str
     component_name: str
-    physical_data_id: str = ""
     mask_path: str = ""
     volume: float = Field(..., ge=0)
-    weight: float = Field(..., ge=0)
-    calories: float = Field(..., ge=0)
-    protein: float = Field(..., ge=0)
-    carbs: float = Field(..., ge=0)
-    fat: float = Field(..., ge=0)
 
 
-class BackendNutritionResponse(BaseModel):
+class AIAnalysisResponse(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     model_version: str
     latency_ms: int = Field(..., ge=0)
-    totals: BackendNutritionTotals
-    components: list[BackendNutritionComponent]
+    components: list[AIAnalysisComponent]

@@ -11,18 +11,12 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
+        protected_namespaces=("settings_",),
     )
 
     # --- Cấu hình chung ---
     device: Literal["auto", "cpu", "cuda"] = "auto"
     log_level: str = "INFO"
-    ground_truth_path: str = "app/db/ground_truth.csv"
-
-    # --- Backend Internal API ---
-    backend_base_url: str = "http://127.0.0.1:8000"
-    backend_internal_api_key: str = ""
-    backend_ingredients_path: str = "/api/v1/nutrients/internal/ingredients/"
-    backend_api_timeout: float = 10.0
 
     # --- YOLO Detection (Food & Plate) ---
     yolo_food_weights: str = "weights/yolo/food_yolo.pt"

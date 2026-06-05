@@ -207,14 +207,12 @@ class DebugVisualizer:
         plate_depth: np.ndarray,
         merged_depth: np.ndarray,
         topo_overlay: np.ndarray,
-        nutrition_results: dict,
         geometry_results: list[dict],
         food_heights: np.ndarray,
-        ground_truth=None,
         dish_id: str | None = None,
     ):
         """
-        Lưu dashboard tổng hợp toàn bộ pipeline phân tích dinh dưỡng.
+        Lưu dashboard tổng hợp pipeline phân tích hình học.
         """
 
         fig = plt.figure(figsize=(24, 18))
@@ -282,7 +280,7 @@ class DebugVisualizer:
         self._safe_imshow(ax7, topo_overlay, "Topological Order")
 
         # =========================================================
-        # 8. NUTRITION TABLE
+        # 8. GEOMETRY TABLE
         # =========================================================
         ax8 = fig.add_subplot(gs[2, 1:])
         ax8.axis("off")
@@ -290,39 +288,19 @@ class DebugVisualizer:
         lines = []
 
         for item in geometry_results:
-
             ing = item.get("ingredient", "unknown")
-
-            nutrition = nutrition_results[
-                "ingredients"
-            ].get(ing, {})
-
             line = (
                 f"{ing:<18} | "
                 f"Vol={item.get('volume_cm3', 0):7.1f} cm3 | "
-                f"Mass={nutrition.get('mass_g', 0):7.1f} g | "
-                f"Cal={nutrition.get('calories_kcal', 0):7.1f} kcal"
+                f"AvgH={item.get('avg_height_cm', 0):6.2f} cm"
             )
-
             lines.append(line)
 
-        total = nutrition_results["total"]
-
-        pred_mass = float(
-            total.get("mass_g", 0.0)
-        )
-
-        pred_cal = float(
-            total.get("calories_kcal", 0.0)
-        )
+        total_volume = sum(float(item.get("volume_cm3", 0.0)) for item in geometry_results)
 
         lines.append("")
         lines.append(
-            f"TOTAL MASS      : {pred_mass:.2f} g"
-        )
-
-        lines.append(
-            f"TOTAL CALORIES  : {pred_cal:.2f} kcal"
+            f"TOTAL VOLUME    : {total_volume:.2f} cm3"
         )
 
         ax8.text(
@@ -334,10 +312,10 @@ class DebugVisualizer:
             family="monospace"
         )
 
-        ax8.set_title("Nutrition Summary")
+        ax8.set_title("Geometry Summary")
 
         # =========================================================
-        # 9. PREDICTION / GROUND TRUTH
+        # 9. GEOMETRY METRICS
         # =========================================================
         ax9 = fig.add_subplot(gs[3, 0])
         ax9.axis("off")
@@ -351,77 +329,12 @@ class DebugVisualizer:
         metric_lines.append("")
 
         metric_lines.append(
-            f"Pred Mass        : {pred_mass:.2f} g"
+            f"Components       : {len(geometry_results)}"
         )
 
         metric_lines.append(
-            f"Pred Calories    : {pred_cal:.2f} kcal"
+            f"Total Volume     : {total_volume:.2f} cm3"
         )
-
-        gt_found = False
-
-        # =========================================================
-        # CHECK GROUND TRUTH CSV
-        # =========================================================
-        if (
-            ground_truth is not None
-            and hasattr(ground_truth, "empty")
-            and not ground_truth.empty
-            and dish_id is not None
-        ):
-
-            gt_row = ground_truth[
-                ground_truth["dish_id"] == dish_id
-            ]
-
-            if not gt_row.empty:
-
-                gt_found = True
-
-                gt_mass = float(
-                    gt_row.iloc[0]["total_mass"]
-                )
-
-                gt_cal = float(
-                    gt_row.iloc[0]["total_calories"]
-                )
-
-                mae_mass = abs(
-                    pred_mass - gt_mass
-                )
-
-                mae_cal = abs(
-                    pred_cal - gt_cal
-                )
-
-                mape_mass = (
-                    mae_mass / gt_mass * 100.0
-                    if gt_mass > 1e-6 else 0.0
-                )
-
-                mape_cal = (
-                    mae_cal / gt_cal * 100.0
-                    if gt_cal > 1e-6 else 0.0
-                )
-
-                metric_lines.append("")
-                metric_lines.append(
-                    f"GT Mass          : {gt_mass:.2f} g"
-                )
-
-                metric_lines.append(
-                    f"GT Calories      : {gt_cal:.2f} kcal"
-                )
-
-                metric_lines.append("")
-
-                metric_lines.append(
-                    f"Mass MAPE        : {mape_mass:.2f} %"
-                )
-
-                metric_lines.append(
-                    f"Calories MAPE    : {mape_cal:.2f} %"
-                )
 
         ax9.text(
             0.05,
@@ -476,8 +389,6 @@ class DebugVisualizer:
         food_mask_combined: np.ndarray,
         depth_data: dict,
         geometry_data: dict,
-        nutrition_results: dict,
-        ground_truth,
     ):
         self.save_image_rgb(
             "01_original.jpg",
@@ -543,11 +454,6 @@ class DebugVisualizer:
             geometry
         )
 
-        self.save_json(
-            "10_nutrition.json",
-            nutrition_results
-        )
-
         self.save_dashboard(
             filename="dashboard.png",
             original_rgb=image_rgb,
@@ -557,9 +463,7 @@ class DebugVisualizer:
             plate_depth=depth_data["plate_depth"],
             merged_depth=merged_depth,
             topo_overlay=topo_overlay,
-            nutrition_results=nutrition_results,
             geometry_results=geometry,
             food_heights=food_heights,
-            ground_truth=ground_truth,
             dish_id=dish_id
         )

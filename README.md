@@ -3,7 +3,7 @@
 # Deep Learning-based Ingredient-level Calorie Estimation using Foundation Vision Models
 
 ## Abstract
-This project presents an end-to-end pipeline for ingredient-level calorie estimation from a single food image. The system integrates object detection, vision-language reasoning, instance segmentation, monocular depth estimation, geometric volume computation, and nutritional quantification based on physical food databases.
+This project presents the AI-side image analysis pipeline for ingredient geometry estimation from a single food image. The system integrates object detection, vision-language reasoning, instance segmentation, monocular depth estimation, and geometric volume computation. The NutriLens backend performs ingredient matching and nutritional quantification.
 
 ## Methodology
 The analysis is performed through six tightly coupled stages:
@@ -13,7 +13,6 @@ The analysis is performed through six tightly coupled stages:
 3. **Stage 3 — Instance Segmentation:** SAM3 produces pixel-level masks for each inferred ingredient within detected food regions.  
 4. **Stage 4 — Monocular Depth Estimation:** Depth Anything V2 reconstructs a depth map from a single 2D image to recover 3D structure.  
 5. **Stage 5 — Volume Estimation:** Geometric integration combines segmentation masks and depth to estimate ingredient volumes.  
-6. **Stage 6 — Nutritional Quantification:** Volumes are mapped to mass and energy using density and nutritional databases.
 
 ## Author
 - **Đặng Phúc Long** — Class 22T_DT4 — Faculty Information Technology — Email: dangphuclong2019@gmail.com — Phone: 0366646801  
@@ -23,23 +22,7 @@ The analysis is performed through six tightly coupled stages:
 ## Configuration
 Environment variables are stored in `.env`. Set `DEVICE=auto` to use CUDA if available.
 
-Nutrition data is loaded from NutriLens backend internal API:
-
-```env
-BACKEND_BASE_URL=http://127.0.0.1:8000
-BACKEND_INTERNAL_API_KEY=
-BACKEND_INGREDIENTS_PATH=/api/v1/nutrients/internal/ingredients/
-BACKEND_API_TIMEOUT=10
-```
-
-The AI server maps backend fields as follows:
-
-- `density` -> `density`
-- `cal_per_100g / 100` -> `cal`
-- `protein_per_100g / 100` -> `protein`
-- `fat_per_100g / 100` -> `fat`
-- `carb_per_100g / 100` -> `carbs`
-- `id` -> `physical_data_id`
+The AI server returns ingredient geometry and mask paths. The NutriLens backend owns ingredient matching and nutrition calculation from `IngredientPhysicalData`.
 
 ## Running the API
 ```bash
@@ -87,31 +70,18 @@ Example `camera_metadata`:
 }
 ```
 
-Returns the backend contract:
+Returns raw component geometry. The backend recalculates ingredient matches, weights, and nutrition after receiving the response:
 
 ```json
 {
   "model_version": "seg-nutrition-v1",
   "latency_ms": 1240,
-  "totals": {
-    "calories": 520.5,
-    "protein": 28.4,
-    "carbs": 62.1,
-    "fat": 15.7,
-    "weight": 430.0
-  },
   "components": [
     {
       "component_id": "comp_001",
       "component_name": "Cơm trắng",
-      "physical_data_id": "igr_abcd1234",
       "mask_path": "https://res.cloudinary.com/.../comp_001.png",
-      "volume": 180.5,
-      "weight": 235.0,
-      "calories": 305.5,
-      "protein": 5.2,
-      "carbs": 67.1,
-      "fat": 0.6
+      "volume": 180.5
     }
   ]
 }

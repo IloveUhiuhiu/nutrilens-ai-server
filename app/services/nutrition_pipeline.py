@@ -9,7 +9,6 @@ from app.services.extraction_service import ExtractionService
 from app.services.segmentation_service import SegmentationService
 from app.services.depth_service import DepthService
 from app.services.geometry_service import GeometryService
-from app.services.nutrition_service import NutritionService
 
 class NutritionPipeline:
     def __init__(
@@ -19,14 +18,12 @@ class NutritionPipeline:
         segmentation: SegmentationService,
         depth: DepthService,
         geometry: GeometryService,
-        nutrition: NutritionService,
     ) -> None:
         self.detection = detection
         self.extraction = extraction
         self.segmentation = segmentation
         self.depth = depth
         self.geometry = geometry
-        self.nutrition = nutrition
 
     def _call(self, service_name: str, func, *args, **kwargs):
         try:
@@ -38,7 +35,6 @@ class NutritionPipeline:
         self,
         image_bytes: bytes,
         models: object,
-        nutrition_db: dict,
         camera_height_ref: float,
         pixel_area_ref: float,
         templates_dir: str,
@@ -111,13 +107,6 @@ class NutritionPipeline:
             pixel_area_ref=pixel_area_ref,
         )
 
-        nutrition_results = self._call(
-            "nutrition",
-            self.nutrition.estimate_nutrition,
-            geometry_data["geometry"],
-            nutrition_db.get("foods", {}),
-        )
-
         return {
             "image_rgb": image_rgb,
             "detections": detections,
@@ -126,5 +115,4 @@ class NutritionPipeline:
             "food_mask_combined": food_mask_combined,
             "depth_data": depth_data,
             "geometry_data": geometry_data,
-            "nutrition_results": nutrition_results,
         }
