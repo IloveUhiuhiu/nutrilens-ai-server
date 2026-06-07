@@ -93,6 +93,6 @@ Cloudinary mask upload env:
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
-CLOUDINARY_MASK_FOLDER=inference/masks
+CLOUDINARY_MASK_FOLDER=nutrilens/inference/jobs
 MASK_LOCAL_DIR=logs/masks
 ```

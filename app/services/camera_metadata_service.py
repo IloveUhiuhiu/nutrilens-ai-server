@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from app.exceptions import ValidationError
 
+DEFAULT_CAMERA_HEIGHT_CM = 40.0
+
 
 def get_nested(data: dict, *keys, default=None):
     """Chức năng: lấy giá trị nested dict. Đầu vào: dict và keys. Đầu ra: value hoặc default."""
@@ -14,7 +16,7 @@ def get_nested(data: dict, *keys, default=None):
 
 
 class CameraMetadataService:
-    """Chức năng: chuẩn hóa thông số camera. Đầu vào: metadata client. Đầu ra: camera_height_ref và pixel_area_ref."""
+    """Chức năng: chuẩn hóa thông số camera. Đầu vào: metadata client. Đầu ra: chiều cao fallback và intrinsics."""
 
     def derive_camera_height_cm(self, camera_metadata: dict, fallback: float | None = None) -> float:
         """Chức năng: lấy chiều cao camera cm. Đầu vào: metadata. Đầu ra: số cm."""
@@ -32,32 +34,20 @@ class CameraMetadataService:
 
         if fallback is not None:
             return float(fallback)
-        raise ValidationError("camera_height_cm or camera_height_mm is required", {"field": "camera_metadata"})
+        return DEFAULT_CAMERA_HEIGHT_CM
 
-    def derive_pixel_area_cm2(self, camera_metadata: dict, camera_height_cm: float, fallback: float | None = None) -> float:
-        """Chức năng: tính/lấy diện tích pixel cm2. Đầu vào: metadata và chiều cao camera. Đầu ra: cm2."""
-        pixel_area_cm2 = (
-            camera_metadata.get("pixel_area_cm2")
-            or get_nested(camera_metadata, "pixel_size", "pixel_area_cm2")
-            or get_nested(camera_metadata, "camera", "pixel_size", "pixel_area_cm2")
-        )
-        if pixel_area_cm2 is not None:
-            return float(pixel_area_cm2)
-
-        pixel_area_mm2 = (
-            camera_metadata.get("pixel_area_mm2")
-            or get_nested(camera_metadata, "pixel_size", "pixel_area_mm2")
-            or get_nested(camera_metadata, "camera", "pixel_size", "pixel_area_mm2")
-        )
-        if pixel_area_mm2 is not None:
-            return float(pixel_area_mm2) / 100.0
-
+    def derive_intrinsics(self, camera_metadata: dict) -> dict:
+        """Chức năng: lấy intrinsics camera từ metadata. Đầu vào: metadata. Đầu ra: fx/fy/cx/cy."""
         intrinsics = camera_metadata.get("intrinsics") or get_nested(camera_metadata, "camera", "intrinsics") or {}
-        fx = intrinsics.get("fx")
-        fy = intrinsics.get("fy")
-        if fx and fy:
-            return (camera_height_cm / float(fx)) * (camera_height_cm / float(fy))
-
-        if fallback is not None:
-            return float(fallback)
-        raise ValidationError("pixel_area_cm2 or camera intrinsics fx/fy is required", {"field": "camera_metadata"})
+        fx = intrinsics.get("fx") or camera_metadata.get("fx")
+        fy = intrinsics.get("fy") or camera_metadata.get("fy")
+        cx = intrinsics.get("cx") or camera_metadata.get("cx")
+        cy = intrinsics.get("cy") or camera_metadata.get("cy")
+        if not fx or not fy:
+            raise ValidationError("camera intrinsics fx/fy is required", {"field": "camera_metadata"})
+        return {
+            "fx": float(fx),
+            "fy": float(fy),
+            "cx": float(cx) if cx is not None else None,
+            "cy": float(cy) if cy is not None else None,
+        }

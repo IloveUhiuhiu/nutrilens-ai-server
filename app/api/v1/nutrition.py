@@ -79,9 +79,8 @@ async def analyze_nutrition(
         camera_height_ref = camera_metadata_service.derive_camera_height_cm(
             analyze_input.camera_metadata,
         )
-        pixel_area_ref = camera_metadata_service.derive_pixel_area_cm2(
+        camera_intrinsics = camera_metadata_service.derive_intrinsics(
             analyze_input.camera_metadata,
-            camera_height_ref,
         )
 
         models = request.app.state.models
@@ -95,7 +94,7 @@ async def analyze_nutrition(
                 image_bytes=analyze_input.image_bytes,
                 models=models,
                 camera_height_ref=camera_height_ref,
-                pixel_area_ref=pixel_area_ref,
+                camera_intrinsics=camera_intrinsics,
                 templates_dir=request.app.state.settings.templates_dir,
                 depth_bytes=analyze_input.depth_bytes,
                 depth_metadata=analyze_input.depth_metadata,

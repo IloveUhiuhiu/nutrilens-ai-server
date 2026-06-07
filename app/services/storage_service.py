@@ -54,7 +54,7 @@ class CloudinaryStorage(ServiceBase):
             api_secret=self.settings.cloudinary_api_secret,
             secure=True,
         )
-        public_id = f"{self.folder}/{job_id}/{component_id}"
+        public_id = f"{self.folder}/{job_id}/masks/{component_id}"
         result = cloudinary.uploader.upload(
             str(local_path),
             public_id=public_id,

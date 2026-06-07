@@ -36,7 +36,7 @@ class NutritionPipeline:
         image_bytes: bytes,
         models: object,
         camera_height_ref: float,
-        pixel_area_ref: float,
+        camera_intrinsics: dict,
         templates_dir: str,
         depth_bytes: bytes | None = None,
         depth_metadata: dict | None = None,
@@ -103,8 +103,7 @@ class NutritionPipeline:
             segments,
             depth_map=depth_data["depth_map"],
             depth_plate=depth_data["plate_depth"],
-            camera_height_ref=camera_height_ref,
-            pixel_area_ref=pixel_area_ref,
+            camera_intrinsics=camera_intrinsics,
         )
 
         return {

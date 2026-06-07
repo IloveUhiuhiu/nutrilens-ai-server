@@ -19,8 +19,7 @@ class GeometryService(ServiceBase):
         segments_dict: dict,
         depth_map: np.ndarray,       # Bản đồ độ sâu mặt trên thực phẩm (cm)
         depth_plate: np.ndarray,     # Bản đồ độ sâu mặt đĩa đã inpaint (cm)
-        camera_height_ref: float,    # Chiều cao camera thực tế (cm)
-        pixel_area_ref: float,       # Diện tích 1 pixel tại mặt sàn tham chiếu (cm2)
+        camera_intrinsics: dict,     # Thông số nội tại camera, fx/fy theo pixel
     ) -> dict:
         self._log_info("enter compute_geometry")
         start = time.perf_counter()
@@ -73,8 +72,8 @@ class GeometryService(ServiceBase):
                 shared_height = height_global / overlap_count
                 
                 for i, mask in enumerate(instance_masks):
-                    # Công thức Adaptive Area cho từng pixel dựa trên độ sâu
-                    area_map_i = pixel_area_ref * (depth_map / camera_height_ref) ** 2
+                    # Diện tích pixel metric từ depth thật: dA ~= Z^2 / (fx * fy)
+                    area_map_i = self._pixel_area_from_metric_depth(depth_map, camera_intrinsics)
                     
                     # Thể tích = diện tích pixel * chiều cao chia sẻ
                     vol = np.sum(shared_height[mask] * area_map_i[mask])
@@ -130,8 +129,8 @@ class GeometryService(ServiceBase):
                     h_i = height_instances[i]
                     d_i = instance_depth_maps[i] # Bề mặt trên của vật i
                     
-                    # Công thức Adaptive Area (Perspective Compensation)
-                    area_map_i = pixel_area_ref * (d_i / camera_height_ref) ** 2
+                    # Diện tích pixel metric từ depth thật: dA ~= Z^2 / (fx * fy)
+                    area_map_i = self._pixel_area_from_metric_depth(d_i, camera_intrinsics)
                     
                     # Volume (cm3)
                     vol = np.sum(h_i[mask_i] * area_map_i[mask_i])
@@ -170,5 +169,14 @@ class GeometryService(ServiceBase):
             raise
         finally:
             self._log_info("geometry_service finished")
+
+    def _pixel_area_from_metric_depth(self, depth_cm: np.ndarray, camera_intrinsics: dict) -> np.ndarray:
+        """Chức năng: tính diện tích mỗi pixel từ metric depth và intrinsics. Đầu vào: depth cm, fx/fy pixel. Đầu ra: cm2/pixel."""
+        fx = float(camera_intrinsics["fx"])
+        fy = float(camera_intrinsics["fy"])
+        if fx <= 0 or fy <= 0:
+            raise ValueError("camera intrinsics fx/fy must be positive")
+        valid_depth = np.maximum(depth_cm.astype(np.float32), 0)
+        return (valid_depth * valid_depth) / (fx * fy)
 
 __all__ = ["GeometryService"]
