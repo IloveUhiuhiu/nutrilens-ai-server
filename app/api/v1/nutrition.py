@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 def _log_error(message: str) -> None:
-    logger.error(message)
+    logger.exception(message)
 
 
 def _run_step(step_name: str, func, *args, **kwargs):
@@ -35,7 +35,11 @@ def _run_step(step_name: str, func, *args, **kwargs):
         return func(*args, **kwargs)
     except AppError as exc:
         _log_error(f"app error in step: {step_name}")
-        raise HTTPException(status_code=500, detail=exc.to_detail()) from exc
+        detail = exc.to_detail()
+        detail.setdefault("detail", {})
+        detail["detail"]["step"] = step_name
+        status_code = 400 if exc.code == "validation_error" else 500
+        raise HTTPException(status_code=status_code, detail=detail) from exc
     except Exception as exc:
         _log_error(f"step failed: {step_name}")
         raise HTTPException(
@@ -119,7 +123,8 @@ async def analyze_nutrition(
         raise
     except AppError as exc:
         _log_error("handled app error in analyze_nutrition")
-        raise HTTPException(status_code=500, detail=exc.to_detail()) from exc
+        status_code = 400 if exc.code == "validation_error" else 500
+        raise HTTPException(status_code=status_code, detail=exc.to_detail()) from exc
     except Exception as exc:
         _log_error("unhandled error in analyze_nutrition")
         raise HTTPException(status_code=500, detail={"code": "internal_error", "message": str(exc)}) from exc
