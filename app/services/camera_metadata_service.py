@@ -18,6 +18,22 @@ def get_nested(data: dict, *keys, default=None):
 class CameraMetadataService:
     """Chức năng: chuẩn hóa thông số camera. Đầu vào: metadata client. Đầu ra: chiều cao fallback và intrinsics."""
 
+    def derive_absolute_distance(self, camera_metadata: dict) -> tuple[bool, float | None]:
+        """Chức năng: lấy khoảng cách tuyệt đối từ AR (CASE A). Đầu vào: metadata. Đầu ra: (has_absolute, distance_cm)."""
+        has_absolute = bool(camera_metadata.get("has_absolute_depth"))
+        raw = (
+            camera_metadata.get("camera_to_object_distance")
+            or camera_metadata.get("distance_cm")
+            or get_nested(camera_metadata, "depth", "camera_to_object_distance")
+        )
+        try:
+            distance = float(raw) if raw is not None else None
+        except (TypeError, ValueError):
+            distance = None
+        if not has_absolute or distance is None or distance <= 0:
+            return False, None
+        return True, distance
+
     def derive_camera_height_cm(self, camera_metadata: dict, fallback: float | None = None) -> float:
         """Chức năng: lấy chiều cao camera cm. Đầu vào: metadata. Đầu ra: số cm."""
         raw_value = (

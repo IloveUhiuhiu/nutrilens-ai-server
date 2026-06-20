@@ -10,6 +10,7 @@ import numpy as np
 from app.utils.cv.image import decode_image_bytes
 from app.utils.processing import inpaint_plate_depth
 from app.services.base import ServiceBase
+from app.services.depth_scale_service import DepthScaleResolver
 
 MODELS_DIR = Path(__file__).resolve().parents[2] / "models"
 DA2_DIR = MODELS_DIR / "Depth-Anything-V2" / "metric_depth"
@@ -24,7 +25,7 @@ class DepthService(ServiceBase):
     service_name = "depth"
 
     def __init__(self) -> None:
-        pass
+        self._scale_resolver = DepthScaleResolver()
 
     def get_inference_transform(self) -> Compose:
         return Compose([
@@ -94,16 +95,36 @@ class DepthService(ServiceBase):
         camera_h_ref: float,
         depth_bundle: dict,
         templates_dir: str,
+        has_absolute_depth: bool = False,
+        anchor_distance_cm: float | None = None,
+        anchor_pixel: tuple[float, float] | None = None,
     ) -> dict:
         self._log_info("enter estimate_depth")
         start = time.perf_counter()
-        
+
         try:
             image_rgb = decode_image_bytes(image_bytes)
-            
+
             # 1. Chạy dự đoán độ sâu (đơn vị CM)
             depth_map = self._run_depth_inference(depth_bundle, image_rgb)
-            
+
+            # 1b. CASE A — anchor depth scale to the measured camera-to-object
+            # distance so the metric depth (and volume) is absolute instead of
+            # relying on the model's fixed max_depth assumption. anchor_pixel
+            # is the exact image pixel the AR raycast measured (camera
+            # principal point) — the depth value must be read at that same
+            # pixel, not from an unrelated whole-plate aggregate.
+            scale = 1.0
+            scale_source = "da2_metric"
+            if has_absolute_depth:
+                depth_map, scale, scale_source = self._scale_resolver.anchor_with_distance(
+                    depth_map=depth_map,
+                    plate_mask=plate_mask,
+                    food_mask=food_mask,
+                    anchor_distance_cm=anchor_distance_cm,
+                    anchor_pixel=anchor_pixel,
+                )
+
             # 2. Inpainting chuyên sâu (Affine + Z-Offset)
             # Sử dụng mặt sàn thực tế từ Template thay vì median đơn thuần
             plate_depth = inpaint_plate_depth(
@@ -114,12 +135,14 @@ class DepthService(ServiceBase):
                 camera_h_ref=camera_h_ref,
                 template_dir=templates_dir
             )
-                    
+
             return {
                 "depth_map": depth_map,     # Độ sâu mặt trên (food + plate)
-                "plate_depth": plate_depth  # Độ sâu mặt sàn (đã khôi phục)
+                "plate_depth": plate_depth, # Độ sâu mặt sàn (đã khôi phục)
+                "scale": scale,
+                "scale_source": scale_source,
             }
-            
+
         except Exception:
             self._log_error("depth_service failed")
             raise

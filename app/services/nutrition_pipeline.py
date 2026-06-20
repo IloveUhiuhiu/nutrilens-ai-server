@@ -40,6 +40,8 @@ class NutritionPipeline:
         templates_dir: str,
         depth_bytes: bytes | None = None,
         depth_metadata: dict | None = None,
+        has_absolute_depth: bool = False,
+        anchor_distance_cm: float | None = None,
     ) -> dict:
         image_rgb = decode_image_bytes(image_bytes)
         detections = self._call(
@@ -85,6 +87,20 @@ class NutritionPipeline:
                 templates_dir=templates_dir,
             )
         else:
+            # The AR raycast measures distance at one specific pixel: the
+            # camera's principal point (cx, cy) — the screen centre where the
+            # reticle sits. That's the only pixel where anchor_distance_cm is
+            # actually valid; fall back to the image centre if intrinsics
+            # didn't carry a principal point.
+            anchor_pixel = None
+            if has_absolute_depth:
+                cx = camera_intrinsics.get("cx")
+                cy = camera_intrinsics.get("cy")
+                anchor_pixel = (
+                    cx if cx is not None else orig_w / 2.0,
+                    cy if cy is not None else orig_h / 2.0,
+                )
+
             depth_data = self._call(
                 "depth",
                 self.depth.estimate_depth,
@@ -95,6 +111,9 @@ class NutritionPipeline:
                 camera_h_ref=camera_height_ref,
                 depth_bundle=models.depth_anything,
                 templates_dir=templates_dir,
+                has_absolute_depth=has_absolute_depth,
+                anchor_distance_cm=anchor_distance_cm,
+                anchor_pixel=anchor_pixel,
             )
 
         geometry_data = self._call(

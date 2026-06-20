@@ -86,6 +86,9 @@ async def analyze_nutrition(
         camera_intrinsics = camera_metadata_service.derive_intrinsics(
             analyze_input.camera_metadata,
         )
+        has_absolute_depth, anchor_distance_cm = camera_metadata_service.derive_absolute_distance(
+            analyze_input.camera_metadata,
+        )
 
         models = request.app.state.models
         device = request.app.state.device
@@ -102,6 +105,8 @@ async def analyze_nutrition(
                 templates_dir=request.app.state.settings.templates_dir,
                 depth_bytes=analyze_input.depth_bytes,
                 depth_metadata=analyze_input.depth_metadata,
+                has_absolute_depth=has_absolute_depth,
+                anchor_distance_cm=anchor_distance_cm,
             )
             if getattr(request.app.state.settings, "debug_visuals", False):
                 _run_debug_visuals(request, analyze_input.dish_id, pipeline_data)
