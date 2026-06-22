@@ -26,16 +26,16 @@ class Settings(BaseSettings):
     yolo_plate_conf: float = 0.8
 
     # --- VLM Extraction (Qwen3-VL) ---
-    qwen3vl_weights: str = "weights/vlm/qwen3vl-4bit"
+    qwen3vl_weights: str = "weights/qwen3vl"
 
     # --- SAM3 LoRA Segmentation ---
-    sam3_config_path: str = "app/services/sam3/food_config.yaml"
-    sam3_weights: str = "weights/sam3/sam3_lora.pth"
+    sam3_config_path: str = "weights/sam3/food_config.yaml"
+    sam3_weights: str = "weights/sam3/sam3_lora.pt"
     sam3_conf: float = 0.7
 
     # --- Depth Estimation (DepthAnythingV2) ---
     depth_encoder: Literal["vits", "vitb", "vitl", "vitg"] = "vits"
-    depthanything_weights: str = "weights/depth/depth_anything_v2_vits.pth"
+    depthanything_weights: str = "weights/da2/depth_anything_v2_vits"
     templates_dir: str = "templates"
 
     debug_visuals: bool = False

@@ -1,6 +1,5 @@
 .venv/
 venv/
-templates
 *.ipynb
 __pycache__/
 unsloth_compiled_cache/
@@ -12,9 +11,6 @@ debug_outputs/
 weights/*
 !weights/.gitkeep
 !weights/**/.gitkeep
-models/*
-!models/.gitkeep
-!models/**/.gitkeep
 logs/*
 !logs/.gitkeep
 *.pt
