@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 
 from app.core.config import Settings
+from app.exceptions import InferenceError
 from app.services.base import ServiceBase
 
 
@@ -19,10 +20,21 @@ class CloudinaryStorage(ServiceBase):
 
     def save_component_mask(self, mask: np.ndarray, job_id: str, component_id: str) -> str:
         """Chức năng: lưu mask nguyên liệu lên Cloudinary. Đầu vào: mask, job_id, component_id. Đầu ra: URL/path mask."""
-        local_path = self._write_local_mask(mask, job_id, component_id)
-        if not self._is_cloudinary_configured():
-            return str(local_path)
-        return self._upload_to_cloudinary(local_path, job_id, component_id)
+        try:
+            local_path = self._write_local_mask(mask, job_id, component_id)
+            if not self._is_cloudinary_configured():
+                return str(local_path)
+            return self._upload_to_cloudinary(local_path, job_id, component_id)
+        except Exception as exc:
+            self._log_error(
+                f"step=response_builder failed: cannot persist mask for job_id={job_id} component_id={component_id} "
+                f"({type(exc).__name__})"
+            )
+            raise InferenceError(
+                "response_builder",
+                "Failed to save the component mask.",
+                {"step": "response_builder", "job_id": job_id, "component_id": component_id},
+            ) from exc
 
     def _write_local_mask(self, mask: np.ndarray, job_id: str, component_id: str) -> Path:
         """Chức năng: ghi mask PNG tạm. Đầu vào: mask. Đầu ra: local path."""

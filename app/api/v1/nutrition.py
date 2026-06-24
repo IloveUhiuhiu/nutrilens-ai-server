@@ -30,21 +30,27 @@ def _log_error(message: str) -> None:
 
 
 def _run_step(step_name: str, func, *args, **kwargs):
-    """Chức năng: chạy một bước và map lỗi. Đầu vào: tên bước và callable. Đầu ra: kết quả bước."""
+    """Chức năng: chạy một bước và map lỗi. Đầu vào: tên bước và callable. Đầu ra: kết quả bước.
+    Status code lấy từ exc.status_code (do exception class quyết định) thay vì suy luận lại từ exc.code,
+    để các lỗi nghiệp vụ mới (no_food_detected, no_plate_detected,...) có status đúng (422) thay vì rơi về 500."""
     try:
         return func(*args, **kwargs)
     except AppError as exc:
-        _log_error(f"app error in step: {step_name}")
+        _log_error(f"app error in step: {step_name} (error_code={exc.code})")
         detail = exc.to_detail()
-        detail.setdefault("detail", {})
-        detail["detail"]["step"] = step_name
-        status_code = 400 if exc.code == "validation_error" else 500
-        raise HTTPException(status_code=status_code, detail=detail) from exc
+        detail["context"].setdefault("step", step_name)
+        raise HTTPException(status_code=exc.status_code, detail=detail) from exc
     except Exception as exc:
-        _log_error(f"step failed: {step_name}")
+        # Lỗi không lường trước: log đầy đủ traceback ở server, nhưng KHÔNG trả str(exc)
+        # (có thể chứa chi tiết nội bộ thư viện) thẳng ra client.
+        _log_error(f"step failed: {step_name} (unexpected {type(exc).__name__})")
         raise HTTPException(
             status_code=500,
-            detail={"code": "internal_error", "message": str(exc), "detail": {"step": step_name}},
+            detail={
+                "error_code": "internal_error",
+                "message": "An unexpected error occurred while processing the request.",
+                "context": {"step": step_name},
+            },
         ) from exc
 
 
@@ -109,11 +115,16 @@ async def analyze_nutrition(
                 anchor_distance_cm=anchor_distance_cm,
             )
             if getattr(request.app.state.settings, "debug_visuals", False):
-                _run_debug_visuals(request, analyze_input.dish_id, pipeline_data)
+                # Debug visuals chỉ phục vụ mục đích kỹ thuật, không thuộc response trả
+                # về cho client - nếu thất bại thì chỉ log lại, không làm hỏng request.
+                try:
+                    _run_debug_visuals(request, analyze_input.dish_id, pipeline_data)
+                except Exception:
+                    _log_error(f"debug visuals failed for dish_id={analyze_input.dish_id}, ignoring")
 
-        response = AIAnalysisResponseBuilder(
-            CloudinaryStorage(request.app.state.settings)
-        ).build(
+        response = _run_step(
+            "response_builder.build",
+            AIAnalysisResponseBuilder(CloudinaryStorage(request.app.state.settings)).build,
             pipeline_data=pipeline_data,
             model_version=request.app.state.settings.model_version,
             latency_ms=int((time.perf_counter() - start) * 1000),
@@ -127,12 +138,18 @@ async def analyze_nutrition(
     except HTTPException:
         raise
     except AppError as exc:
-        _log_error("handled app error in analyze_nutrition")
-        status_code = 400 if exc.code == "validation_error" else 500
-        raise HTTPException(status_code=status_code, detail=exc.to_detail()) from exc
+        _log_error(f"handled app error in analyze_nutrition (error_code={exc.code})")
+        raise HTTPException(status_code=exc.status_code, detail=exc.to_detail()) from exc
     except Exception as exc:
-        _log_error("unhandled error in analyze_nutrition")
-        raise HTTPException(status_code=500, detail={"code": "internal_error", "message": str(exc)}) from exc
+        _log_error(f"unhandled error in analyze_nutrition (unexpected {type(exc).__name__})")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error_code": "internal_error",
+                "message": "An unexpected error occurred while processing the request.",
+                "context": {},
+            },
+        ) from exc
 
 
 async def _parse_analyze_input(
@@ -144,11 +161,13 @@ async def _parse_analyze_input(
     """Chức năng: parse multipart thành input nội bộ. Đầu vào: form fields. Đầu ra: AnalyzeNutritionInput."""
     image_bytes = await image.read()
     if not image_bytes:
+        logger.warning(f"step=request_validation failed: empty upload file (filename={image.filename})")
         raise ValidationError("Empty upload file", {"filename": image.filename})
 
     parsed_camera_metadata = parse_json_form(camera_metadata)
     parsed_depth_metadata = parsed_camera_metadata.get("depth") or {}
     if not isinstance(parsed_depth_metadata, dict):
+        logger.warning("step=request_validation failed: camera_metadata.depth is not a JSON object")
         raise ValidationError("camera_metadata.depth must be a JSON object", {"field": "camera_metadata.depth"})
 
     depth_bytes = None

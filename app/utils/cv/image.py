@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Tuple
 import cv2
 import numpy as np
+from app.exceptions import ImageCropError, ImageDecodeError
 from app.utils.common import get_logger
 
 logger = get_logger(__name__)
@@ -22,25 +23,47 @@ def resize_with_padding(image: np.ndarray, size: int) -> np.ndarray:
     return canvas
 
 def decode_image_bytes(image_bytes: bytes) -> np.ndarray:
-    logger.info("enter decode_image_bytes")
+    """Chức năng: decode ảnh upload thành RGB ndarray. Đầu vào: bytes ảnh. Đầu ra: ndarray RGB.
+    Raise ImageDecodeError nếu bytes rỗng hoặc file ảnh bị hỏng/không hỗ trợ."""
+    logger.info("step=image_decode: enter decode_image_bytes")
     if not image_bytes:
-        logger.info("empty image_bytes branch")
-        return np.zeros((0, 0, 3), dtype=np.uint8)
+        logger.error("step=image_decode failed: received empty image bytes")
+        raise ImageDecodeError("The uploaded image is empty.", {"reason": "empty_bytes"})
     nparr = np.frombuffer(image_bytes, np.uint8)
     image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     if image is None:
-        logger.info("image decode failed branch")
-        return np.zeros((0, 0, 3), dtype=np.uint8)
+        logger.error(
+            "step=image_decode failed: cv2.imdecode could not parse %d byte(s) "
+            "(file is corrupted or in an unsupported format)",
+            len(image_bytes),
+        )
+        raise ImageDecodeError(
+            "Unable to read the uploaded image. The file may be corrupted or in an unsupported format.",
+            {"reason": "decode_failed", "byte_length": len(image_bytes)},
+        )
     return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
 def crop_image(image: np.ndarray, bbox: list[float] | tuple[float, float, float, float]) -> np.ndarray:
-    logger.info("enter crop_image")
+    """Chức năng: crop vùng ảnh theo bbox. Đầu vào: ảnh RGB, bbox [x1,y1,x2,y2]. Đầu ra: ndarray vùng crop.
+    Raise ImageCropError nếu bbox không hợp lệ và crop ra vùng rỗng."""
+    logger.info("step=image_crop: enter crop_image")
     if image.size == 0:
         return image
     x1, y1, x2, y2 = [int(max(0, v)) for v in bbox]
     x2 = min(image.shape[1], x2)
     y2 = min(image.shape[0], y2)
-    return image[y1:y2, x1:x2]
+    cropped = image[y1:y2, x1:x2]
+    if cropped.size == 0:
+        logger.error(
+            "step=image_crop failed: bbox=%s produced an empty region on image shape=%s",
+            bbox,
+            image.shape,
+        )
+        raise ImageCropError(
+            "Failed to crop the detected region from the image.",
+            {"bbox": list(bbox)},
+        )
+    return cropped
 
 def warp_affine(image: np.ndarray, matrix: np.ndarray, output_shape: Tuple[int, int]) -> np.ndarray:
     if image.size == 0:

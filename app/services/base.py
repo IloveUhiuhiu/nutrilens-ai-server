@@ -14,5 +14,11 @@ class ServiceBase:
         cls.logger.info(message)
 
     @classmethod
-    def _log_error(cls, message: str) -> None:
-        cls.logger.error(message)
+    def _log_warning(cls, message: str) -> None:
+        cls.logger.warning(message)
+
+    @classmethod
+    def _log_error(cls, message: str, exc_info: bool = True) -> None:
+        """exc_info=True theo mặc định vì _log_error luôn được gọi trong except block;
+        nếu không bật, traceback gốc sẽ không bao giờ được ghi lại ở server."""
+        cls.logger.error(message, exc_info=exc_info)

@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+import logging
+
 from app.exceptions import ValidationError
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_CAMERA_HEIGHT_CM = 40.0
 
@@ -60,6 +64,7 @@ class CameraMetadataService:
         cx = intrinsics.get("cx") or camera_metadata.get("cx")
         cy = intrinsics.get("cy") or camera_metadata.get("cy")
         if not fx or not fy:
+            logger.warning("step=request_validation failed: camera_metadata is missing intrinsics fx/fy")
             raise ValidationError("camera intrinsics fx/fy is required", {"field": "camera_metadata"})
         return {
             "fx": float(fx),

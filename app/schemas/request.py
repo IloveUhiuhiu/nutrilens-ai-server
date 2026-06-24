@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import json
+import logging
 from dataclasses import dataclass
 
 from app.exceptions import ValidationError
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -34,7 +37,9 @@ def parse_json_form(value: str | dict | None) -> dict:
     try:
         parsed = json.loads(value)
     except json.JSONDecodeError as exc:
+        logger.warning(f"step=request_validation failed: invalid JSON metadata - {exc}")
         raise ValidationError("Invalid JSON metadata", {"value": value}) from exc
     if not isinstance(parsed, dict):
+        logger.warning("step=request_validation failed: metadata JSON is not an object")
         raise ValidationError("Metadata must be a JSON object", {"value": value})
     return parsed

@@ -35,7 +35,11 @@ def complete_depth_instance(
         )
         pred = np.maximum(pred, depth_food)
         pred = np.minimum(pred, depth_below)
-    except Exception:
+    except Exception as exc:
+        logger.warning(
+            f"step=geometry(depth_completion) failed: polynomial surface fit raised "
+            f"{type(exc).__name__} ({exc}); falling back to raw depth without completion"
+        )
         return depth_food.copy()
     depth_completed = depth_food.copy()
     fill_zone = mask & missing_mask

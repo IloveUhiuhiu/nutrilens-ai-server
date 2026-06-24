@@ -4,21 +4,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def _ensure_logging() -> None:
-    if not logging.getLogger().handlers:
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter("%(asctime)s - %(filename)s - %(funcName)s - %(message)s")
-        handler.setFormatter(formatter)
-        logging.getLogger().addHandler(handler)
-    logger.setLevel(logging.INFO)
-
 def _log_info(message: str) -> None:
-    _ensure_logging()
     logger.info(message)
 
 def _log_error(message: str) -> None:
-    _ensure_logging()
-    logger.error(message)
+    logger.error(message, exc_info=True)
 
 def infer_instance_order(instance_masks: list[np.ndarray], depth_food: np.ndarray) -> tuple[list[int], bool]:
     _log_info("enter infer_instance_order")

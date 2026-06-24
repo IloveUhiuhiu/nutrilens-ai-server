@@ -7,6 +7,7 @@ import torch
 import torch.nn.functional as F
 import cv2
 import numpy as np
+from app.exceptions import AppError, InferenceError, ModelLoadError, ValidationError
 from app.utils.cv.image import decode_image_bytes
 from app.utils.processing import inpaint_plate_depth
 from app.services.base import ServiceBase
@@ -44,18 +45,25 @@ class DepthService(ServiceBase):
 
     def load_depth_anything(self, weights_path: str, device: str, encoder: str = "vits") -> dict:
         self._log_info(f"loading DepthAnythingV2 {encoder} on {device}")
-        
+
         model_configs = {
             'vits': {'encoder': 'vits', 'features': 64, 'out_channels': [48, 96, 192, 384]},
             'vitb': {'encoder': 'vitb', 'features': 128, 'out_channels': [96, 192, 384, 768]},
         }
-        
-        
-        
-        model = DepthAnythingV2(**{**model_configs[encoder], 'max_depth': 0.4})
-        model.load_state_dict(torch.load(weights_path, map_location='cpu'))
-        model.to(device).eval()
-        
+
+        try:
+            model = DepthAnythingV2(**{**model_configs[encoder], 'max_depth': 0.4})
+            model.load_state_dict(torch.load(weights_path, map_location='cpu'))
+            model.to(device).eval()
+        except Exception as exc:
+            self._log_error(
+                f"model_load failed: DepthAnythingV2 encoder={encoder} weights_path={weights_path} device={device}"
+            )
+            raise ModelLoadError(
+                "Failed to load the depth estimation model (DepthAnythingV2).",
+                {"model": "depth_anything", "encoder": encoder, "weights_path": weights_path},
+            ) from exc
+
         return {
             "model": model,
             "transform": self.get_inference_transform(),
@@ -99,14 +107,28 @@ class DepthService(ServiceBase):
         anchor_distance_cm: float | None = None,
         anchor_pixel: tuple[float, float] | None = None,
     ) -> dict:
-        self._log_info("enter estimate_depth")
+        self._log_info("step=depth: enter estimate_depth")
         start = time.perf_counter()
 
         try:
             image_rgb = decode_image_bytes(image_bytes)
 
             # 1. Chạy dự đoán độ sâu (đơn vị CM)
-            depth_map = self._run_depth_inference(depth_bundle, image_rgb)
+            try:
+                depth_map = self._run_depth_inference(depth_bundle, image_rgb)
+            except torch.cuda.OutOfMemoryError as exc:
+                self._log_error("step=depth failed: GPU out of memory while running DepthAnythingV2 inference")
+                raise InferenceError(
+                    "depth", "GPU ran out of memory while estimating depth.", {"step": "depth", "reason": "cuda_oom"}
+                ) from exc
+
+            if not np.isfinite(depth_map).any():
+                self._log_error(
+                    f"step=depth failed: DepthAnythingV2 produced no finite depth values (shape={depth_map.shape})"
+                )
+                raise InferenceError(
+                    "depth", "Depth estimation produced no valid depth values for this image.", {"step": "depth"}
+                )
 
             # 1b. CASE A — anchor depth scale to the measured camera-to-object
             # distance so the metric depth (and volume) is absolute instead of
@@ -143,11 +165,13 @@ class DepthService(ServiceBase):
                 "scale_source": scale_source,
             }
 
-        except Exception:
-            self._log_error("depth_service failed")
+        except AppError:
             raise
+        except Exception as exc:
+            self._log_error(f"step=depth failed: unexpected error {type(exc).__name__} during depth estimation")
+            raise InferenceError("depth", "Depth estimation failed due to an internal error.", {"step": "depth"}) from exc
         finally:
-            self._log_info("depth_service finished")
+            self._log_info("step=depth: depth_service finished")
 
     def load_client_depth_map(
         self,
@@ -156,7 +180,7 @@ class DepthService(ServiceBase):
         target_shape: tuple[int, int],
     ) -> np.ndarray:
         """Chức năng: đọc depth map client gửi. Đầu vào: bytes, metadata, shape ảnh. Đầu ra: depth cm."""
-        self._log_info("enter load_client_depth_map")
+        self._log_info("step=depth(client): enter load_client_depth_map")
         suffix = (depth_metadata or {}).get("file_extension", "").lower()
         depth_unit = (depth_metadata or {}).get("depth_unit", "cm").lower()
         try:
@@ -166,9 +190,17 @@ class DepthService(ServiceBase):
             if depth_map.shape[:2] != (target_h, target_w):
                 depth_map = cv2.resize(depth_map, (target_w, target_h), interpolation=cv2.INTER_LINEAR)
             return depth_map.astype(np.float32)
-        except Exception:
-            self._log_error("load_client_depth_map failed")
+        except AppError:
             raise
+        except Exception as exc:
+            self._log_error(
+                f"step=depth(client) failed: unexpected error {type(exc).__name__} while processing client "
+                f"depth map (suffix={suffix}, depth_unit={depth_unit})"
+            )
+            raise ValidationError(
+                "The provided depth map could not be processed.",
+                {"step": "depth_client", "file_extension": suffix, "depth_unit": depth_unit},
+            ) from exc
 
     def prepare_client_depth(
         self,
@@ -182,37 +214,73 @@ class DepthService(ServiceBase):
         templates_dir: str,
     ) -> dict:
         """Chức năng: dùng depth map client và tính plate depth. Đầu vào: depth bytes + mask. Đầu ra: depth_data."""
-        self._log_info("enter prepare_client_depth")
-        image_rgb = decode_image_bytes(image_bytes)
-        depth_map = self.load_client_depth_map(
-            depth_bytes,
-            depth_metadata,
-            target_shape=image_rgb.shape[:2],
-        )
-        plate_depth = inpaint_plate_depth(
-            depth_map=depth_map,
-            plate_mask=plate_mask,
-            food_mask=food_mask,
-            plate_type=plate_type,
-            camera_h_ref=camera_h_ref,
-            template_dir=templates_dir,
-        )
-        return {
-            "depth_map": depth_map,
-            "plate_depth": plate_depth,
-            "source": "client_depth_map",
-        }
+        self._log_info("step=depth(client): enter prepare_client_depth")
+        try:
+            image_rgb = decode_image_bytes(image_bytes)
+            depth_map = self.load_client_depth_map(
+                depth_bytes,
+                depth_metadata,
+                target_shape=image_rgb.shape[:2],
+            )
+
+            if not np.isfinite(depth_map).any():
+                self._log_error(
+                    f"step=depth(client) failed: client depth map has no finite values (shape={depth_map.shape})"
+                )
+                raise ValidationError(
+                    "The provided depth map contains no valid depth values.",
+                    {"step": "depth_client"},
+                )
+
+            plate_depth = inpaint_plate_depth(
+                depth_map=depth_map,
+                plate_mask=plate_mask,
+                food_mask=food_mask,
+                plate_type=plate_type,
+                camera_h_ref=camera_h_ref,
+                template_dir=templates_dir,
+            )
+            return {
+                "depth_map": depth_map,
+                "plate_depth": plate_depth,
+                "source": "client_depth_map",
+            }
+        except AppError:
+            raise
+        except Exception as exc:
+            self._log_error(f"step=depth(client) failed: unexpected error {type(exc).__name__}")
+            raise InferenceError(
+                "depth", "Processing the client-provided depth map failed due to an internal error.", {"step": "depth_client"}
+            ) from exc
+        finally:
+            self._log_info("step=depth(client): prepare_client_depth finished")
 
     def _decode_depth_bytes(self, depth_bytes: bytes, suffix: str) -> np.ndarray:
-        """Chức năng: decode depth map từ npy hoặc ảnh. Đầu vào: bytes/suffix. Đầu ra: ndarray."""
+        """Chức năng: decode depth map từ npy hoặc ảnh. Đầu vào: bytes/suffix. Đầu ra: ndarray.
+        Raise ValidationError nếu file depth map client gửi bị hỏng hoặc không đúng định dạng hỗ trợ."""
         if suffix == ".npy":
             from io import BytesIO
 
-            return np.load(BytesIO(depth_bytes)).astype(np.float32)
+            try:
+                return np.load(BytesIO(depth_bytes)).astype(np.float32)
+            except Exception as exc:
+                self._log_error(f"step=depth(client) failed: corrupted or unsupported .npy depth map ({len(depth_bytes)} bytes)")
+                raise ValidationError(
+                    "The provided depth map (.npy) is corrupted or unsupported.",
+                    {"step": "depth_client", "file_extension": suffix},
+                ) from exc
+
         buffer = np.frombuffer(depth_bytes, dtype=np.uint8)
         depth_map = cv2.imdecode(buffer, cv2.IMREAD_UNCHANGED)
         if depth_map is None:
-            raise ValueError("Unsupported depth map format.")
+            self._log_error(
+                f"step=depth(client) failed: cv2.imdecode could not parse depth map "
+                f"({len(depth_bytes)} bytes, suffix={suffix})"
+            )
+            raise ValidationError(
+                "Unsupported depth map format.",
+                {"step": "depth_client", "file_extension": suffix},
+            )
         if depth_map.ndim == 3:
             depth_map = depth_map[:, :, 0]
         return depth_map.astype(np.float32)

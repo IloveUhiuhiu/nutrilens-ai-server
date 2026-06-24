@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 from app.utils.cv.image import decode_image_bytes
-from app.exceptions import InferenceError
+from app.exceptions import AppError, InferenceError
 
 from app.services.detection_service import DetectionService
 from app.services.extraction_service import ExtractionService
@@ -26,10 +26,21 @@ class NutritionPipeline:
         self.geometry = geometry
 
     def _call(self, service_name: str, func, *args, **kwargs):
+        """Chức năng: chạy 1 bước pipeline. Đầu vào: tên service + callable. Đầu ra: kết quả bước.
+        AppError đã được service chuẩn hóa (kèm log gốc tại đúng nơi phát sinh) nên truyền thẳng ra,
+        không bọc lại - tránh mất error_code/status_code cụ thể (vd. no_food_detected -> inference_error).
+        Exception lạ (chưa được service nào đoán trước) mới bị bọc thành InferenceError với message
+        an toàn cho client, traceback gốc đã được service log ở nơi phát sinh và giữ qua `from exc`."""
         try:
             return func(*args, **kwargs)
+        except AppError:
+            raise
         except Exception as exc:
-            raise InferenceError(service_name, str(exc)) from exc
+            raise InferenceError(
+                service_name,
+                f"{service_name.capitalize()} step failed due to an internal processing error.",
+                {"step": service_name},
+            ) from exc
 
     def run_pipeline(
         self,
@@ -71,6 +82,16 @@ class NutritionPipeline:
         food_mask_combined = np.zeros((orig_h, orig_w), dtype=np.uint8)
         for mask in segments["global_masks"].values():
             food_mask_combined = np.maximum(food_mask_combined, mask)
+
+        if detections["plate_mask"].get("mask") is None:
+            # YOLO Plate không detect được đĩa/vật chứa nào (miss, confidence
+            # thấp, hoặc ảnh thực sự không có đĩa) -> không chặn pipeline, coi
+            # món ăn đặt trực tiếp trên mặt bàn: dùng toàn khung ảnh làm vùng
+            # tham chiếu mặt sàn. plate_type vẫn None nên inpaint_plate_depth
+            # tự rơi vào nhánh "flat plate" sẵn có; chỉ cần đảm bảo plate_mask
+            # không còn là None để get_clean_plate_samples/DepthScaleResolver
+            # không crash AttributeError khi gọi .astype()/.astype(bool).
+            detections["plate_mask"]["mask"] = np.ones((orig_h, orig_w), dtype=np.uint8)
 
         plate_type = detections["plate_mask"].get("class")
         if depth_bytes:

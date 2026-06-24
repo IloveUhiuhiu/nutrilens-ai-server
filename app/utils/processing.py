@@ -23,7 +23,10 @@ def load_template_data(template_dir: str, plate_type: str) -> tuple[np.ndarray |
         ref_mask = cv2.imread(os.path.join(target_dir, mask_file), cv2.IMREAD_GRAYSCALE)
         return ref_depth, ref_mask
     except Exception as exc:
-        logger.error(f"load_template_data exception: {exc}")
+        logger.error(
+            f"step=depth(template) failed: cannot load plate template for plate_type={plate_type} "
+            f"dir={target_dir} ({type(exc).__name__}: {exc}); falling back to flat plate depth"
+        )
         return None, None
 
 def get_clean_plate_samples(
