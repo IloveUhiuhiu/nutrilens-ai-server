@@ -135,7 +135,16 @@ class GeometryService(ServiceBase):
                     
                     # Volume (cm3)
                     vol = np.sum(h_i[mask_i] * area_map_i[mask_i])
-                    
+
+                    h_vals = h_i[mask_i]
+                    if h_vals.size > 0:
+                        self._log_info(
+                            f"step=geometry height profile: ingredient={instance_labels[i]} "
+                            f"min={h_vals.min():.2f} p10={np.percentile(h_vals,10):.2f} "
+                            f"p50={np.percentile(h_vals,50):.2f} p90={np.percentile(h_vals,90):.2f} "
+                            f"max={h_vals.max():.2f} pixels={h_vals.size}"
+                        )
+
                     name = instance_labels[i]
                     results_agg[name]["volume"] += vol
                     results_agg[name]["sum_height"] += np.sum(h_i[mask_i])

@@ -177,6 +177,24 @@ class DepthService(ServiceBase):
                 f"client_fallback={camera_h_ref} -> using={resolved_camera_h_ref}"
             )
 
+            valid_dm = np.isfinite(depth_map) & (depth_map > 0)
+            food_b = food_mask.astype(bool)
+            plate_b = plate_mask.astype(bool)
+            regions = {
+                "food": valid_dm & food_b,
+                "plate_clean": valid_dm & plate_b & ~food_b,
+                "table_remaining": valid_dm & ~plate_b & ~food_b,
+            }
+            for region_name, region_mask in regions.items():
+                vals = depth_map[region_mask]
+                if vals.size > 0:
+                    self._log_info(
+                        f"step=depth region {region_name}: min={vals.min():.2f}cm "
+                        f"max={vals.max():.2f}cm mean={vals.mean():.2f}cm pixels={vals.size}"
+                    )
+                else:
+                    self._log_info(f"step=depth region {region_name}: no valid pixels")
+
             # 2. Inpainting chuyên sâu (Affine + Z-Offset)
             # Sử dụng mặt sàn thực tế từ Template thay vì median đơn thuần
             plate_depth = inpaint_plate_depth(
