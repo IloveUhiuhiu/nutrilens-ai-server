@@ -31,38 +31,43 @@ async def lifespan(app: FastAPI):
     segmentation_service = SegmentationService()
     # 2. Nạp các Model Bundles kèm tham số conf (Ngưỡng tin cậy)
     # Tách biệt weights và conf cho từng model để tối ưu độ chính xác
+    yolo_food = detection_service.load_yolo_food(
+        settings.yolo_food_weights,
+        device,
+        conf=settings.yolo_food_conf
+    )
+    yolo_plate = detection_service.load_yolo_plate(
+        settings.yolo_plate_weights,
+        device,
+        conf=settings.yolo_plate_conf
+    )
+
+    # 2b. Warmup YOLO ngay sau khi load, trước khi Qwen3-VL/SAM3 chạm GPU.
+    # Mục đích: cô lập lỗi CUDNN_STATUS_NOT_INITIALIZED — nếu warmup chạy được
+    # ở đây nhưng lỗi xuất hiện sau khi load các model khác, nghĩa là model
+    # load sau đó (Qwen3-VL 4-bit/Xformers hoặc SAM3 LoRA) làm hỏng CUDA context.
+    detection_service.warmup(yolo_food, yolo_plate)
+
     models = ModelBundle(
-        yolo_food=detection_service.load_yolo_food(
-            settings.yolo_food_weights, 
-            device, 
-            conf=settings.yolo_food_conf
-        ),
-        yolo_plate=detection_service.load_yolo_plate(
-            settings.yolo_plate_weights, 
-            device, 
-            conf=settings.yolo_plate_conf
-        ),
+        yolo_food=yolo_food,
+        yolo_plate=yolo_plate,
         qwen3_vl=extraction_service.load_qwen3_vl(
-            settings.qwen3vl_weights, 
+            settings.qwen3vl_weights,
             device
         ),
         sam3=segmentation_service.load_sam3(
-            settings.sam3_config_path, 
-            settings.sam3_weights, 
-            device, 
+            settings.sam3_config_path,
+            settings.sam3_weights,
+            device,
             conf=settings.sam3_conf
         ),
         depth_anything=depth_service.load_depth_anything(
-            settings.depthanything_weights, 
-            device, 
+            settings.depthanything_weights,
+            device,
             encoder=settings.depth_encoder  # 'vits' hoặc 'vitb'
         ),
         device=device,
     )
-
-    # 3. Warmup các model YOLO tuần tự để cuDNN init xong trước khi pipeline
-    # chạy food/plate detection song song bằng thread cho request thật.
-    detection_service.warmup(models.yolo_food, models.yolo_plate)
 
     # 4. Lưu trữ trạng thái vào app.state để truy cập từ Router
     app.state.settings = settings
