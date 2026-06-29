@@ -106,6 +106,7 @@ class DepthService(ServiceBase):
         has_absolute_depth: bool = False,
         anchor_distance_cm: float | None = None,
         anchor_pixel: tuple[float, float] | None = None,
+        plate_detected: bool = True,
     ) -> dict:
         self._log_info("step=depth: enter estimate_depth")
         start = time.perf_counter()
@@ -147,6 +148,20 @@ class DepthService(ServiceBase):
                     anchor_pixel=anchor_pixel,
                 )
 
+            # 1c. Tách biệt không gian với bước anchor ở trên: anchor đọc 1
+            # patch nhỏ gần đúng điểm AR đo để tính scale; ở đây suy ra
+            # camera_h_ref thực tế từ median cả vùng mặt bàn quan sát được
+            # trên depth_map ĐÃ scale — ổn định hơn giá trị tĩnh client khai
+            # báo/mặc định, dùng cho việc tái tạo mặt đĩa bên dưới.
+            table_height = self._scale_resolver.derive_table_height(
+                depth_map, plate_mask, food_mask, plate_detected=plate_detected,
+            )
+            resolved_camera_h_ref = table_height if table_height is not None else camera_h_ref
+            self._log_info(
+                f"camera_h_ref: table_derived={table_height}, "
+                f"client_fallback={camera_h_ref} -> using={resolved_camera_h_ref}"
+            )
+
             # 2. Inpainting chuyên sâu (Affine + Z-Offset)
             # Sử dụng mặt sàn thực tế từ Template thay vì median đơn thuần
             plate_depth = inpaint_plate_depth(
@@ -154,7 +169,7 @@ class DepthService(ServiceBase):
                 plate_mask=plate_mask,
                 food_mask=food_mask,
                 plate_type=plate_type,
-                camera_h_ref=camera_h_ref,
+                camera_h_ref=resolved_camera_h_ref,
                 template_dir=templates_dir
             )
 
@@ -163,6 +178,7 @@ class DepthService(ServiceBase):
                 "plate_depth": plate_depth, # Độ sâu mặt sàn (đã khôi phục)
                 "scale": scale,
                 "scale_source": scale_source,
+                "camera_h_ref": resolved_camera_h_ref,
             }
 
         except AppError:
@@ -212,6 +228,7 @@ class DepthService(ServiceBase):
         plate_type: str | None,
         camera_h_ref: float,
         templates_dir: str,
+        plate_detected: bool = True,
     ) -> dict:
         """Chức năng: dùng depth map client và tính plate depth. Đầu vào: depth bytes + mask. Đầu ra: depth_data."""
         self._log_info("step=depth(client): enter prepare_client_depth")
@@ -232,18 +249,28 @@ class DepthService(ServiceBase):
                     {"step": "depth_client"},
                 )
 
+            table_height = self._scale_resolver.derive_table_height(
+                depth_map, plate_mask, food_mask, plate_detected=plate_detected,
+            )
+            resolved_camera_h_ref = table_height if table_height is not None else camera_h_ref
+            self._log_info(
+                f"camera_h_ref(client): table_derived={table_height}, "
+                f"client_fallback={camera_h_ref} -> using={resolved_camera_h_ref}"
+            )
+
             plate_depth = inpaint_plate_depth(
                 depth_map=depth_map,
                 plate_mask=plate_mask,
                 food_mask=food_mask,
                 plate_type=plate_type,
-                camera_h_ref=camera_h_ref,
+                camera_h_ref=resolved_camera_h_ref,
                 template_dir=templates_dir,
             )
             return {
                 "depth_map": depth_map,
                 "plate_depth": plate_depth,
                 "source": "client_depth_map",
+                "camera_h_ref": resolved_camera_h_ref,
             }
         except AppError:
             raise

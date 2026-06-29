@@ -84,7 +84,11 @@ class NutritionPipeline:
         for mask in segments["global_masks"].values():
             food_mask_combined = np.maximum(food_mask_combined, mask)
 
-        if detections["plate_mask"].get("mask") is None:
+        # Chốt cờ trước khi (có thể) ghi đè mask ở dưới — derive_table_height
+        # cần biết plate_mask có phản ánh đĩa thật hay chỉ là toàn khung giả
+        # lập, để không lấy giao với nó (sẽ rỗng) khi không có đĩa thật.
+        plate_detected = detections["plate_mask"].get("mask") is not None
+        if not plate_detected:
             # YOLO Plate không detect được đĩa/vật chứa nào (miss, confidence
             # thấp, hoặc ảnh thực sự không có đĩa) -> không chặn pipeline, coi
             # món ăn đặt trực tiếp trên mặt bàn: dùng toàn khung ảnh làm vùng
@@ -107,6 +111,7 @@ class NutritionPipeline:
                 plate_type=plate_type,
                 camera_h_ref=camera_height_ref,
                 templates_dir=templates_dir,
+                plate_detected=plate_detected,
             )
         else:
             # The AR raycast measures distance at one specific pixel — the
@@ -137,6 +142,7 @@ class NutritionPipeline:
                 has_absolute_depth=has_absolute_depth,
                 anchor_distance_cm=anchor_distance_cm,
                 anchor_pixel=resolved_anchor_pixel,
+                plate_detected=plate_detected,
             )
 
         geometry_data = self._call(

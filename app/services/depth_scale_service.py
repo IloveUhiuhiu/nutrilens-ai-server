@@ -14,6 +14,11 @@ MIN_PATCH_SAMPLES = 8
 # not enough valid depth around it) — whole clean-plate-region median.
 MIN_ANCHOR_SAMPLES = 50
 
+# Minimum table-region pixels to trust the table-derived camera_h_ref below
+# — same order as MIN_ANCHOR_SAMPLES, since this is also a median over a
+# (much larger) masked region.
+MIN_TABLE_SAMPLES = 50
+
 
 class DepthScaleResolver(ServiceBase):
     """Hybrid Depth Pipeline — scale resolution.
@@ -67,11 +72,13 @@ class DepthScaleResolver(ServiceBase):
         food_mask: np.ndarray,
         anchor_pixel: tuple[float, float] | None,
     ) -> tuple[float | None, str]:
-        """Lấy depth tham chiếu tại đúng pixel đã đo (ưu tiên), fallback sang
-        median cả vùng đĩa nếu pixel đó không dùng được."""
+        """Lấy depth tham chiếu tại đúng pixel đã đo (ưu tiên: bàn hoặc đĩa,
+        miễn không phải food), fallback sang median vùng đĩa nếu pixel đó
+        không dùng được."""
         valid = np.isfinite(depth_map) & (depth_map > 0)
         h, w = depth_map.shape[:2]
         plate_clean = plate_mask.astype(bool) & ~food_mask.astype(bool)
+        non_food = ~food_mask.astype(bool)
 
         if anchor_pixel is not None:
             col = int(round(anchor_pixel[0]))
@@ -82,25 +89,56 @@ class DepthScaleResolver(ServiceBase):
                 patch_valid = valid[r0:r1, c0:c1]
                 patch_depth = depth_map[r0:r1, c0:c1]
 
-                # Only ever read plate (non-food) pixels inside the patch —
-                # never widen to "any valid pixel in the patch", since that
-                # could be the food's own surface sitting right at the
-                # anchor point (e.g. the anchor landed near the food's edge).
-                # If the plate mask doesn't reach the patch, fall through to
-                # the whole-plate median below instead of silently anchoring
-                # against food depth.
-                patch_plate = plate_clean[r0:r1, c0:c1]
-                samples = patch_depth[patch_valid & patch_plate]
+                # Đọc bất kỳ pixel không-phải-food trong patch (bàn hoặc
+                # đĩa) — bàn là mặt tham chiếu hợp lệ tương đương đĩa, vì
+                # AR raycast luôn đo trên một mặt phẳng ngang đã được xác
+                # nhận (không phải food). Chỉ loại trừ food, vì bề mặt food
+                # nhô cao hơn mặt sàn nên không phản ánh đúng khoảng cách
+                # AR đã đo.
+                patch_non_food = non_food[r0:r1, c0:c1]
+                samples = patch_depth[patch_valid & patch_non_food]
                 if samples.size >= MIN_PATCH_SAMPLES:
                     return float(np.median(samples)), "anchor_pixel"
 
-        # Fallback: AR didn't give us (or we couldn't use) the exact pixel —
-        # whole clean-plate-region median is a coarser but still reasonable
-        # proxy, since the plate is assumed roughly planar.
+        # Fallback: AR không cho biết (hoặc không dùng được) đúng pixel đã đo
+        # — median cả vùng đĩa sạch là proxy thô hơn nhưng vẫn hợp lý, vì đĩa
+        # được coi là tương đối phẳng.
         samples = depth_map[plate_clean & valid]
         if samples.size < MIN_ANCHOR_SAMPLES:
             return None, "insufficient"
         return float(np.median(samples)), "plate_median_fallback"
+
+    def derive_table_height(
+        self,
+        depth_map: np.ndarray,
+        plate_mask: np.ndarray,
+        food_mask: np.ndarray,
+        plate_detected: bool = True,
+    ) -> float | None:
+        """Suy ra camera_h_ref thực tế từ vùng mặt bàn trên depth map ĐÃ
+        SCALE — tách biệt hoàn toàn về không gian với anchor pixel dùng để
+        tính scale: anchor đọc 1 patch nhỏ gần đúng điểm AR đo; ở đây đọc
+        median cả vùng bàn nền quan sát được.
+
+        plate_detected=False nghĩa là YOLO không tìm thấy đĩa — lúc đó
+        `plate_mask` đầu vào đã bị nutrition_pipeline.py ghi đè thành toàn
+        khung (ones) để phục vụ inpaint_plate_depth, KHÔNG phản ánh đĩa
+        thật. Theo đúng quy ước "không có đĩa thì coi món ăn đặt trực tiếp
+        trên mặt bàn" đã có sẵn ở đó, trường hợp này coi TOÀN BỘ phần
+        không-phải-thức-ăn là mặt bàn, không lấy giao với plate_mask (sẽ
+        rỗng nếu lấy giao).
+
+        Trả None nếu mặt bàn không đủ pixel hợp lệ (vd thức ăn/đĩa chiếm
+        toàn khung) — caller tự fallback về giá trị cũ."""
+        valid = np.isfinite(depth_map) & (depth_map > 0)
+        if plate_detected:
+            table_mask = ~plate_mask.astype(bool) & ~food_mask.astype(bool)
+        else:
+            table_mask = ~food_mask.astype(bool)
+        samples = depth_map[table_mask & valid]
+        if samples.size < MIN_TABLE_SAMPLES:
+            return None
+        return float(np.median(samples))
 
 
 __all__ = ["DepthScaleResolver"]

@@ -345,14 +345,7 @@ class DebugVisualizer:
             family="monospace"
         )
 
-        if gt_found:
-            ax9.set_title(
-                "Prediction vs Ground Truth"
-            )
-        else:
-            ax9.set_title(
-                "Prediction Summary"
-            )
+        ax9.set_title("Prediction Summary")
 
         # =========================================================
         # 10. HEIGHT HISTOGRAM
