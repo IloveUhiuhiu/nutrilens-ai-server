@@ -38,6 +38,19 @@ class CameraMetadataService:
             return False, None
         return True, distance
 
+    def derive_anchor_pixel(self, camera_metadata: dict) -> tuple[float, float] | None:
+        """Chức năng: lấy pixel thực tế nơi tia AR raycast đã đo (CASE A).
+        Đầu vào: metadata. Đầu ra: (x, y) theo pixel ảnh client gửi, hoặc None
+        nếu client chưa gửi (app cũ) - khi đó caller tự fallback về (cx, cy)."""
+        x = camera_metadata.get("anchor_pixel_x")
+        y = camera_metadata.get("anchor_pixel_y")
+        if x is None or y is None:
+            return None
+        try:
+            return float(x), float(y)
+        except (TypeError, ValueError):
+            return None
+
     def derive_camera_height_cm(self, camera_metadata: dict, fallback: float | None = None) -> float:
         """Chức năng: lấy chiều cao camera cm. Đầu vào: metadata. Đầu ra: số cm."""
         raw_value = (

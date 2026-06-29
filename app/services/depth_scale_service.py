@@ -23,13 +23,14 @@ class DepthScaleResolver(ServiceBase):
     so the metric depth — and therefore the estimated volume — reflects the real
     geometry instead of a fixed `max_depth` assumption.
 
-    The AR distance is measured at one specific point: the pixel the raycast
-    passes through (the camera's principal point / screen centre, where the
-    reticle sits). The anchor must read the depth model's prediction at that
-    *same* pixel — not an aggregate over the whole plate, which has no defined
-    spatial correspondence to where the distance was actually measured.
-    ``scale = distance / depth_map[anchor_pixel]`` (median of a small patch
-    around it, for robustness against single-pixel model noise).
+    The AR distance is measured at one specific point: wherever the native
+    anchor search found a pixel currently landing on the detected table/plate
+    plane (no longer always the principal point — see ArKitPlatformView.swift
+    / ArPlatformView.kt). The anchor must read the depth model's prediction at
+    that *same* pixel — not an aggregate over the whole plate, which has no
+    defined spatial correspondence to where the distance was actually
+    measured. ``scale = distance / depth_map[anchor_pixel]`` (median of a
+    small patch around it, for robustness against single-pixel model noise).
     """
 
     service_name = "depth_scale"
@@ -43,7 +44,7 @@ class DepthScaleResolver(ServiceBase):
         anchor_pixel: tuple[float, float] | None = None,
     ) -> tuple[np.ndarray, float, str]:
         """Đầu vào: depth (cm), mask đĩa/thức ăn, khoảng cách tuyệt đối (cm),
-        pixel (x, y) mà tia raycast AR đã đo (principal point / tâm khung).
+        pixel (x, y) mà tia raycast AR đã đo (không còn cố định là tâm khung).
         Đầu ra: (depth đã anchor, scale, nguồn scale)."""
         if not anchor_distance_cm or anchor_distance_cm <= 0:
             return depth_map, 1.0, "da2_metric"
@@ -81,14 +82,15 @@ class DepthScaleResolver(ServiceBase):
                 patch_valid = valid[r0:r1, c0:c1]
                 patch_depth = depth_map[r0:r1, c0:c1]
 
-                # Prefer plate (non-food) pixels inside the patch; if the
-                # plate mask doesn't reach the exact measured point, accept
-                # any valid depth right there rather than silently widening
-                # the spatial correspondence.
+                # Only ever read plate (non-food) pixels inside the patch —
+                # never widen to "any valid pixel in the patch", since that
+                # could be the food's own surface sitting right at the
+                # anchor point (e.g. the anchor landed near the food's edge).
+                # If the plate mask doesn't reach the patch, fall through to
+                # the whole-plate median below instead of silently anchoring
+                # against food depth.
                 patch_plate = plate_clean[r0:r1, c0:c1]
                 samples = patch_depth[patch_valid & patch_plate]
-                if samples.size < MIN_PATCH_SAMPLES:
-                    samples = patch_depth[patch_valid]
                 if samples.size >= MIN_PATCH_SAMPLES:
                     return float(np.median(samples)), "anchor_pixel"
 

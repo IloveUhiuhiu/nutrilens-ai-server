@@ -95,6 +95,9 @@ async def analyze_nutrition(
         has_absolute_depth, anchor_distance_cm = camera_metadata_service.derive_absolute_distance(
             analyze_input.camera_metadata,
         )
+        anchor_pixel = camera_metadata_service.derive_anchor_pixel(
+            analyze_input.camera_metadata,
+        )
 
         models = request.app.state.models
         device = request.app.state.device
@@ -113,6 +116,7 @@ async def analyze_nutrition(
                 depth_metadata=analyze_input.depth_metadata,
                 has_absolute_depth=has_absolute_depth,
                 anchor_distance_cm=anchor_distance_cm,
+                anchor_pixel=anchor_pixel,
             )
             if getattr(request.app.state.settings, "debug_visuals", False):
                 # Debug visuals chỉ phục vụ mục đích kỹ thuật, không thuộc response trả

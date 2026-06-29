@@ -53,6 +53,7 @@ class NutritionPipeline:
         depth_metadata: dict | None = None,
         has_absolute_depth: bool = False,
         anchor_distance_cm: float | None = None,
+        anchor_pixel: tuple[float, float] | None = None,
     ) -> dict:
         image_rgb = decode_image_bytes(image_bytes)
         detections = self._call(
@@ -108,16 +109,17 @@ class NutritionPipeline:
                 templates_dir=templates_dir,
             )
         else:
-            # The AR raycast measures distance at one specific pixel: the
-            # camera's principal point (cx, cy) — the screen centre where the
-            # reticle sits. That's the only pixel where anchor_distance_cm is
-            # actually valid; fall back to the image centre if intrinsics
-            # didn't carry a principal point.
-            anchor_pixel = None
-            if has_absolute_depth:
+            # The AR raycast measures distance at one specific pixel — the
+            # point the native anchor search actually landed on (no longer
+            # always the image centre, see ArKitPlatformView.swift /
+            # ArPlatformView.kt). The client now sends that pixel explicitly;
+            # only fall back to the principal point (cx, cy) for older app
+            # builds that didn't carry it through.
+            resolved_anchor_pixel = anchor_pixel
+            if has_absolute_depth and resolved_anchor_pixel is None:
                 cx = camera_intrinsics.get("cx")
                 cy = camera_intrinsics.get("cy")
-                anchor_pixel = (
+                resolved_anchor_pixel = (
                     cx if cx is not None else orig_w / 2.0,
                     cy if cy is not None else orig_h / 2.0,
                 )
@@ -134,7 +136,7 @@ class NutritionPipeline:
                 templates_dir=templates_dir,
                 has_absolute_depth=has_absolute_depth,
                 anchor_distance_cm=anchor_distance_cm,
-                anchor_pixel=anchor_pixel,
+                anchor_pixel=resolved_anchor_pixel,
             )
 
         geometry_data = self._call(
