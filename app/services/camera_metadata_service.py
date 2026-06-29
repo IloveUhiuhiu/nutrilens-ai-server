@@ -51,6 +51,33 @@ class CameraMetadataService:
         except (TypeError, ValueError):
             return None
 
+    def derive_anchor_candidates(self, camera_metadata: dict) -> list[tuple[float, float, float]]:
+        """Chức năng: lấy danh sách candidate anchor (CASE A, multi-candidate).
+        Đầu vào: metadata client gửi field `anchor_candidates` - mảng các điểm
+        ring-search native đã đo được trong frame đó (không chỉ điểm "sticky"
+        duy nhất), xếp theo thứ tự ưu tiên do native quyết định (hiện tại:
+        ngoài vào trong, tâm màn hình cuối cùng) - vì native không biết pixel
+        nào sẽ rơi vào food (việc đó chỉ xác định được ở server sau khi
+        segment), nên anchor "tốt nhất" chỉ có thể chọn ở đây, sau khi đã có
+        food_mask. Đầu ra: list (pixel_x, pixel_y, distance_cm), rỗng nếu
+        client cũ chưa gửi field này hoặc dữ liệu không hợp lệ."""
+        raw = camera_metadata.get("anchor_candidates")
+        if not isinstance(raw, list):
+            return []
+        candidates: list[tuple[float, float, float]] = []
+        for item in raw:
+            if not isinstance(item, dict):
+                continue
+            try:
+                x = float(item.get("pixel_x"))
+                y = float(item.get("pixel_y"))
+                distance = float(item.get("distance_cm"))
+            except (TypeError, ValueError):
+                continue
+            if distance > 0:
+                candidates.append((x, y, distance))
+        return candidates
+
     def derive_camera_height_cm(self, camera_metadata: dict, fallback: float | None = None) -> float:
         """Chức năng: lấy chiều cao camera cm. Đầu vào: metadata. Đầu ra: số cm."""
         raw_value = (

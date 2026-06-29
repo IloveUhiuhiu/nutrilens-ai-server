@@ -106,6 +106,7 @@ class DepthService(ServiceBase):
         has_absolute_depth: bool = False,
         anchor_distance_cm: float | None = None,
         anchor_pixel: tuple[float, float] | None = None,
+        anchor_candidates: list[tuple[float, float, float]] | None = None,
         plate_detected: bool = True,
     ) -> dict:
         self._log_info("step=depth: enter estimate_depth")
@@ -145,7 +146,8 @@ class DepthService(ServiceBase):
             # pixel, not from an unrelated whole-plate aggregate.
             self._log_info(
                 f"step=depth: has_absolute_depth={has_absolute_depth} "
-                f"anchor_distance_cm={anchor_distance_cm} anchor_pixel={anchor_pixel}"
+                f"anchor_distance_cm={anchor_distance_cm} anchor_pixel={anchor_pixel} "
+                f"anchor_candidates={len(anchor_candidates) if anchor_candidates else 0}"
             )
             scale = 1.0
             scale_source = "da2_metric"
@@ -156,6 +158,7 @@ class DepthService(ServiceBase):
                     food_mask=food_mask,
                     anchor_distance_cm=anchor_distance_cm,
                     anchor_pixel=anchor_pixel,
+                    anchor_candidates=anchor_candidates,
                 )
                 finite_scaled = depth_map[np.isfinite(depth_map)]
                 self._log_info(

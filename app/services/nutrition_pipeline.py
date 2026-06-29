@@ -54,6 +54,7 @@ class NutritionPipeline:
         has_absolute_depth: bool = False,
         anchor_distance_cm: float | None = None,
         anchor_pixel: tuple[float, float] | None = None,
+        anchor_candidates: list[tuple[float, float, float]] | None = None,
     ) -> dict:
         image_rgb = decode_image_bytes(image_bytes)
         detections = self._call(
@@ -114,14 +115,18 @@ class NutritionPipeline:
                 plate_detected=plate_detected,
             )
         else:
-            # The AR raycast measures distance at one specific pixel — the
-            # point the native anchor search actually landed on (no longer
-            # always the image centre, see ArKitPlatformView.swift /
-            # ArPlatformView.kt). The client now sends that pixel explicitly;
-            # only fall back to the principal point (cx, cy) for older app
-            # builds that didn't carry it through.
+            # The AR raycast measures distance at one or more candidate
+            # pixels — wherever the native ring-search landed on the
+            # detected table/plate plane that frame (see
+            # ArKitPlatformView.swift / ArPlatformView.kt). Native can't know
+            # on-device which pixel will end up overlapping food once
+            # segmentation runs here, so it reports every candidate it found;
+            # picking the best one is deferred to depth_scale_service, after
+            # food_mask is known. Only fall back to a single pixel (and, for
+            # very old builds without even that, the principal point) when
+            # the client didn't send the candidate list at all.
             resolved_anchor_pixel = anchor_pixel
-            if has_absolute_depth and resolved_anchor_pixel is None:
+            if has_absolute_depth and not anchor_candidates and resolved_anchor_pixel is None:
                 cx = camera_intrinsics.get("cx")
                 cy = camera_intrinsics.get("cy")
                 resolved_anchor_pixel = (
@@ -142,6 +147,7 @@ class NutritionPipeline:
                 has_absolute_depth=has_absolute_depth,
                 anchor_distance_cm=anchor_distance_cm,
                 anchor_pixel=resolved_anchor_pixel,
+                anchor_candidates=anchor_candidates,
                 plate_detected=plate_detected,
             )
 

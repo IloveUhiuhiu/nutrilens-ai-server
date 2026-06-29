@@ -28,13 +28,16 @@ class DepthScaleResolver(ServiceBase):
     so the metric depth — and therefore the estimated volume — reflects the real
     geometry instead of a fixed `max_depth` assumption.
 
-    The AR distance is measured at one specific point: wherever the native
-    anchor search found a pixel currently landing on the detected table/plate
-    plane (no longer always the principal point — see ArKitPlatformView.swift
-    / ArPlatformView.kt). The anchor must read the depth model's prediction at
-    that *same* pixel — not an aggregate over the whole plate, which has no
-    defined spatial correspondence to where the distance was actually
-    measured. ``scale = distance / depth_map[anchor_pixel]`` (median of a
+    The AR distance can be measured at several candidate points per frame —
+    native ring-searches outward for screen pixels currently landing on the
+    detected table/plate plane (see ArKitPlatformView.swift /
+    ArPlatformView.kt) and reports all of them, since it has no way to know
+    on-device which pixel will turn out to overlap food once segmentation
+    runs server-side. This resolver tries each candidate in priority order
+    and uses the first whose patch doesn't land on food — not an aggregate
+    over the whole plate, which has no defined spatial correspondence to
+    where any single distance was actually measured.
+    ``scale = distance / depth_map[chosen_candidate_pixel]`` (median of a
     small patch around it, for robustness against single-pixel model noise).
     """
 
@@ -47,73 +50,103 @@ class DepthScaleResolver(ServiceBase):
         food_mask: np.ndarray,
         anchor_distance_cm: float | None,
         anchor_pixel: tuple[float, float] | None = None,
+        anchor_candidates: list[tuple[float, float, float]] | None = None,
     ) -> tuple[np.ndarray, float, str]:
-        """Đầu vào: depth (cm), mask đĩa/thức ăn, khoảng cách tuyệt đối (cm),
-        pixel (x, y) mà tia raycast AR đã đo (không còn cố định là tâm khung).
+        """Đầu vào: depth (cm), mask đĩa/thức ăn, khoảng cách tuyệt đối (cm)
+        (đường cũ, 1 điểm duy nhất - giữ để tương thích app cũ), hoặc
+        `anchor_candidates` (đường mới): danh sách (pixel_x, pixel_y,
+        distance_cm) mà native đã raycast được trong frame đó, xếp theo thứ
+        tự ưu tiên của native (ngoài vào trong) - native không biết pixel nào
+        sẽ là food (segment chỉ chạy ở server, sau khi đã chụp), nên không
+        thể tự chọn "điểm tốt nhất" lúc capture; việc chọn được dồn về đây,
+        sau khi đã có food_mask thật.
         Đầu ra: (depth đã anchor, scale, nguồn scale)."""
-        if not anchor_distance_cm or anchor_distance_cm <= 0:
+        candidates = self._normalize_candidates(anchor_distance_cm, anchor_pixel, anchor_candidates)
+        if not candidates:
             return depth_map, 1.0, "da2_metric"
 
-        reference, source = self._reference_depth(depth_map, plate_mask, food_mask, anchor_pixel)
+        reference, distance_cm, source = self._reference_depth(depth_map, plate_mask, food_mask, candidates)
         if reference is None or reference <= 0:
             self._log_info("anchor: no usable reference depth, keeping DA2 metric")
             return depth_map, 1.0, "da2_metric"
 
-        scale = float(anchor_distance_cm) / reference
+        scale = float(distance_cm) / reference
         self._log_info(
-            f"anchor[{source}]: scale={scale:.4f} (ref={reference:.2f}cm -> {anchor_distance_cm:.2f}cm)"
+            f"anchor[{source}]: scale={scale:.4f} (ref={reference:.2f}cm -> {distance_cm:.2f}cm)"
         )
         return depth_map * scale, scale, "ar_absolute"
+
+    def _normalize_candidates(
+        self,
+        anchor_distance_cm: float | None,
+        anchor_pixel: tuple[float, float] | None,
+        anchor_candidates: list[tuple[float, float, float]] | None,
+    ) -> list[tuple[float | None, float | None, float]]:
+        """Quy về 1 danh sách candidate duy nhất, ưu tiên `anchor_candidates`
+        (đường mới, nhiều điểm) nếu có; nếu không có thì dùng đường cũ (1
+        điểm, hoặc chỉ có distance không pixel - app rất cũ)."""
+        if anchor_candidates:
+            return [(x, y, d) for (x, y, d) in anchor_candidates if d and d > 0]
+        if anchor_distance_cm and anchor_distance_cm > 0:
+            px, py = anchor_pixel if anchor_pixel is not None else (None, None)
+            return [(px, py, float(anchor_distance_cm))]
+        return []
 
     def _reference_depth(
         self,
         depth_map: np.ndarray,
         plate_mask: np.ndarray,
         food_mask: np.ndarray,
-        anchor_pixel: tuple[float, float] | None,
-    ) -> tuple[float | None, str]:
-        """Lấy depth tham chiếu tại đúng pixel đã đo (ưu tiên: bàn hoặc đĩa,
-        miễn không phải food), fallback sang median vùng đĩa nếu pixel đó
-        không dùng được."""
+        candidates: list[tuple[float | None, float | None, float]],
+    ) -> tuple[float | None, float | None, str]:
+        """Thử lần lượt từng candidate theo đúng thứ tự được gửi lên, trả về
+        candidate ĐẦU TIÊN đọc được patch hợp lệ (không rơi vào food).
+        Nếu không candidate nào dùng được, fallback sang median vùng đĩa
+        sạch, dùng distance_cm của candidate đầu tiên (gần nguồn nhất theo
+        thứ tự ưu tiên của native)."""
         valid = np.isfinite(depth_map) & (depth_map > 0)
         h, w = depth_map.shape[:2]
         plate_clean = plate_mask.astype(bool) & ~food_mask.astype(bool)
         non_food = ~food_mask.astype(bool)
 
-        if anchor_pixel is not None:
-            col = int(round(anchor_pixel[0]))
-            row = int(round(anchor_pixel[1]))
-            if 0 <= col < w and 0 <= row < h:
-                r0, r1 = max(0, row - ANCHOR_PATCH_RADIUS), min(h, row + ANCHOR_PATCH_RADIUS + 1)
-                c0, c1 = max(0, col - ANCHOR_PATCH_RADIUS), min(w, col + ANCHOR_PATCH_RADIUS + 1)
-                patch_valid = valid[r0:r1, c0:c1]
-                patch_depth = depth_map[r0:r1, c0:c1]
+        for idx, (px, py, distance_cm) in enumerate(candidates):
+            if px is None or py is None:
+                continue
+            col = int(round(px))
+            row = int(round(py))
+            if not (0 <= col < w and 0 <= row < h):
+                self._log_info(f"anchor candidate[{idx}] out of bounds: pixel=({col},{row}) image=({w}x{h})")
+                continue
 
-                # Đọc bất kỳ pixel không-phải-food trong patch (bàn hoặc
-                # đĩa) — bàn là mặt tham chiếu hợp lệ tương đương đĩa, vì
-                # AR raycast luôn đo trên một mặt phẳng ngang đã được xác
-                # nhận (không phải food). Chỉ loại trừ food, vì bề mặt food
-                # nhô cao hơn mặt sàn nên không phản ánh đúng khoảng cách
-                # AR đã đo.
-                patch_non_food = non_food[r0:r1, c0:c1]
-                samples = patch_depth[patch_valid & patch_non_food]
-                if samples.size >= MIN_PATCH_SAMPLES:
-                    return float(np.median(samples)), "anchor_pixel"
-                self._log_info(
-                    f"anchor patch miss: pixel=({col},{row}) image=({w}x{h}) "
-                    f"patch_valid={int(patch_valid.sum())} patch_non_food={int(patch_non_food.sum())} "
-                    f"samples={samples.size} (need {MIN_PATCH_SAMPLES})"
-                )
-            else:
-                self._log_info(f"anchor pixel out of bounds: pixel=({col},{row}) image=({w}x{h})")
+            r0, r1 = max(0, row - ANCHOR_PATCH_RADIUS), min(h, row + ANCHOR_PATCH_RADIUS + 1)
+            c0, c1 = max(0, col - ANCHOR_PATCH_RADIUS), min(w, col + ANCHOR_PATCH_RADIUS + 1)
+            patch_valid = valid[r0:r1, c0:c1]
+            patch_depth = depth_map[r0:r1, c0:c1]
 
-        # Fallback: AR không cho biết (hoặc không dùng được) đúng pixel đã đo
-        # — median cả vùng đĩa sạch là proxy thô hơn nhưng vẫn hợp lý, vì đĩa
-        # được coi là tương đối phẳng.
+            # Đọc bất kỳ pixel không-phải-food trong patch (bàn hoặc đĩa) —
+            # bàn là mặt tham chiếu hợp lệ tương đương đĩa, vì AR raycast
+            # luôn đo trên một mặt phẳng ngang đã được xác nhận (không phải
+            # food). Chỉ loại trừ food, vì bề mặt food nhô cao hơn mặt sàn
+            # nên không phản ánh đúng khoảng cách AR đã đo tại candidate này.
+            patch_non_food = non_food[r0:r1, c0:c1]
+            samples = patch_depth[patch_valid & patch_non_food]
+            if samples.size >= MIN_PATCH_SAMPLES:
+                return float(np.median(samples)), distance_cm, f"anchor_candidate[{idx}]"
+            self._log_info(
+                f"anchor candidate[{idx}] miss: pixel=({col},{row}) image=({w}x{h}) "
+                f"patch_valid={int(patch_valid.sum())} patch_non_food={int(patch_non_food.sum())} "
+                f"samples={samples.size} (need {MIN_PATCH_SAMPLES})"
+            )
+
+        # Fallback: không candidate nào rơi vào vùng không-phải-food — median
+        # cả vùng đĩa sạch là proxy thô hơn nhưng vẫn hợp lý, vì đĩa được coi
+        # là tương đối phẳng. Dùng distance_cm của candidate đầu tiên (ưu
+        # tiên cao nhất theo thứ tự native gửi lên).
         samples = depth_map[plate_clean & valid]
-        if samples.size < MIN_ANCHOR_SAMPLES:
-            return None, "insufficient"
-        return float(np.median(samples)), "plate_median_fallback"
+        fallback_distance = candidates[0][2] if candidates else None
+        if samples.size < MIN_ANCHOR_SAMPLES or fallback_distance is None:
+            return None, None, "insufficient"
+        return float(np.median(samples)), fallback_distance, "plate_median_fallback"
 
     def derive_table_height(
         self,
