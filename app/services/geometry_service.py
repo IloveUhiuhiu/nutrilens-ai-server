@@ -156,7 +156,13 @@ class GeometryService(ServiceBase):
                     "volume_cm3": round(float(data["volume"]), 2),
                     "avg_height_cm": round(float(avg_h), 2)
                 })
-                
+
+            for r in final_results:
+                self._log_info(
+                    f"step=geometry result: ingredient={r['ingredient']} "
+                    f"volume_cm3={r['volume_cm3']} avg_height_cm={r['avg_height_cm']}"
+                )
+
             return {
                 "geometry": final_results,
                 "topological_order": sorted_idx,

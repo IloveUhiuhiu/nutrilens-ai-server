@@ -137,6 +137,10 @@ class DepthService(ServiceBase):
             # is the exact image pixel the AR raycast measured (camera
             # principal point) — the depth value must be read at that same
             # pixel, not from an unrelated whole-plate aggregate.
+            self._log_info(
+                f"step=depth: has_absolute_depth={has_absolute_depth} "
+                f"anchor_distance_cm={anchor_distance_cm} anchor_pixel={anchor_pixel}"
+            )
             scale = 1.0
             scale_source = "da2_metric"
             if has_absolute_depth:
