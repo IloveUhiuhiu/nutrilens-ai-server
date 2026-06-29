@@ -1,7 +1,17 @@
 from __future__ import annotations
 
 import logging
+import os
 import time
+
+# Unsloth's torch.compile path monkeypatches torch.nn.Conv2d.forward (and other
+# norm/conv modules) globally for the whole process to speed up Qwen3-VL's vision
+# tower. That breaks every other Conv2d-based model loaded in this same process
+# (YOLO, SAM3, DepthAnythingV2) with "CUDNN_STATUS_NOT_INITIALIZED" once it kicks
+# in. Disable it before unsloth is imported; Qwen3-VL still runs correctly, just
+# without that specific speedup.
+os.environ.setdefault("UNSLOTH_COMPILE_DISABLE", "1")
+
 import torch
 import gc
 import numpy as np

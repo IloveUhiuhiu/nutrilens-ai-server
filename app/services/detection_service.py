@@ -42,6 +42,14 @@ class DetectionService(ServiceBase):
             ) from exc
         return {"model": model, "device": device, "conf": conf, "task": "plate"}
 
+    def warmup(self, yolo_food_bundle: dict, yolo_plate_bundle: dict) -> None:
+        """Chạy inference 1 lần tuần tự cho mỗi model để cuDNN init trước khi
+        có request thật chạy song song bằng thread (tránh race CUDNN_STATUS_NOT_INITIALIZED)."""
+        self._log_info("warming up YOLO models")
+        dummy = np.zeros((640, 640, 3), dtype=np.uint8)
+        self._run_yolo(yolo_food_bundle, dummy)
+        self._run_yolo(yolo_plate_bundle, dummy)
+
     def _run_yolo(self, model_dict: dict, image: np.ndarray) -> Any:
         self._log_info("run yolo")
         """Thực hiện inference trên thiết bị %s."""

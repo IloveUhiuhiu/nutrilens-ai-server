@@ -60,6 +60,10 @@ async def lifespan(app: FastAPI):
         device=device,
     )
 
+    # 3. Warmup các model YOLO tuần tự để cuDNN init xong trước khi pipeline
+    # chạy food/plate detection song song bằng thread cho request thật.
+    detection_service.warmup(models.yolo_food, models.yolo_plate)
+
     # 4. Lưu trữ trạng thái vào app.state để truy cập từ Router
     app.state.settings = settings
     app.state.device = device
