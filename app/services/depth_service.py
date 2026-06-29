@@ -131,6 +131,12 @@ class DepthService(ServiceBase):
                     "depth", "Depth estimation produced no valid depth values for this image.", {"step": "depth"}
                 )
 
+            finite_raw = depth_map[np.isfinite(depth_map)]
+            self._log_info(
+                f"step=depth: raw depth_map (pre-scale) min={finite_raw.min():.2f}cm "
+                f"max={finite_raw.max():.2f}cm mean={finite_raw.mean():.2f}cm"
+            )
+
             # 1b. CASE A — anchor depth scale to the measured camera-to-object
             # distance so the metric depth (and volume) is absolute instead of
             # relying on the model's fixed max_depth assumption. anchor_pixel
@@ -150,6 +156,11 @@ class DepthService(ServiceBase):
                     food_mask=food_mask,
                     anchor_distance_cm=anchor_distance_cm,
                     anchor_pixel=anchor_pixel,
+                )
+                finite_scaled = depth_map[np.isfinite(depth_map)]
+                self._log_info(
+                    f"step=depth: depth_map (post-scale) min={finite_scaled.min():.2f}cm "
+                    f"max={finite_scaled.max():.2f}cm mean={finite_scaled.mean():.2f}cm scale={scale:.4f}"
                 )
 
             # 1c. Tách biệt không gian với bước anchor ở trên: anchor đọc 1

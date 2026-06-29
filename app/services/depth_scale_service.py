@@ -99,6 +99,13 @@ class DepthScaleResolver(ServiceBase):
                 samples = patch_depth[patch_valid & patch_non_food]
                 if samples.size >= MIN_PATCH_SAMPLES:
                     return float(np.median(samples)), "anchor_pixel"
+                self._log_info(
+                    f"anchor patch miss: pixel=({col},{row}) image=({w}x{h}) "
+                    f"patch_valid={int(patch_valid.sum())} patch_non_food={int(patch_non_food.sum())} "
+                    f"samples={samples.size} (need {MIN_PATCH_SAMPLES})"
+                )
+            else:
+                self._log_info(f"anchor pixel out of bounds: pixel=({col},{row}) image=({w}x{h})")
 
         # Fallback: AR không cho biết (hoặc không dùng được) đúng pixel đã đo
         # — median cả vùng đĩa sạch là proxy thô hơn nhưng vẫn hợp lý, vì đĩa
