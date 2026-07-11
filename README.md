@@ -1,76 +1,139 @@
-# nutrilens-ai-server
+<p align="center">
+  <img src="docs/assets/logo_app.png" alt="NutriLens logo" width="140" />
+</p>
 
-# Deep Learning-based Ingredient-level Calorie Estimation using Foundation Vision Models
+<h1 align="center">NutriLens AI Server</h1>
 
-## Abstract
-This project presents the AI-side image analysis pipeline for ingredient geometry estimation from a single food image. The system integrates object detection, vision-language reasoning, instance segmentation, monocular depth estimation, and geometric volume computation. The NutriLens backend performs ingredient matching and nutritional quantification.
+<p align="center">
+  AI inference service for the graduation project <strong>"Building a 2D Food Image-Based Calorie Estimation System"</strong>
+</p>
 
-## Methodology
-The analysis is performed through six tightly coupled stages:
+<p align="center">
+  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white" />
+  <img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-Inference-EE4C2C?logo=pytorch&logoColor=white" />
+  <img alt="Computer Vision" src="https://img.shields.io/badge/Computer%20Vision-2D%20Food%20Analysis-blue" />
+  <img alt="Status" src="https://img.shields.io/badge/Status-Graduation%20Project-success" />
+</p>
 
-1. **Stage 1 — Object Detection:** YOLO is used to localize food regions and reduce background noise, constraining downstream computation.  
-2. **Stage 2 — Semantic Reasoning:** Qwen3-VL infers ingredient semantics from visual features to generate a list of candidate ingredients.  
-3. **Stage 3 — Instance Segmentation:** SAM3 produces pixel-level masks for each inferred ingredient within detected food regions.  
-4. **Stage 4 — Monocular Depth Estimation:** Depth Anything V2 reconstructs a depth map from a single 2D image to recover 3D structure.  
-5. **Stage 5 — Volume Estimation:** Geometric integration combines segmentation masks and depth to estimate ingredient volumes.  
+## Pipeline Overview
 
-## Author
-- **Đặng Phúc Long** — Class 22T_DT4 — Faculty Information Technology — Email: dangphuclong2019@gmail.com — Phone: 0366646801  
-- **Nguyễn Đức Nhã** — Class 22T_KHDL  
-- **Trương Bùi Diễn** — Class 24T_KHDL  
+<p align="center">
+  <img src="docs/assets/pipeline.png" alt="NutriLens AI pipeline" width="92%" />
+</p>
 
-## Configuration
-Environment variables are stored in `.env`. Set `DEVICE=auto` to use CUDA if available.
+## AI Output Demo
 
-The AI server returns ingredient geometry and mask paths. The NutriLens backend owns ingredient matching and nutrition calculation from `IngredientPhysicalData`.
+<p align="center">
+  <img src="docs/assets/demo_ai.png" alt="AI analysis output 1" width="45%" />
+  <img src="docs/assets/demo_ai_1.png" alt="AI analysis output 2" width="45%" />
+</p>
 
-## Running the API
+## Overview
+
+NutriLens AI Server is the image analysis service in the NutriLens system. It receives a 2D food image and camera metadata from the backend, runs a deep learning-based computer vision pipeline, and returns ingredient components, segmentation masks, and estimated volumes. The backend then performs nutrition-data matching, weight estimation, calorie calculation, and meal persistence.
+
+The scientific focus of this project is to recover missing spatial information from a single-view 2D food image. NutriLens combines multiple modern foundation vision models instead of relying on fixed reference objects or specialized hardware such as LiDAR/depth cameras. On the Nutrition5K benchmark, the integrated system achieved **69.23 kCal MAE** and **27.36% MAPE**.
+
+## AI Pipeline
+
+1. **Food & Plate Detection**: YOLO detects food regions and containers to reduce background noise.
+2. **Ingredient Reasoning**: Qwen3-VL infers likely food ingredients from visual context.
+3. **Instance Segmentation**: SAM3 LoRA produces pixel-level masks for each ingredient.
+4. **Monocular Depth Estimation**: Depth Anything V2 estimates depth from a single 2D image.
+5. **Depth Scaling & Geometry**: camera metadata, anchor distance, or client-provided depth maps are used to normalize spatial scale.
+6. **Volume Estimation**: geometric integration over segmented masks estimates ingredient-level volume.
+7. **Response Building**: masks are uploaded to Cloudinary or stored locally, then normalized results are returned to the backend.
+
+## Tech Stack
+
+- Python, FastAPI, Pydantic Settings
+- PyTorch, CUDA
+- Ultralytics YOLO
+- Qwen3-VL
+- SAM3 LoRA
+- Depth Anything V2
+- OpenCV, NumPy, scikit-image, SciPy
+- Cloudinary
+- Pytest
+
+## Project Structure
+
+```text
+app/
+  api/v1/       Analysis endpoint
+  core/         Configuration, logging, constants
+  exceptions/   Business and inference exceptions
+  schemas/      Request/response schemas
+  services/     Detection, extraction, segmentation, depth, geometry, storage
+  utils/        Image-processing, math, and visualization utilities
+models/         Foundation-model and LoRA source/reference files
+tests/          Unit and smoke tests
+weights/        Model weights; large files should not be committed directly
+docs/assets/    Logo, pipeline, and AI demo assets used by this README
+```
+
+## Local Setup
+
+A CUDA-enabled NVIDIA GPU is recommended for practical inference.
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate
+pip install --upgrade pip
 pip install -r requirements.txt
-uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-## Tests
+Create a `.env` file if you need to override the default settings:
+
+```env
+DEVICE=auto
+LOG_LEVEL=INFO
+
+YOLO_FOOD_WEIGHTS=weights/yolo/food_yolo.pt
+YOLO_FOOD_CONF=0.8
+YOLO_PLATE_WEIGHTS=weights/yolo/plate_yolo_seg.pt
+YOLO_PLATE_CONF=0.8
+
+QWEN3VL_WEIGHTS=weights/qwen3vl
+SAM3_CONFIG_PATH=weights/sam3/food_config.yaml
+SAM3_WEIGHTS=weights/sam3/sam3_lora.pt
+SAM3_CONF=0.7
+
+DEPTH_ENCODER=vits
+DEPTHANYTHING_WEIGHTS=weights/da2/depth_anything_v2_vits
+
+MODEL_VERSION=seg-nutrition-v1
+MASK_LOCAL_DIR=logs/masks
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+CLOUDINARY_MASK_FOLDER=nutrilens/inference/jobs
+```
+
+## Running the API
+
 ```bash
-pytest
+uvicorn app.main:app --host 0.0.0.0 --port 8001
 ```
 
-## API
+Swagger UI:
+
+```text
+http://localhost:8001/docs
+```
+
+## Main Endpoint
+
 `POST /v1/analyze`
 
-Form data:
-- `image`: image upload
-- `depth_map`: optional depth map upload (`.npy`, `.png`, `.exr`, ...)
-- `job_id`: backend inference job id
-- `camera_metadata`: JSON string with camera height, intrinsics/pixel area, and optional `depth` metadata
+The request uses `multipart/form-data`:
 
-If `depth_map` is present, the server uses client depth. Otherwise it keeps the original Depth Anything V2 flow.
+- `image`: food image.
+- `job_id`: backend-generated inference job ID.
+- `camera_metadata`: JSON string containing camera metadata, intrinsics, height/anchor distance, and optional depth metadata.
+- `depth_map`: optional client-provided depth map.
 
-Example `camera_metadata`:
-
-```json
-{
-  "device_model": "iPhone 15",
-  "camera_type": "wide",
-  "camera_height_mm": 400,
-  "intrinsics": {
-    "fx": 2850.2,
-    "fy": 2851.7,
-    "cx": 2016.0,
-    "cy": 1512.0
-  },
-  "depth": {
-    "depth_unit": "meter",
-    "source": "client_depth_model",
-    "width_px": 4032,
-    "height_px": 3024
-  }
-}
-```
-
-Returns raw component geometry. The backend recalculates ingredient matches, weights, and nutrition after receiving the response:
+Example response:
 
 ```json
 {
@@ -79,7 +142,7 @@ Returns raw component geometry. The backend recalculates ingredient matches, wei
   "components": [
     {
       "component_id": "comp_001",
-      "component_name": "Cơm trắng",
+      "component_name": "White rice",
       "mask_path": "https://res.cloudinary.com/.../comp_001.png",
       "volume": 180.5
     }
@@ -87,12 +150,28 @@ Returns raw component geometry. The backend recalculates ingredient matches, wei
 }
 ```
 
-Cloudinary mask upload env:
+## Tests
 
-```env
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-CLOUDINARY_MASK_FOLDER=nutrilens/inference/jobs
-MASK_LOCAL_DIR=logs/masks
+```bash
+pytest
 ```
+
+## Deployment Notes
+
+- `DEVICE=auto` selects CUDA when available and falls back to CPU otherwise.
+- Large model weights should be managed outside Git when they exceed repository limits.
+- When `DEBUG_VISUALS=True`, the server generates additional debugging images for technical inspection; they are not part of the client response.
+- The backend should point to `http://<ai-server-host>:8001/v1/analyze`.
+
+## Related Repositories
+
+- AI Server: https://github.com/IloveUhiuhiu/nutrilens-ai-server
+- Backend Server: https://github.com/IloveUhiuhiu/nutrilens-backend
+- Web Admin Interface: https://github.com/IloveUhiuhiu/nutrilens-web-frontend
+- Mobile Application: https://github.com/IloveUhiuhiu/nutrilens-mobile-app
+
+## Contributors
+
+- **Dang Phuc Long** - Class 22T_DT4 - Faculty of Information Technology
+- **Nguyen Duc Nha** - Class 22T_KHDL
+- **Truong Bui Dien** - Class 24T_KHDL

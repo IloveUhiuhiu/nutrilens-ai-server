@@ -62,7 +62,8 @@ def inpaint_plate_depth(
     camera_h_ref: float,
     template_dir: str = "templates",
 ) -> np.ndarray:
-    logger.info("enter inpaint_plate_depth")
+    logger.info("enter inpaint_plate_depth") 
+    plate_type = "bowl_ceramic"
     img_h, img_w = depth_map.shape
     x_s, y_s, z_s = get_clean_plate_samples(depth_map, plate_mask, food_mask, camera_h_ref)
     if plate_type in ["plate_flat", None]:
