@@ -52,7 +52,7 @@ class DepthService(ServiceBase):
         }
 
         try:
-            model = DepthAnythingV2(**{**model_configs[encoder], 'max_depth': 0.4})
+            model = DepthAnythingV2(**{**model_configs[encoder], 'max_depth': 0.6})
             model.load_state_dict(torch.load(weights_path, map_location='cpu'))
             model.to(device).eval()
         except Exception as exc:
