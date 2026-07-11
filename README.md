@@ -70,6 +70,7 @@ models/         Foundation-model and LoRA source/reference files
 tests/          Unit and smoke tests
 weights/        Model weights; large files should not be committed directly
 docs/assets/    Logo, pipeline, and AI demo assets used by this README
+docs/documents/ Graduation report and presentation slides
 ```
 
 ## Local Setup
@@ -162,6 +163,11 @@ pytest
 - Large model weights should be managed outside Git when they exceed repository limits.
 - When `DEBUG_VISUALS=True`, the server generates additional debugging images for technical inspection; they are not part of the client response.
 - The backend should point to `http://<ai-server-host>:8001/v1/analyze`.
+
+## Project Documents
+
+- Graduation report: [docs/documents/graduation_report.pdf](docs/documents/graduation_report.pdf)
+- Presentation slides: [docs/documents/presentation_slides.pdf](docs/documents/presentation_slides.pdf)
 
 ## Related Repositories
 
