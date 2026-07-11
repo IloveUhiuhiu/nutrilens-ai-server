@@ -2,19 +2,18 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import json
 from contextlib import asynccontextmanager
-import pandas as pd
 from fastapi import FastAPI
 
 from app.api.v1.nutrition import router as nutrition_router
 from app.core.config import Settings
 from app.core.logging import configure_logging
 from app.services import ModelBundle
-from app.services.depth import load_depth_anything
-from app.services.detection import load_yolo_food, load_yolo_plate
-from app.services.extraction import load_qwen3_vl
-from app.services.segmentation import load_sam3
+from app.services.depth_service import DepthService
+from app.services.detection_service import DetectionService
+from app.services.extraction_service import ExtractionService
+from app.services.segmentation_service import SegmentationService
+
 
 logger = logging.getLogger(__name__)
 
@@ -26,68 +25,54 @@ async def lifespan(app: FastAPI):
     configure_logging(settings.log_level)
     device = settings.device_resolved
     logger.info("[DEBUG] NutriLens AI Server starting on device: %s", device)
-
+    depth_service = DepthService()
+    detection_service = DetectionService()
+    extraction_service = ExtractionService()
+    segmentation_service = SegmentationService()
     # 2. Nạp các Model Bundles kèm tham số conf (Ngưỡng tin cậy)
     # Tách biệt weights và conf cho từng model để tối ưu độ chính xác
+    yolo_food = detection_service.load_yolo_food(
+        settings.yolo_food_weights,
+        device,
+        conf=settings.yolo_food_conf
+    )
+    yolo_plate = detection_service.load_yolo_plate(
+        settings.yolo_plate_weights,
+        device,
+        conf=settings.yolo_plate_conf
+    )
+
+    # 2b. Warmup YOLO ngay sau khi load, trước khi Qwen3-VL/SAM3 chạm GPU.
+    # Mục đích: cô lập lỗi CUDNN_STATUS_NOT_INITIALIZED — nếu warmup chạy được
+    # ở đây nhưng lỗi xuất hiện sau khi load các model khác, nghĩa là model
+    # load sau đó (Qwen3-VL 4-bit/Xformers hoặc SAM3 LoRA) làm hỏng CUDA context.
+    detection_service.warmup(yolo_food, yolo_plate)
+
     models = ModelBundle(
-        yolo_food=load_yolo_food(
-            settings.yolo_food_weights, 
-            device, 
-            conf=settings.yolo_food_conf
-        ),
-        yolo_plate=load_yolo_plate(
-            settings.yolo_plate_weights, 
-            device, 
-            conf=settings.yolo_plate_conf
-        ),
-        qwen3_vl=load_qwen3_vl(
-            settings.qwen3vl_weights, 
+        yolo_food=yolo_food,
+        yolo_plate=yolo_plate,
+        qwen3_vl=extraction_service.load_qwen3_vl(
+            settings.qwen3vl_weights,
             device
         ),
-        sam3=load_sam3(
-            settings.sam3_config_path, 
-            settings.sam3_weights, 
-            device, 
+        sam3=segmentation_service.load_sam3(
+            settings.sam3_config_path,
+            settings.sam3_weights,
+            device,
             conf=settings.sam3_conf
         ),
-        depth_anything=load_depth_anything(
-            settings.depthanything_weights, 
-            device, 
+        depth_anything=depth_service.load_depth_anything(
+            settings.depthanything_weights,
+            device,
             encoder=settings.depth_encoder  # 'vits' hoặc 'vitb'
         ),
         device=device,
     )
 
-    # 3. Nạp Nutrition Database vào RAM (Chỉ thực hiện 1 lần duy nhất)
-    logger.info("[DEBUG] Pre-loading Nutrition Database from %s", settings.nutrition_db_path)
-    try:
-        with open(settings.nutrition_db_path, "r", encoding="utf-8") as f:
-            nutrition_db = json.load(f)
-    except Exception as e:
-        logger.error("[ERROR] Failed to load nutrition database: %s", e)
-        # Fallback về dict trống nếu lỗi để tránh crash server
-        nutrition_db = {}
-
-    # 4. Nạp GT Database vào RAM (Chỉ thực hiện 1 lần duy nhất)
-    logger.info("[DEBUG] Pre-loading Ground Truth from %s", settings.ground_truth_path)
-    try:
-        ground_truth = pd.read_csv(
-            settings.ground_truth_path,
-            encoding="utf-8"
-        )
-
-    except Exception as e:
-        logger.error("[ERROR] Failed to load nutrition database: %s", e)
-
-        # fallback tránh crash
-        ground_truth = pd.DataFrame()
-
     # 4. Lưu trữ trạng thái vào app.state để truy cập từ Router
     app.state.settings = settings
     app.state.device = device
     app.state.models = models
-    app.state.nutrition_db = nutrition_db
-    app.state.ground_truth = ground_truth
     app.state.gpu_lock = asyncio.Lock() # Đảm bảo an toàn tài nguyên GPU khi xử lý đa luồng
 
     yield
